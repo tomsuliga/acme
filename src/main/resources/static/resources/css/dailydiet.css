@@ -1,0 +1,91 @@
+@charset "ISO-8859-1";
+
+body {
+	width: 1300px;
+	border: solid 1px blue;
+	//background-color: black;
+	//color: white;
+}
+
+header {
+	text-align: center;
+}
+
+footer {
+	clear: both;
+}
+
+.shadowfont {
+	font-size: 2em;
+	color: #a00;
+	text-shadow: 2px 2px 2px gray;
+}
+
+section#fooditems {
+	width: 648px;
+	border: solid 1px blue;
+	height: 1080px;
+	float: left;
+}
+
+aside#nutrients {
+	width: 648px;
+	border: solid 1px blue;
+	height: 1080px;
+	float: right;
+}
+
+table { 
+	border-collapse: separate; 
+	border-spacing: .4em; 
+}
+
+th {
+	width: 100px;
+	font-size: 1.5em;
+	//border: solid 1px red;
+}
+
+td.ingredient {
+	width: 200px;
+}
+
+td.vitamineInfo {
+	width: 110px;
+	text-align: center;
+}
+
+td.largeCol {
+	width: 250px;
+}
+
+.selectable {
+	border: solid 3px #eee;
+}
+
+td.numServings {
+	text-align: center;
+	width: 75px;
+}
+
+td.foodPart {
+	//text-align: center;
+	width: 100px;
+	font-weight: bold;
+}
+
+td.selected {
+	border: solid 3px blue;
+}
+
+td.hilite {
+	border: solid 3px #ee0;
+}
+
+.percent {
+	text-decoration: underline;
+}
+
+
+
+

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang='en' xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Acme</title>
+	<link href="resources/css/main.css" type="text/css" rel="stylesheet">
+	<link href="resources/css/minesweeper.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<h1 class='shadowfont'>Minesweeper</h1>
+<div id="info-line-id">
+	<div class="info-line-class" >
+		<button class="myButton" id="btnNewGameSmall">New Small</button>
+		<button class="myButton" id="btnNewGameMedium">New Medium</button>
+		<button class="myButton" id="btnNewGameLarge">New Large</button>
+	</div>
+	<div class="info-line-class playing shadowfont" id='primaryMsg'>Remaining Mines:</div>
+	<div class="info-line-class" id="minesLeft" th:text="${gameGrid.getNumMines()}">028</div>
+</div>
+<br>
+<div id='gameGrid'  
+				  th:attr="data-numcols=${gameGrid.getNumCols()}, 
+                           data-numrows=${gameGrid.getNumRows()},
+                           data-nummines=${gameGrid.getNumMines()},
+                           data-sessionId=${sessionId},
+                           style=${'width:' + (gameGrid.getNumCols() * 32 + 2) + 'px; height:' + (gameGrid.getNumRows() * 32 + 2) + 'px;'} ">
+	<div class="col" th:each="col:${#numbers.sequence(0, gameGrid.getNumCols()-1)}"> <!-- Inclusive -->
+		<div class="row" th:each="row:${#numbers.sequence(0, gameGrid.getNumRows()-1)}">
+			<div th:class='${cells[col][row].getViewClass()}'
+				 th:id="${col + '_' + row}" th:text="${cells[col][row].getViewData()}" 
+				 th:attr="data-known=${cells[col][row].getCellValue()},
+				          data-col=${col},
+				          data-row=${row},
+				          data-visible=${cells[col][row].isVisible()}">Dummy</div>
+		</div>
+		<br>
+	</div>
+</div>
+<footer><a href="home">Home</a></footer>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="resources/js/minesweeper.js"></script>
+</body>
+</html>

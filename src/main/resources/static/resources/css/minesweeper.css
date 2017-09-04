@@ -1,0 +1,117 @@
+@charset "ISO-8859-1";
+
+body {
+	background-color: #88f;
+	width: 800px;
+}
+
+h1 {
+	color: blue;
+	width: 800px;
+	text-align: center;
+}
+
+div#info-line-id {
+	width: 800px;
+	height: 36px;
+}
+
+button.myButton {
+	margin-top: 8px;
+	margin-left: 8px;
+}
+
+#col, #row {
+	margin-top: 8px;
+	margin-left: 8px;
+	width: 4em;
+}
+
+div#minesLeft {
+	width: 100px;
+	height: 36px;
+	background-color: black;
+	color: red;
+	font-size: 2em;
+	margin-left: 25px;
+	text-align: center;
+	border-top: 1px solid gray;
+	border-left: 1px solid gray;
+	border-right: 1px solid white;
+	border-bottom: 1px solid white;
+}
+
+div#primaryMsg {
+	margin-left: 25px;
+}
+
+div.info-line-class {
+	float: left;
+}
+
+div.win, div.lose, div.playing {
+	text-align: center;
+	font-size: 2em;
+	text-shadow: 2px 2px 2px #000;
+}
+
+div.win {
+	color: green;
+}
+
+div.playing {
+	color: #c33;
+}
+
+div.lose {
+	color: red;
+}
+
+div.cellUnknown {
+	background-color: #ccc;
+	width: 28px;
+	height: 28px;
+	border-left: 2px solid #fff;
+	border-top: 2px solid #fff;
+	border-right: 2px solid #888;
+	border-bottom: 2px solid #888;
+}
+
+div.cellKnown {
+	background-color: #cb8;
+	width: 24px;
+	height: 28px;
+	padding-top: 2px;
+	padding-left: 6px;
+	border: 1px solid #888;
+	font-size: 1.5em;
+	color: blue;
+	font-weight: bold;
+}
+
+div.visibleMine {
+	background-color: #f22 !important;
+	font-size: 1.8em;
+	//border-radius: 16px;
+}
+
+div.possibleMine {
+	background-color: #ff0 !important;
+}
+
+div.row {
+	width: 800px;
+	height: 32px;
+}
+
+div.col {
+	width: 32px;
+	height: 32px;
+	float: left;
+}
+
+div#gameGrid {
+	background-color: gray;
+	border: 1px solid black;
+}
+

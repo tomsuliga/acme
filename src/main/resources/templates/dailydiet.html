@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang='en' xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Acme</title>
+	<link href="resources/css/main.css" type="text/css" rel="stylesheet">
+	<link href="resources/css/dailydiet.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<section id='fooditems'>
+<header class='shadowfont' id="dailyDietName" th:attr="data-dailyDietName=${dailyDiet.name}" th:text="${'Daily Diet - ' + dailyDiet.name}">Daily Diet</header>
+<table>
+	<tr>
+		<th class='largeCol'>Menu Item</th>
+		<th colspan="4"># Servings</th>
+	</tr>
+	<tr th:each="foodItem:${foodItems}">
+		<td class='largeCol menuItem selectable' th:id='${"foodItem-" + foodItem.id}' th:text='${foodItem.name}' >V1</td>
+		<td class='numServings selectable' th:id='${"foodItem-" + foodItem.id + "-count-1"}'>1</td>
+		<td class='numServings selectable' th:id='${"foodItem-" + foodItem.id + "-count-2"}'>2</td>
+		<td class='numServings selectable' th:id='${"foodItem-" + foodItem.id + "-count-3"}'>3</td>
+		<td class='numServings selectable' th:id='${"foodItem-" + foodItem.id + "-count-4"}'>4</td>
+</table>
+</section>
+<aside id='nutrients'>
+<table>
+	<tr>
+		<th>Nutrients</th>
+		<th class=percent>Percent</th>
+		<th>Total</th>
+		<th>RDA</th>
+		<th>Menu Item</th>
+	</tr>
+	<tr th:each="nutrientItem:${nutrientItems}">
+			<td th:if="${!nutrientItem.selectable}"class='foodPart' th:id='${"nutrientName-" + nutrientItem.id}' th:text='${nutrientItem.name}' >V1</td>
+			<td th:if="${nutrientItem.selectable}" class='ingredient selectable' th:id='${"nutrientName-" + nutrientItem.id}' th:text='${nutrientItem.name}' >V1</td>
+		<td th:id='${"nutrientPercent-" + nutrientItem.id}' class='vitamineInfo'></td>
+		<td th:id='${"nutrientTotal-" + nutrientItem.id}'   class='vitamineInfo'>0</td>
+		<td th:id='${"nutrientRDA-" + nutrientItem.id}'     class='vitamineInfo' th:text='${nutrientItem.rda + " " + nutrientItem.units}'></td>
+		<td th:id='${"nutrientServing-" + nutrientItem.id}' class='vitamineInfo'></td>
+	</tr>
+</table>
+</aside>
+<footer><a href="home">Home</a></footer>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="resources/js/dailydiet.js"></script>
+</body>
+</html>
+

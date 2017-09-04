@@ -1,0 +1,437 @@
+NutrientItem: Calories 2000 cal false
+NutrientItem: Carbs 200 g false
+NutrientItem: Fat 90 g false
+NutrientItem: Protein 100 g false
+NutrientItem: Fiber 30 g false
+NutrientItem: Sodium 2000 mg false
+NutrientItem: A 3000 IU true
+NutrientItem: B1 1.2 mg true
+NutrientItem: B2 1.3 mg true
+NutrientItem: B3 16 mg true
+NutrientItem: B5 5 mg true
+NutrientItem: B6 1.3 mg true
+NutrientItem: B9 400 ug true
+NutrientItem: B12 2.25 ug true
+NutrientItem: C 90 mg true
+NutrientItem: D 15 ug true
+NutrientItem: E 15 ug true
+NutrientItem: K 120 ug true
+NutrientItem: Calcium 1000 mg true
+NutrientItem: Choline 550 mg true
+NutrientItem: Copper 900 ug true
+NutrientItem: Iron 8 mg true
+NutrientItem: Omega-3 400 ug true
+NutrientItem: Omega-6 400 ug true
+NutrientItem: Magnesium 400 mg true
+NutrientItem: Manganese 2.3 mg true
+NutrientItem: Phosphorus 2200 mg true
+NutrientItem: Potassium 2200 mg true
+NutrientItem: Selenium 60 ug true
+NutrientItem: Zinc 11 mg true
+
+FoodItem: Avocado
+FoodItem: Banana
+FoodItem: Black_Beans
+FoodItem: Blueberries
+FoodItem: Bread_1_slice
+FoodItem: Brown_Rice
+FoodItem: Carrot
+FoodItem: Cashews
+FoodItem: Celery
+FoodItem: Cheese
+FoodItem: Cherries
+FoodItem: Cocoa
+FoodItem: Corn
+FoodItem: Cucumber
+FoodItem: Egg
+FoodItem: Flour_50_grams
+FoodItem: Honey
+FoodItem: Mayonnaise
+FoodItem: Mushrooms
+FoodItem: Olives
+FoodItem: Onion
+FoodItem: Potato
+FoodItem: Salsa
+FoodItem: Sardines
+FoodItem: Soy_Milk
+FoodItem: Tomato
+FoodItem: Tuna
+FoodItem: Yogurt
+
+FoodNutrient: Avocado Carbs 8.53
+FoodNutrient: Avocado Fat 14.66
+FoodNutrient: Avocado Protein 2
+FoodNutrient: Avocado Fiber 6.7
+FoodNutrient: Avocado B1 0.067
+FoodNutrient: Avocado B2 0.13
+FoodNutrient: Avocado B3 1.738
+FoodNutrient: Avocado B5 1.389
+FoodNutrient: Avocado B6 0.257
+FoodNutrient: Avocado B9 81
+FoodNutrient: Avocado C 10
+FoodNutrient: Avocado E 2.07
+FoodNutrient: Avocado K 21
+FoodNutrient: Avocado Calcium 12
+FoodNutrient: Avocado Iron 0.55
+FoodNutrient: Avocado Magnesium 29
+FoodNutrient: Avocado Manganese 0.142
+FoodNutrient: Avocado Phosphorus 52
+FoodNutrient: Avocado Potassium 485
+FoodNutrient: Avocado Zinc 0.64
+
+FoodNutrient: Banana Carbs 22.84
+FoodNutrient: Banana Fat 0.33
+FoodNutrient: Banana Protein 1.09
+FoodNutrient: Banana Fiber 2.6
+FoodNutrient: Banana B1 0.031
+FoodNutrient: Banana B2 0.073
+FoodNutrient: Banana B3 0.665
+FoodNutrient: Banana B5 0.334
+FoodNutrient: Banana B6 0.4
+FoodNutrient: Banana B9 20
+FoodNutrient: Banana Choline 9.8
+FoodNutrient: Banana C 8.7
+FoodNutrient: Banana Iron 0.26
+FoodNutrient: Banana Magnesium 27
+FoodNutrient: Banana Manganese 0.27
+FoodNutrient: Banana Phosphorus 22
+FoodNutrient: Banana Potassium 358
+FoodNutrient: Banana Zinc 0.15
+
+FoodNutrient: Black_Beans Carbs 23.71
+FoodNutrient: Black_Beans Fat 0.5
+FoodNutrient: Black_Beans Protein 8.86
+FoodNutrient: Black_Beans Fiber 8.7
+FoodNutrient: Black_Beans B1 0.244
+FoodNutrient: Black_Beans B2 0.059
+FoodNutrient: Black_Beans B3 0.505
+FoodNutrient: Black_Beans B6 0.069
+FoodNutrient: Black_Beans B9 149
+FoodNutrient: Black_Beans E 0.87
+FoodNutrient: Black_Beans K 3.3
+FoodNutrient: Black_Beans Calcium 27
+FoodNutrient: Black_Beans Iron 2.1
+FoodNutrient: Black_Beans Magnesium 70
+FoodNutrient: Black_Beans Phosphorus 140
+FoodNutrient: Black_Beans Potassium 355
+FoodNutrient: Black_Beans Sodium 237
+FoodNutrient: Black_Beans Zinc 1.12
+
+FoodNutrient: Blueberries Carbs 14.5
+FoodNutrient: Blueberries Fat 0.3
+FoodNutrient: Blueberries Protein 0.7
+FoodNutrient: Blueberries B1 3%
+FoodNutrient: Blueberries B2 3%
+FoodNutrient: Blueberries B3 3%
+FoodNutrient: Blueberries B5 2%
+FoodNutrient: Blueberries B6 4%
+FoodNutrient: Blueberries B9 2%
+FoodNutrient: Blueberries C 12%
+FoodNutrient: Blueberries E 4%
+FoodNutrient: Blueberries K 18%
+FoodNutrient: Blueberries Calcium 1%
+FoodNutrient: Blueberries Iron 2%
+FoodNutrient: Blueberries Magnesium 2%
+FoodNutrient: Blueberries Manganese 16%
+FoodNutrient: Blueberries Phosphorus 2%
+FoodNutrient: Blueberries Potassium 2%
+FoodNutrient: Blueberries Zinc 2%
+
+FoodNutrient: Bread_1_slice Fat 2
+FoodNutrient: Bread_1_slice Carbs 19
+FoodNutrient: Bread_1_slice Protein 4
+FoodNutrient: Bread_1_slice Fiber 2
+FoodNutrient: Bread_1_slice Sodium 130
+FoodNutrient: Bread_1_slice Calcium 4%
+FoodNutrient: Bread_1_slice B1 8%
+FoodNutrient: Bread_1_slice B3 4%
+FoodNutrient: Bread_1_slice Iron 6%
+FoodNutrient: Bread_1_slice B2 4%
+FoodNutrient: Bread_1_slice B9 6%
+
+FoodNutrient: Brown_Rice Carbs 77
+FoodNutrient: Brown_Rice Fat 3
+FoodNutrient: Brown_Rice Protein 8
+FoodNutrient: Brown_Rice Fiber 3.52
+FoodNutrient: Brown_Rice B1 35%
+FoodNutrient: Brown_Rice B2 8%
+FoodNutrient: Brown_Rice B3 34%
+FoodNutrient: Brown_Rice B5 30%
+FoodNutrient: Brown_Rice B6 39%
+FoodNutrient: Brown_Rice B9 5%
+FoodNutrient: Brown_Rice Calcium 2%
+FoodNutrient: Brown_Rice Iron 11%
+FoodNutrient: Brown_Rice Magnesium 40%
+FoodNutrient: Brown_Rice Manganese 178%
+FoodNutrient: Brown_Rice Phosphorus 48%
+FoodNutrient: Brown_Rice Potassium 5%
+FoodNutrient: Brown_Rice Selenium 23.4
+FoodNutrient: Brown_Rice Zinc 2
+
+FoodNutrient: Carrot Carbs 9.6
+FoodNutrient: Carrot Fat 0.24
+FoodNutrient: Carrot Protein 0.93
+FoodNutrient: Carrot Fiber 2.8
+FoodNutrient: Carrot A 835
+FoodNutrient: Carrot B1 6%
+FoodNutrient: Carrot B2 5%
+FoodNutrient: Carrot B3 7%
+FoodNutrient: Carrot B5 5%
+FoodNutrient: Carrot B6 11%
+FoodNutrient: Carrot B9 5%
+FoodNutrient: Carrot C 7%
+FoodNutrient: Carrot E 4%
+FoodNutrient: Carrot K 13%
+FoodNutrient: Carrot Calcium 3%
+FoodNutrient: Carrot Iron 2%
+FoodNutrient: Carrot Magnesium 3%
+FoodNutrient: Carrot Phosphorus 5%
+FoodNutrient: Carrot Potassium 7%
+FoodNutrient: Carrot Sodium 69
+FoodNutrient: Carrot Zinc 3%
+
+FoodNutrient: Cashews Carbs 15
+FoodNutrient: Cashews Fat 22
+FoodNutrient: Cashews Protein 9
+FoodNutrient: Cashews Fiber 1.6
+FoodNutrient: Cashews B1 0.21
+FoodNutrient: Cashews B2 0.03
+FoodNutrient: Cashews B3 0.5
+FoodNutrient: Cashews B5 0.43
+FoodNutrient: Cashews B6 0.21
+FoodNutrient: Cashews B9 12.5
+FoodNutrient: Cashews E 0.45
+FoodNutrient: Cashews K 17.0
+FoodNutrient: Cashews Calcium 18.5
+FoodNutrient: Cashews Copper 1.1
+FoodNutrient: Cashews Iron 3.35
+FoodNutrient: Cashews Magnesium 145
+FoodNutrient: Cashews Manganese 0.83
+FoodNutrient: Cashews Phosphorus 300
+FoodNutrient: Cashews Potassium 330
+FoodNutrient: Cashews Selenium 10
+FoodNutrient: Cashews Zinc 2.9
+
+FoodNutrient: Celery Carbs 2.4
+FoodNutrient: Celery A 6%
+FoodNutrient: Celery C 4%
+FoodNutrient: Celery Calcium 2%
+FoodNutrient: Celery Magnesium 2%
+FoodNutrient: Celery Fiber 1
+FoodNutrient: Celery Sodium 64
+
+FoodNutrient: Cheese Fat 7
+FoodNutrient: Cheese Protein 10
+FoodNutrient: Cheese Sodium 350
+FoodNutrient: Cheese A 4%
+FoodNutrient: Cheese Calcium 35%
+
+FoodNutrient: Cherries Carbs 19
+FoodNutrient: Cherries Protein 2
+FoodNutrient: Cherries Fiber 3
+FoodNutrient: Cherries Sodium 5
+FoodNutrient: Cherries Potassium 268
+FoodNutrient: Cherries A 39%
+FoodNutrient: Cherries C 25%
+FoodNutrient: Cherries Calcium 2%
+FoodNutrient: Cherries Iron 2%
+FoodNutrient: Cherries B6 5%
+FoodNutrient: Cherries Magnesium 3%
+
+FoodNutrient: Cocoa Carbs 3.1
+FoodNutrient: Cocoa Fat 0.7
+FoodNutrient: Cocoa Protein 1.1
+FoodNutrient: Cocoa Fiber 1.8
+FoodNutrient: Cocoa Iron 0.24
+FoodNutrient: Cocoa Magnesium 24
+FoodNutrient: Cocoa Potassium 82
+
+FoodNutrient: Corn Carbs 9.5
+FoodNutrient: Corn Fat 0.67
+FoodNutrient: Corn Protein 1.6
+FoodNutrient: Corn Fiber 1
+FoodNutrient: Corn B1 0.08
+FoodNutrient: Corn B2 0.03
+FoodNutrient: Corn B3 0.85
+FoodNutrient: Corn B5 0.36
+FoodNutrient: Corn B6 0.05
+FoodNutrient: Corn B9 21
+FoodNutrient: Corn C 3.4
+FoodNutrient: Corn Iron 0.26
+FoodNutrient: Corn Magnesium 18
+FoodNutrient: Corn Manganese 0.08
+FoodNutrient: Corn Potassium 140
+FoodNutrient: Corn Phosphorus 45
+FoodNutrient: Corn Zinc 0.23
+
+FoodNutrient: Cucumber Carbs 2
+FoodNutrient: Cucumber Potassium 76
+FoodNutrient: Cucumber A 1%
+FoodNutrient: Cucumber C 2%
+FoodNutrient: Cucumber Magnesium 1%
+
+FoodNutrient: Egg Carbs 1.12
+FoodNutrient: Egg Fat 10.6
+FoodNutrient: Egg Protein 12.6
+FoodNutrient: Egg A 149
+FoodNutrient: Egg B1 6%
+FoodNutrient: Egg B2 42%
+FoodNutrient: Egg B5 28%
+FoodNutrient: Egg B6 9%
+FoodNutrient: Egg B9 11%
+FoodNutrient: Egg B12 46%
+FoodNutrient: Egg Choline 60%
+FoodNutrient: Egg D 15%
+FoodNutrient: Egg E 7%
+FoodNutrient: Egg Calcium 5%
+FoodNutrient: Egg Iron 9%
+FoodNutrient: Egg Magnesium 3%
+FoodNutrient: Egg Phosphorus 25%
+FoodNutrient: Egg Potassium 3%
+FoodNutrient: Egg Sodium 124
+FoodNutrient: Egg Zinc 11%
+
+FoodNutrient: Flour_50_grams Carbs 33
+FoodNutrient: Flour_50_grams Protein 5
+FoodNutrient: Flour_50_grams Fiber 1
+FoodNutrient: Flour_50_grams Potassium 65
+FoodNutrient: Flour_50_grams Iron 10%
+FoodNutrient: Flour_50_grams B1 17%
+FoodNutrient: Flour_50_grams B2 10%
+FoodNutrient: Flour_50_grams B3 14%
+FoodNutrient: Flour_50_grams B9 17%
+
+FoodNutrient: Honey Carbs 82
+FoodNutrient: Honey B2 3%
+FoodNutrient: Honey B6 2%
+FoodNutrient: Honey Iron 3%
+FoodNutrient: Honey Zinc 2%
+
+FoodNutrient: Mayonnaise Fat 22
+FoodNutrient: Mayonnaise Sodium 190
+
+FoodNutrient: Mushrooms Carbs 3.3
+FoodNutrient: Mushrooms Fat 0.3
+FoodNutrient: Mushrooms Protein 3.1
+FoodNutrient: Mushrooms B1 7%
+FoodNutrient: Mushrooms B2 33%
+FoodNutrient: Mushrooms B3 24%
+FoodNutrient: Mushrooms B5 30%
+FoodNutrient: Mushrooms B6 8%
+FoodNutrient: Mushrooms B9 4%
+FoodNutrient: Mushrooms Choline 4%
+FoodNutrient: Mushrooms Copper 16%
+FoodNutrient: Mushrooms Iron 4%
+FoodNutrient: Mushrooms Magnesium 3%
+FoodNutrient: Mushrooms Manganese 2%
+FoodNutrient: Mushrooms Phosphorus 12%
+FoodNutrient: Mushrooms Potassium 7%
+FoodNutrient: Mushrooms Selenium 13%
+FoodNutrient: Mushrooms Zinc 5%
+
+FoodNutrient: Olives Fat 6
+FoodNutrient: Olives A 20
+FoodNutrient: Olives B1 2%
+FoodNutrient: Olives B3 2%
+FoodNutrient: Olives B6 2%
+FoodNutrient: Olives Choline 3%
+FoodNutrient: Olives E 15%
+FoodNutrient: Olives Calcium 5%
+FoodNutrient: Olives Iron 4%
+FoodNutrient: Olives Magnesium 3%
+FoodNutrient: Olives Sodium 560
+
+FoodNutrient: Onion Carbs 9.34
+FoodNutrient: Onion Fat 0.1
+FoodNutrient: Onion Protein 1.1
+FoodNutrient: Onion Fiber 1.7
+FoodNutrient: Onion B1 4%
+FoodNutrient: Onion B2 2%
+FoodNutrient: Onion B5 2%
+FoodNutrient: Onion B9 5%
+FoodNutrient: Onion C 9%
+FoodNutrient: Onion Calcium 2%
+FoodNutrient: Onion Iron 2%
+FoodNutrient: Onion Magnesium 3%
+FoodNutrient: Onion Manganese 6%
+FoodNutrient: Onion Phosphorus 4%
+FoodNutrient: Onion Potassium 3%
+FoodNutrient: Onion Zinc 2%
+
+FoodNutrient: Potato Carbs 17.47
+FoodNutrient: Potato Fat 0.1
+FoodNutrient: Potato Protein 2
+FoodNutrient: Potato Fiber 2.1
+FoodNutrient: Potato B1 7%
+FoodNutrient: Potato B2 3%
+FoodNutrient: Potato B3 7%
+FoodNutrient: Potato B5 6%
+FoodNutrient: Potato B6 23%
+FoodNutrient: Potato B9 4%
+FoodNutrient: Potato C 24%
+FoodNutrient: Potato K 2%
+FoodNutrient: Potato Iron 6%
+FoodNutrient: Potato Magnesium 6%
+FoodNutrient: Potato Manganese 7%
+FoodNutrient: Potato Phosphorus 8%
+FoodNutrient: Potato Potassium 9%
+FoodNutrient: Potato Zinc 3%
+
+FoodNutrient: Salsa Carbs 2
+FoodNutrient: Salsa A 4%
+FoodNutrient: Salsa C 6%
+FoodNutrient: Salsa Sodium 240
+
+FoodNutrient: Sardines Carbs 8
+FoodNutrient: Sardines Fat 9
+FoodNutrient: Sardines Protein 14
+FoodNutrient: Sardines A 8%
+FoodNutrient: Sardines B3 30%
+FoodNutrient: Sardines B12 338%
+FoodNutrient: Sardines D 44%
+FoodNutrient: Sardines Calcium 4%
+FoodNutrient: Sardines Copper 19%
+FoodNutrient: Sardines Choline 16%
+FoodNutrient: Sardines Selenium 87%
+FoodNutrient: Sardines Phosphorus 64%
+FoodNutrient: Sardines Omega-3 61%
+FoodNutrient: Sardines Iron 60%
+FoodNutrient: Sardines Sodium 280
+
+FoodNutrient: Soy_Milk Fat 4
+FoodNutrient: Soy_Milk Protein 7
+FoodNutrient: Soy_Milk Carbs 7
+FoodNutrient: Soy_Milk A 10%
+FoodNutrient: Soy_Milk Calcium 45%
+FoodNutrient: Soy_Milk Iron 6%
+FoodNutrient: Soy_Milk D 25%
+FoodNutrient: Soy_Milk B2 30%
+FoodNutrient: Soy_Milk B12 25%
+FoodNutrient: Soy_Milk Sodium 105
+FoodNutrient: Soy_Milk Potassium 300
+
+FoodNutrient: Tomato Carbs 5
+FoodNutrient: Tomato Protein 1
+FoodNutrient: Tomato Potassium 292
+FoodNutrient: Tomato A 20%
+FoodNutrient: Tomato C 28%
+FoodNutrient: Tomato B6 5%
+FoodNutrient: Tomato Magnesium 3%
+
+FoodNutrient: Tuna Fat 5
+FoodNutrient: Tuna Protein 20
+FoodNutrient: Tuna Sodium 160
+FoodNutrient: Tuna Potassium 120
+FoodNutrient: Tuna A 1200
+FoodNutrient: Tuna B6 0.26
+FoodNutrient: Tuna B12 3.375
+FoodNutrient: Tuna Magnesium 52
+
+FoodNutrient: Yogurt Fat 1
+FoodNutrient: Yogurt Carbs 6
+FoodNutrient: Yogurt Protein 17
+FoodNutrient: Yogurt Calcium 18%
+FoodNutrient: Yogurt B6 5%
+FoodNutrient: Yogurt B12 21%
+FoodNutrient: Yogurt Magnesium 4%
+
