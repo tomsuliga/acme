@@ -24,7 +24,7 @@
 				 th:id="${col + '_' + row}" 
 				 th:attr="data-col=${col},
 				          data-row=${row}"
-				 th:text='${mazeCells[col][row].getViewText()}'></div>
+				 th:utext='${mazeCells[col][row].getViewText()}'></div>
 		</div>
 		<br>
 	</div>

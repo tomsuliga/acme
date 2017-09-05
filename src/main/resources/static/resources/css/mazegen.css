@@ -47,3 +47,10 @@ div.south {
 div.west {
 		border-left: 1px solid black;
 }
+
+div.path {
+	color: #00f;
+	//border-radius: 16px;
+}
+
+

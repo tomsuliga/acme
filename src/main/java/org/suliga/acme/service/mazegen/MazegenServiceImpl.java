@@ -20,4 +20,9 @@ public class MazegenServiceImpl implements MazegenService {
 	public void generateNewMaze() {
 		mazeGrid = new MazeGrid();
 	}
+
+	@Override
+	public void solveMaze() {
+		mazeGrid.solve();
+	}
 }

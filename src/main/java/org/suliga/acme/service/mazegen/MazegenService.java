@@ -5,4 +5,5 @@ import org.suliga.acme.model.mazegen.MazeGrid;
 public interface MazegenService {
 	MazeGrid getMazeGrid();
 	void generateNewMaze();
+	void solveMaze();
 }

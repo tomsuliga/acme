@@ -135,6 +135,12 @@ public class AcmeMainController {
 	public void handleMazegenGenerate(String incoming) {
 		mazegenService.generateNewMaze();
 	}
+	
+	@MessageMapping("/mazegen/solve")
+	@SendTo("/topic/result/mazegendisplay")
+	public void handleMazegenSolve(String incoming) {
+		mazegenService.solveMaze();
+	}
 }
 
 

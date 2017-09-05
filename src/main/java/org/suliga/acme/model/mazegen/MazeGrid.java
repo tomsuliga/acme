@@ -1,7 +1,9 @@
 package org.suliga.acme.model.mazegen;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ public class MazeGrid {
 	private MazeCell[][] mazeCells;
 	private int numCols;
 	private int numRows;
+	private boolean solved;
 
 	public MazeGrid() {
 		this(32, 22);
@@ -59,8 +62,11 @@ public class MazeGrid {
 
 		recursiveBacktrack(mazeCells[5][1]);
 
-		mazeCells[3][0].setViewText("S"); mazeCells[3][1].setViewClass(mazeCells[3][1].getViewClass().replace("north", ""));
-		mazeCells[28][21].setViewText("E"); mazeCells[28][20].setViewClass(mazeCells[28][20].getViewClass().replace("south", ""));
+		mazeCells[3][0].setViewText("S"); 
+		mazeCells[3][1].removeClass("north");
+		
+		mazeCells[28][21].setViewText("E"); 
+		mazeCells[28][20].removeClass("south");
 
 		verifyDoubleEdge();
 	}
@@ -71,19 +77,19 @@ public class MazeGrid {
 				MazeCell cell = mazeCells[col][row];
 				if (row > 0 && mazeCells[col][row - 1].getViewClass().contains("south")
 						&& !cell.getViewClass().contains("north")) {
-					cell.setViewClass(cell.getViewClass() + " north");
+					cell.addClass("north");
 				}
 				if (row < 21 && mazeCells[col][row + 1].getViewClass().contains("north")
 						&& !cell.getViewClass().contains("south")) {
-					cell.setViewClass(cell.getViewClass() + " south");
+					cell.addClass("south");
 				}
 				if (col > 0 && mazeCells[col - 1][row].getViewClass().contains("east")
 						&& !cell.getViewClass().contains("west")) {
-					cell.setViewClass(cell.getViewClass() + " west");
+					cell.addClass("west");
 				}
 				if (col < 31 && mazeCells[col + 1][row].getViewClass().contains("west")
 						&& !cell.getViewClass().contains("east")) {
-					cell.setViewClass(cell.getViewClass() + " east");
+					cell.addClass("east");
 				}
 			}
 		}
@@ -116,29 +122,29 @@ public class MazeGrid {
 				case 0:
 					if (!mazeCells[col][row - 1].isVisited()) {
 						nextCell = mazeCells[col][row - 1];
-						cell.setViewClass(cell.getViewClass().replace("north", ""));
-						nextCell.setViewClass(nextCell.getViewClass().replace("south", ""));
+						cell.removeClass("north");
+						nextCell.removeClass("south");
 					}
 					break;
 				case 1:
 					if (!mazeCells[col][row + 1].isVisited()) {
 						nextCell = mazeCells[col][row + 1];
-						cell.setViewClass(cell.getViewClass().replace("south", ""));
-						nextCell.setViewClass(nextCell.getViewClass().replace("north", ""));
+						cell.removeClass("south");
+						nextCell.removeClass("north");
 					}
 					break;
 				case 2:
 					if (!mazeCells[col - 1][row].isVisited()) {
 						nextCell = mazeCells[col - 1][row];
-						cell.setViewClass(cell.getViewClass().replace("west", ""));
-						nextCell.setViewClass(nextCell.getViewClass().replace("east", ""));
+						cell.removeClass("west");
+						nextCell.removeClass("east");
 					}
 					break;
 				case 3:
 					if (!mazeCells[col + 1][row].isVisited()) {
 						nextCell = mazeCells[col + 1][row];
-						cell.setViewClass(cell.getViewClass().replace("east", ""));
-						nextCell.setViewClass(nextCell.getViewClass().replace("west", ""));
+						cell.removeClass("east");
+						nextCell.removeClass("west");
 					}
 					break;
 				}
@@ -148,4 +154,68 @@ public class MazeGrid {
 			recursiveBacktrack(nextCell);
 		}
 	}
+	
+	public void solve() {
+		//mazeCells[3][1].addClass("path");
+		//mazeCells[3][1].setViewText(Character.toString((char)215));
+
+		//mazeCells[28][20].addClass("path");
+		//mazeCells[28][20].setViewText(Character.toString((char)215));
+		
+		// start cell
+		
+		// put each cell on stack
+		
+		// if backtrack, remove cell from stack
+		
+		// if cell is end, copy and save stack as possible solution
+		
+		// continue until all cells are visted - only end can be visited multiple times
+		
+		Deque<MazeCell> stack = new ArrayDeque<>();
+		stack.push(mazeCells[3][1]);
+		solved = false;
+		solve(stack);
+		
+		stack.forEach(e -> {
+			e.addClass("path");
+			//e.setViewText(Character.toString((char)215)); // 
+			e.setViewText("&#9679;");
+		});
+	}
+	
+	private void solve(Deque<MazeCell> stack) {
+		// any moves left?
+		MazeCell cell = stack.peek();
+		cell.setSolveVisited(true);
+		if (cell.getCol() == 28 && cell.getRow() == 20) {
+			// end found
+			solved = true;
+			return;
+		}
+		MazeCell nextCell = null;
+		int col = cell.getCol();
+		int row = cell.getRow();
+		
+		if (!cell.getViewClass().contains("south") && !mazeCells[col][row+1].isSolveVisited()) {
+			nextCell = mazeCells[col][row+1];
+			stack.push(nextCell);
+		} else if (!cell.getViewClass().contains("north") && !mazeCells[col][row-1].isSolveVisited()) {
+			nextCell = mazeCells[col][row-1];
+			stack.push(nextCell);
+		} else if (!cell.getViewClass().contains("east") && !mazeCells[col+1][row].isSolveVisited()) {
+			nextCell = mazeCells[col+1][row];
+			stack.push(nextCell);
+		} else if (!cell.getViewClass().contains("west") && !mazeCells[col-1][row].isSolveVisited()) {
+			nextCell = mazeCells[col-1][row];
+			stack.push(nextCell);
+		}
+
+		return;
+	}
 }
+
+
+
+
+
