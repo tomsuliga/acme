@@ -1,7 +1,6 @@
 package org.suliga.acme.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -148,6 +147,7 @@ public class AcmeMainController {
 	public String getEarthquakes(Model model) {
 		model.addAttribute("rawJson", earthquakesService.getRawJson());
 		model.addAttribute("formattedJson", earthquakesService.getFormattedJson());
+		model.addAttribute("earthquakeFeatures", earthquakesService.getEarthquakeFeatures());
 		return "earthquakes";
 	}
 }

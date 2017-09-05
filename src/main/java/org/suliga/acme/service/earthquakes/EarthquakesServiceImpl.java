@@ -1,14 +1,46 @@
 package org.suliga.acme.service.earthquakes;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.suliga.acme.model.earthquake.EarthquakeEvent;
+import org.suliga.acme.model.earthquake.EarthquakeFeature;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class EarthquakesServiceImpl implements EarthquakesService {
-
+	private static final Logger logger = LoggerFactory.getLogger(EarthquakesServiceImpl.class);
 	private static final String MONTHLY_URL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson";
 	private String monthlyJson;
+	private EarthquakeEvent earthquakeEvent;
+
+	private void loadMonthlyJson() {
+		RestTemplate restTemplate = new RestTemplate();
+		monthlyJson = restTemplate.getForObject(MONTHLY_URL, String.class);
+		ObjectMapper om = new ObjectMapper();
+		try {
+			earthquakeEvent = om.readValue(monthlyJson, EarthquakeEvent.class);
+			logger.info("****** event features size = " + earthquakeEvent.getFeatures().size());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
+	@Override
+	public List<EarthquakeFeature> getEarthquakeFeatures() {
+		if (monthlyJson == null) {
+			loadMonthlyJson();
+		}
+		
+		return earthquakeEvent.getFeatures();
+	}
+
 	@Override
 	public String getRawJson() {
 		if (monthlyJson == null) {
@@ -76,10 +108,5 @@ public class EarthquakesServiceImpl implements EarthquakesService {
 			sb.append("&nbsp;");
 			indent--;
 		}
-	}
-
-	private void loadMonthlyJson() {
-		RestTemplate restTemplate = new RestTemplate();
-		monthlyJson = restTemplate.getForObject(MONTHLY_URL, String.class);
 	}
 }
