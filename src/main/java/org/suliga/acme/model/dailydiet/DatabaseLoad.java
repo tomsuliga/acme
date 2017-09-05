@@ -41,8 +41,7 @@ public class DatabaseLoad {
 		DailyDiet dailyDiet = new DailyDiet("temp-1234");
 		dailyDietDao.save(dailyDiet);
 
-		try {
-			Stream<String> lines = Files.lines(Paths.get(ClassLoader.getSystemResource("data-load.txt").toURI()));
+		try (Stream<String> lines = Files.lines(Paths.get(ClassLoader.getSystemResource("data-load.txt").toURI()));) {
 			lines.forEach(a -> {
 				// logger.info(a);
 				String[] words = a.split(" ");
@@ -81,7 +80,7 @@ public class DatabaseLoad {
 					// logger.info("Unknown keyword = " + words[0]);
 				}
 			});
-			lines.close();
+			//lines.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

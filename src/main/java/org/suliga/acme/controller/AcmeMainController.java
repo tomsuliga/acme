@@ -22,6 +22,8 @@ import org.suliga.acme.model.dailydiet.NutrientDisplaySummary;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
 import org.suliga.acme.service.dailydiet.DailyDietService;
+import org.suliga.acme.service.earthquakes.EarthquakesService;
+import org.suliga.acme.service.mazegen.MazegenService;
 import org.suliga.acme.service.minesweeper.MinesweeperService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,11 +32,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AcmeMainController {
 	private static final Logger logger = LoggerFactory.getLogger(AcmeMainController.class);
 
-	@Autowired
-	private MinesweeperService minesweeperService;
-	
-	@Autowired
-	private DailyDietService dailyDietService;
+	@Autowired private MinesweeperService minesweeperService;
+	@Autowired private DailyDietService dailyDietService;
+	@Autowired private MazegenService mazegenService;
+	@Autowired private EarthquakesService earthquakesService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -120,6 +121,34 @@ public class AcmeMainController {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	@GetMapping("/mazegen")
+	public String getMazeGen(Model model, HttpServletRequest req) {
+		String sessionId = req.getSession().getId();
+		model.addAttribute("sessionId", sessionId);
+		model.addAttribute("mazeGrid", mazegenService.getMazeGrid());
+		model.addAttribute("mazeCells", mazegenService.getMazeGrid().getMazeCells());
+		return "mazegen";
+	}
+	
+	@MessageMapping("/mazegen/generate")
+	@SendTo("/topic/result/mazegendisplay")
+	public void handleMazegenGenerate(String incoming) {
+		mazegenService.generateNewMaze();
+	}
+	
+	@MessageMapping("/mazegen/solve")
+	@SendTo("/topic/result/mazegendisplay")
+	public void handleMazegenSolve(String incoming) {
+		mazegenService.solveMaze();
+	}
+	
+	@GetMapping("/earthquakes")
+	public String getEarthquakes(Model model) {
+		model.addAttribute("rawJson", earthquakesService.getRawJson());
+		model.addAttribute("formattedJson", earthquakesService.getFormattedJson());
+		return "earthquakes";
 	}
 }
 

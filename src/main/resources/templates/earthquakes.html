@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang='en' xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Acme</title>
+	<link href="resources/css/main.css" type="text/css" rel="stylesheet">
+	<link href="resources/css/earthquakes.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<h1 class='shadowfont'>Earthquakes</h1>
+<div id='main-earthquakes'> 
+ <p th:utext="${formattedJson}">Dummy</p>
+</div>
+<footer><a href="home">Home</a></footer>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="resources/js/earthquakes.js"></script>
+</body>
+</html>

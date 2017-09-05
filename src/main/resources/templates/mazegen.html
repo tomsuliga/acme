@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en' xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Acme</title>
+	<link href="resources/css/main.css" type="text/css" rel="stylesheet">
+	<link href="resources/css/mazegen.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<h1 class='shadowfont'>Maze Generator</h1>
+<header>
+	<button class="myButton" id="btnGenerate">Generate</button>
+	<button class="myButton" id="btnSolve">Solve</button>
+</header>
+<br>
+<div id='mazeGrid'  
+				  th:attr="data-numcols=${mazeGrid.getNumCols()}, 
+                           data-numrows=${mazeGrid.getNumRows()},
+                           data-sessionId=${sessionId},
+                           style=${'width:' + (mazeGrid.getNumCols() * 34) + 'px; height:' + (mazeGrid.getNumRows() * 34) + 'px;'} ">
+	<div class="cell" th:each="col:${#numbers.sequence(0, mazeGrid.getNumCols()-1)}"> <!-- Inclusive -->
+		<div class="cell" th:each="row:${#numbers.sequence(0, mazeGrid.getNumRows()-1)}">
+			<div th:class='${"cell " + mazeCells[col][row].getViewClass()}'
+				 th:id="${col + '_' + row}" 
+				 th:attr="data-col=${col},
+				          data-row=${row}"
+				 th:utext='${mazeCells[col][row].getViewText()}'></div>
+		</div>
+		<br>
+	</div>
+</div>
+<footer><a href="home">Home</a></footer>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="resources/js/mazegen.js"></script>
+</body>
+</html>

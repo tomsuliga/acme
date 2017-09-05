@@ -23,6 +23,7 @@ public class AcmeStompConfig extends AbstractWebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/minesweeper").withSockJS(); // stomp/minesweeper
 		registry.addEndpoint("/dailydiet").withSockJS();
+		registry.addEndpoint("/mazegen").withSockJS();
 	}
 }
 

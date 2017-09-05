@@ -1,0 +1,56 @@
+@charset "ISO-8859-1";
+
+h1 {
+	width: 1088px;
+	text-align: center;
+}
+
+header {
+	text-align: center;
+	width: 1088px;
+}
+
+footer {
+	width: 1088px;
+}
+
+button.myButton {
+	padding: 5px 30px 5px 30px;
+	font-size: 1.2em;
+	margin-right: 5px;
+	margin-left: 5px;
+}
+
+div#mazeGrid {
+	background-color: red;
+}
+
+div.cell {
+	width: 34px;
+	height: 34px;
+	background-color: #bbb;
+	float: left;
+	box-sizing: border-box;
+	font-size: 1.2em;
+	text-align: center;
+}
+
+div.north {
+		border-top: 1px solid black;
+}
+div.east {
+		border-right: 1px solid black;
+}
+div.south {
+		border-bottom: 1px solid black;
+}
+div.west {
+		border-left: 1px solid black;
+}
+
+div.path {
+	color: #00f;
+	//border-radius: 16px;
+}
+
+
