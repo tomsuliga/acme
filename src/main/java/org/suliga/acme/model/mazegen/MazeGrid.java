@@ -15,7 +15,7 @@ public class MazeGrid {
 	private MazeCell[][] mazeCells;
 	private int numCols;
 	private int numRows;
-	private boolean solved;
+	private List<Integer> numsToCheck;
 
 	public MazeGrid() {
 		this(32, 22);
@@ -59,6 +59,12 @@ public class MazeGrid {
 				mazeCells[col][row] = new MazeCell(col, row);
 			}
 		}
+		
+		numsToCheck = new ArrayList<>();
+		numsToCheck.add(0);
+		numsToCheck.add(1);
+		numsToCheck.add(2);
+		numsToCheck.add(3);
 
 		recursiveBacktrack(mazeCells[5][1]);
 
@@ -101,12 +107,6 @@ public class MazeGrid {
 		int col = cell.getCol();
 		int row = cell.getRow();
 		
-		List<Integer> numsToCheck = new ArrayList<>();
-		numsToCheck.add(0);
-		numsToCheck.add(1);
-		numsToCheck.add(2);
-		numsToCheck.add(3);
-
 		// Do while not blocked
 		while (!mazeCells[col - 1][row].isVisited() 
 			|| !mazeCells[col + 1][row].isVisited()
@@ -156,31 +156,25 @@ public class MazeGrid {
 	}
 	
 	public void solve() {
-		//mazeCells[3][1].addClass("path");
-		//mazeCells[3][1].setViewText(Character.toString((char)215));
+		// clean old solution
+		for (int col = 0; col < numCols; col++) {
+			for (int row = 0; row < numRows; row++) {
+				MazeCell cell = mazeCells[col][row];
+				if (cell.getViewClass().contains("path")) {
+					cell.removeClass("path");
+					cell.setViewText("");
+					cell.setSolveVisited(false);
+				}
+			}
+		}
 
-		//mazeCells[28][20].addClass("path");
-		//mazeCells[28][20].setViewText(Character.toString((char)215));
-		
-		// start cell
-		
-		// put each cell on stack
-		
-		// if backtrack, remove cell from stack
-		
-		// if cell is end, copy and save stack as possible solution
-		
-		// continue until all cells are visted - only end can be visited multiple times
-		
 		Deque<MazeCell> stack = new ArrayDeque<>();
 		stack.push(mazeCells[3][1]);
-		solved = false;
 		solve(stack);
-		
+				
 		stack.forEach(e -> {
 			e.addClass("path");
-			//e.setViewText(Character.toString((char)215)); // 
-			e.setViewText("&#9679;");
+			e.setViewText("&#9642;");
 		});
 	}
 	
@@ -188,30 +182,59 @@ public class MazeGrid {
 		// any moves left?
 		MazeCell cell = stack.peek();
 		cell.setSolveVisited(true);
+		
 		if (cell.getCol() == 28 && cell.getRow() == 20) {
 			// end found
-			solved = true;
 			return;
 		}
+		
 		MazeCell nextCell = null;
 		int col = cell.getCol();
 		int row = cell.getRow();
 		
-		if (!cell.getViewClass().contains("south") && !mazeCells[col][row+1].isSolveVisited()) {
-			nextCell = mazeCells[col][row+1];
-			stack.push(nextCell);
-		} else if (!cell.getViewClass().contains("north") && !mazeCells[col][row-1].isSolveVisited()) {
-			nextCell = mazeCells[col][row-1];
-			stack.push(nextCell);
-		} else if (!cell.getViewClass().contains("east") && !mazeCells[col+1][row].isSolveVisited()) {
-			nextCell = mazeCells[col+1][row];
-			stack.push(nextCell);
-		} else if (!cell.getViewClass().contains("west") && !mazeCells[col-1][row].isSolveVisited()) {
-			nextCell = mazeCells[col-1][row];
-			stack.push(nextCell);
+ 		// pick random direction
+		Collections.shuffle(numsToCheck);
+		boolean found = false;
+		
+		for (int i=0;i<4;i++) {
+			switch (numsToCheck.get(i)) {
+			case 0:
+				if (!cell.getViewClass().contains("south") && !mazeCells[col][row+1].isSolveVisited()) {
+					nextCell = mazeCells[col][row+1];
+					stack.push(nextCell);
+					found = true;
+				}
+				break;
+			case 1:
+				if (!cell.getViewClass().contains("north") && !mazeCells[col][row-1].isSolveVisited()) {
+					nextCell = mazeCells[col][row-1];
+					stack.push(nextCell);
+					found = true;
+				}				
+				break;
+			case 2:
+				if (!cell.getViewClass().contains("east") && !mazeCells[col+1][row].isSolveVisited()) {
+					nextCell = mazeCells[col+1][row];
+					stack.push(nextCell);
+					found = true;
+				}
+				break;
+			case 3:
+				if (!cell.getViewClass().contains("west") && !mazeCells[col-1][row].isSolveVisited()) {
+					nextCell = mazeCells[col-1][row];
+					stack.push(nextCell);
+					found = true;
+				}
+				break;
+			}
+			if (found)
+				break;
+		}
+		if (!found) {
+			stack.pop();
 		}
 
-		return;
+		solve(stack);
 	}
 }
 

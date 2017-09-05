@@ -29,3 +29,4 @@ function solve() {
 		window.location = "mazegen";
 	}, 100);
 };
+
