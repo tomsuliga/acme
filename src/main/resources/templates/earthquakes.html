@@ -10,19 +10,24 @@
 <h1 class='shadowfont'>Earthquakes</h1>
 <div id='main-earthquakes'>
 <div>
-<table>
-	<tr>
-		<th>Event</th>
-	</tr>
-	<tr th:each="ef:${earthquakeFeatures}">
-		<td th:text='${ef.getProperties().get("title")}' >V1</td>
-	</tr>
-</table>
-
+	<table>
+		<tr>
+			<th>Type</th>
+			<th>Magnitude</th>
+			<th>Place</th>
+			<th>Time</th>
+		</tr>
+		<tr th:each="ef:${earthquakeFeatures}">
+			<td th:text='${ef.getProperties().get("type")}' class='capitalize'>V1</td>
+			<td th:text='${ef.getProperties().get("mag")}' class='center'>V1</td>
+			<td th:text='${ef.getProperties().get("place")}' >V1</td>
+			<td th:text='${ef.getProperties().get("time")}' >V1</td>
+		</tr>
+	</table>
+	<footer><a href="home">Home</a></footer>
 </div>
- <p th:utext="${formattedJson}">Dummy</p>
+	<p th:utext="${formattedJson}">Dummy</p>
 </div>
-<footer><a href="home">Home</a></footer>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

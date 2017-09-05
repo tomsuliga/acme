@@ -1,11 +1,16 @@
 @charset "ISO-8859-1";
 
+body {
+	width: 700px;
+}
+
 @font-face {
 	font-family: 'Earthquake1';
 	src: url('/resources/fonts/EarthquakeMF.ttf');
 }
 
 h1 {
+	width: 700px;
 	font-family: 'Earthquake1', sans-serif;
 	letter-spacing: 2px;
 	color: #c00;
@@ -33,3 +38,38 @@ h2 {
 	*/
 	text-shadow: 4px 4px 4px #000;
 }
+
+th, td {
+	padding: .8em;
+	border: 1px solid black;
+}
+
+th {
+	background-color: #9cf;
+}
+
+tr:nth-child(even) {
+    background-color: #ccf;
+}
+
+tr:nth-child(odd) {
+    background-color: #ddf;
+}
+
+table {
+	border-collapse: collapse;
+	border: 1px solid black;
+}
+
+table tr:hover td {
+	background: #bbf;
+}
+
+.capitalize {
+	text-transform: capitalize;
+}
+
+
+
+
+
