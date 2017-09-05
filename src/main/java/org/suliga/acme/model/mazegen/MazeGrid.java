@@ -75,6 +75,9 @@ public class MazeGrid {
 		mazeCells[28][20].removeClass("south");
 
 		verifyDoubleEdge();
+		
+		// temp
+		//solve();
 	}
 
 	private void verifyDoubleEdge() {

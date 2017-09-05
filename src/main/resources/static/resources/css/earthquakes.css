@@ -1,0 +1,35 @@
+@charset "ISO-8859-1";
+
+@font-face {
+	font-family: 'Earthquake1';
+	src: url('/resources/fonts/EarthquakeMF.ttf');
+}
+
+h1 {
+	font-family: 'Earthquake1', sans-serif;
+	letter-spacing: 2px;
+	color: #c00;
+}
+
+@font-face {
+	font-family: 'Earthquake2';
+	src: url('../fonts/EarthquakeMF.ttf');
+}
+
+h2 {
+	font-family: 'Earthquake2', sans-serif;
+	letter-spacing: 2px;
+	color: #c00;
+}
+
+.shadowfont {
+	font-family: 'Earthquake1', sans-serif;
+	font-size: 3em;
+	font-weight: 500;
+	color: #c33;
+	/* how far to left or right the shadow should fall
+	   distance to top or bottom the shadow should fall
+	   amount of blur 
+	*/
+	text-shadow: 4px 4px 4px #000;
+}

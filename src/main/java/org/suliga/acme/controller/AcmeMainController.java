@@ -22,6 +22,7 @@ import org.suliga.acme.model.dailydiet.NutrientDisplaySummary;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
 import org.suliga.acme.service.dailydiet.DailyDietService;
+import org.suliga.acme.service.earthquakes.EarthquakesService;
 import org.suliga.acme.service.mazegen.MazegenService;
 import org.suliga.acme.service.minesweeper.MinesweeperService;
 
@@ -34,6 +35,7 @@ public class AcmeMainController {
 	@Autowired private MinesweeperService minesweeperService;
 	@Autowired private DailyDietService dailyDietService;
 	@Autowired private MazegenService mazegenService;
+	@Autowired private EarthquakesService earthquakesService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -140,6 +142,13 @@ public class AcmeMainController {
 	@SendTo("/topic/result/mazegendisplay")
 	public void handleMazegenSolve(String incoming) {
 		mazegenService.solveMaze();
+	}
+	
+	@GetMapping("/earthquakes")
+	public String getEarthquakes(Model model) {
+		model.addAttribute("rawJson", earthquakesService.getRawJson());
+		model.addAttribute("formattedJson", earthquakesService.getFormattedJson());
+		return "earthquakes";
 	}
 }
 
