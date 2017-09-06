@@ -24,6 +24,7 @@ import org.suliga.acme.service.dailydiet.DailyDietService;
 import org.suliga.acme.service.earthquakes.EarthquakesService;
 import org.suliga.acme.service.mazegen.MazegenService;
 import org.suliga.acme.service.minesweeper.MinesweeperService;
+import org.suliga.acme.service.primegen.PrimeNumberService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,6 +36,7 @@ public class AcmeMainController {
 	@Autowired private DailyDietService dailyDietService;
 	@Autowired private MazegenService mazegenService;
 	@Autowired private EarthquakesService earthquakesService;
+	@Autowired private PrimeNumberService primeNumberService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -149,6 +151,12 @@ public class AcmeMainController {
 		model.addAttribute("formattedJson", earthquakesService.getFormattedJson());
 		model.addAttribute("earthquakeFeatures", earthquakesService.getEarthquakeFeatures());
 		return "earthquakes";
+	}
+
+	@GetMapping("/primegen")
+	public String getPrimeGen(Model model) {
+		model.addAttribute("prime512", primeNumberService.generatePrimeString512());
+		return "primegen";
 	}
 }
 
