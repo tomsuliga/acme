@@ -51,6 +51,7 @@ FoodItem: Mushrooms
 FoodItem: Olives
 FoodItem: Onion
 FoodItem: Potato
+FoodItem: Protein_powder
 FoodItem: Salsa
 FoodItem: Sardines
 FoodItem: Soy_Milk
@@ -77,6 +78,7 @@ FoodNutrient: Avocado Magnesium 29
 FoodNutrient: Avocado Manganese 0.142
 FoodNutrient: Avocado Phosphorus 52
 FoodNutrient: Avocado Potassium 485
+FoodNutrient: Avocado Sodium 7
 FoodNutrient: Avocado Zinc 0.64
 
 FoodNutrient: Banana Carbs 22.84
@@ -377,6 +379,13 @@ FoodNutrient: Potato Phosphorus 8%
 FoodNutrient: Potato Potassium 9%
 FoodNutrient: Potato Zinc 3%
 
+FoodNutrient: Protein_powder Fat 1
+FoodNutrient: Protein_powder Carbs 3
+FoodNutrient: Protein_powder Protein 24
+FoodNutrient: Protein_powder Sodium 130
+FoodNutrient: Protein_powder Calcium 8%
+FoodNutrient: Protein_powder Iron 2%
+
 FoodNutrient: Salsa Carbs 2
 FoodNutrient: Salsa A 4%
 FoodNutrient: Salsa C 6%
@@ -427,11 +436,10 @@ FoodNutrient: Tuna B6 0.26
 FoodNutrient: Tuna B12 3.375
 FoodNutrient: Tuna Magnesium 52
 
-FoodNutrient: Yogurt Fat 1
-FoodNutrient: Yogurt Carbs 6
-FoodNutrient: Yogurt Protein 17
-FoodNutrient: Yogurt Calcium 18%
-FoodNutrient: Yogurt B6 5%
-FoodNutrient: Yogurt B12 21%
-FoodNutrient: Yogurt Magnesium 4%
+FoodNutrient: Yogurt Carbs 18
+FoodNutrient: Yogurt Protein 12
+FoodNutrient: Yogurt Calcium 15%
+FoodNutrient: Yogurt Sodium 50
+FoodNutrient: Yogurt Potassium 190
+
 

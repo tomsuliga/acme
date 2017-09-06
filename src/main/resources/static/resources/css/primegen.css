@@ -1,1 +1,59 @@
 @charset "ISO-8859-1";
+
+body {
+	width: 960px;
+}
+
+select {
+	margin-right: 1em;
+	font-size: large;
+	font-weight: 500;
+}
+
+button.myButton {
+	margin-left: 8px;
+	margin-right: 8px;
+	font-size: large;
+	font-weight: 500;
+	width: 8em;
+}
+
+label.myLabel {
+	font-size: 1.25em;
+	margin-right: 8px;
+}
+
+label#statusMsgRunning {
+	width: 7em;
+	text-align: center;
+	background-color: #ded698;
+	display: inline-block;
+}
+
+label#statusMsgCount, label#statusMsgAvgTime {
+	width: 5em;
+	text-align: center;
+	background-color: #ded698;
+	display: inline-block;
+}
+
+textarea#taResult {
+	overflow: scroll;
+	white-space: nowrap;
+	
+}
+
+button:disabled,
+button[disabled]{
+  border: 1px solid #999;
+  background-color: #ccc;
+  color: #888;
+}
+
+select:disabled,
+select[disabled]{
+  border: 1px solid #999;
+  background-color: #ccc;
+  color: #888;
+}
+

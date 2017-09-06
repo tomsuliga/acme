@@ -1,16 +1,22 @@
 package org.suliga.acme.service.primegen;
 
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.BitSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.suliga.acme.model.primegen.PrimeNumberResult;
 
 @Service
 public class PrimeNumberServiceImpl implements PrimeNumberService {
 	private static final Logger logger = LoggerFactory.getLogger(PrimeNumberServiceImpl.class);
+	private static boolean canRun;
 	
 	private static final int[] intPrimes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
 			47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137,
@@ -30,14 +36,39 @@ public class PrimeNumberServiceImpl implements PrimeNumberService {
 		}		
 	}
 	
-	public String generatePrimeString512() {
+	@Override
+	public void generatePrimeNumber(int numBits, int numThreads, SimpMessagingTemplate simpMessagingTemplate) {		
+		
+		ExecutorService es = Executors.newFixedThreadPool(numThreads);
+		canRun= true;
+		
+		for (int i=0;i<numThreads;i++) {
+			es.execute(() -> {
+				while (canRun) {
+					PrimeNumberResult pnr = generatePrimeNumber(numBits);
+					simpMessagingTemplate.convertAndSend("/topic/primeNumberResult", pnr);
+				}
+			});
+		}
+		
+		es.shutdown();
+	}
+	
+	@Override
+	public void stopPreviousThreads() {
+		canRun = false;
+	}
+	
+	private PrimeNumberResult generatePrimeNumber(int numBits) {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
 		boolean good = false;
 		BigInteger bigResult = null;
-
+		int numTries = 0;
+		Instant instantStart = Instant.now();
 		while (!good) {
-			BitSet bs = new BitSet(512);
-			for (int i=0;i<512;i++) {
+			numTries++;
+			BitSet bs = new BitSet(numBits);
+			for (int i=0;i<numBits;i++) {
 				if (random.nextInt(2) == 1) {
 					bs.set(i);
 				}
@@ -47,6 +78,7 @@ public class PrimeNumberServiceImpl implements PrimeNumberService {
 				bigResult = bigResult.negate();
 			}
 			good = true;
+			// test initial set of known primes
 			for (int i=0;i<bigPrimes.length;i++) {
 				BigInteger[] bigTest = bigResult.divideAndRemainder(bigPrimes[i]);
 				if (bigTest[1].intValue() == 0) {
@@ -54,7 +86,7 @@ public class PrimeNumberServiceImpl implements PrimeNumberService {
 					break;
 				}				
 			}
-			// still good? try more numbers
+			// still good? try more odd numbers
 			if (good) {
 				for (int i=1001;i<25_000_000;i+=2) {
 					BigInteger bigAdditional = BigInteger.valueOf(i);
@@ -66,9 +98,9 @@ public class PrimeNumberServiceImpl implements PrimeNumberService {
 				}
 			}
 		}
-		String result = bigResult.toString();
-		logger.info("bigResult=" + result);
-		return result;
+		Instant instantEnd = Instant.now();
+		PrimeNumberResult pnr = new PrimeNumberResult(bigResult, numBits, numTries, instantEnd.toEpochMilli() - instantStart.toEpochMilli());
+		return pnr;
 	}
 }
 

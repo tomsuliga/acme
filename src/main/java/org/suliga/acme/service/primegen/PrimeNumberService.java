@@ -1,5 +1,8 @@
 package org.suliga.acme.service.primegen;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
 public interface PrimeNumberService {
-	String generatePrimeString512();
+	void generatePrimeNumber(int numBits, int numThreads, SimpMessagingTemplate simpMessagingTemplate);
+	void stopPreviousThreads();
 }

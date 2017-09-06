@@ -1,6 +1,7 @@
 package org.suliga.acme.controller;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,8 @@ import org.suliga.acme.model.dailydiet.NutrientAggregate;
 import org.suliga.acme.model.dailydiet.NutrientDisplaySummary;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
+import org.suliga.acme.model.primegen.PrimeNumberResult;
+import org.suliga.acme.model.primegen.PrimegenStart;
 import org.suliga.acme.service.dailydiet.DailyDietService;
 import org.suliga.acme.service.earthquakes.EarthquakesService;
 import org.suliga.acme.service.mazegen.MazegenService;
@@ -37,6 +41,7 @@ public class AcmeMainController {
 	@Autowired private MazegenService mazegenService;
 	@Autowired private EarthquakesService earthquakesService;
 	@Autowired private PrimeNumberService primeNumberService;
+	@Autowired private SimpMessagingTemplate simpMessagingTemplate;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -155,8 +160,18 @@ public class AcmeMainController {
 
 	@GetMapping("/primegen")
 	public String getPrimeGen(Model model) {
-		model.addAttribute("prime512", primeNumberService.generatePrimeString512());
 		return "primegen";
+	}
+	
+	@MessageMapping("/primegen/start")
+	public void handlePrimegenStart(PrimegenStart primegenStart) {
+		logger.info("primegenStart=" + primegenStart);
+		primeNumberService.generatePrimeNumber(primegenStart.getNumBits(), primegenStart.getNumThreads(), simpMessagingTemplate);
+	}
+	
+	@MessageMapping("/primegen/stop")
+	public void handlePrimegenStop() {
+		primeNumberService.stopPreviousThreads();
 	}
 }
 
