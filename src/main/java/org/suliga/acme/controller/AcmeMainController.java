@@ -1,7 +1,6 @@
 package org.suliga.acme.controller;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,6 @@ import org.suliga.acme.model.dailydiet.NutrientAggregate;
 import org.suliga.acme.model.dailydiet.NutrientDisplaySummary;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
-import org.suliga.acme.model.primegen.PrimeNumberResult;
 import org.suliga.acme.model.primegen.PrimegenStart;
 import org.suliga.acme.service.dailydiet.DailyDietService;
 import org.suliga.acme.service.earthquakes.EarthquakesService;
@@ -94,6 +92,7 @@ public class AcmeMainController {
 		logger.info("/dailydiet/getOneServingNutrients: incoming = " + incoming);
 		try {
 			ObjectMapper mapper = new ObjectMapper();
+			@SuppressWarnings("unchecked")
 			Map<String, String> map = mapper.readValue(incoming, Map.class);
 			String foodItemId = map.get("foodItemId").substring("foodItem-".length());
 			logger.info("foodItemId=" + foodItemId);

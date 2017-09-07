@@ -46,7 +46,9 @@ public class PrimeNumberServiceImpl implements PrimeNumberService {
 			es.execute(() -> {
 				while (canRun) {
 					PrimeNumberResult pnr = generatePrimeNumber(numBits);
-					simpMessagingTemplate.convertAndSend("/topic/primeNumberResult", pnr);
+					if (canRun) {
+						simpMessagingTemplate.convertAndSend("/topic/primeNumberResult", pnr);
+					}
 				}
 			});
 		}
@@ -56,6 +58,7 @@ public class PrimeNumberServiceImpl implements PrimeNumberService {
 	
 	@Override
 	public void stopPreviousThreads() {
+		logger.debug("stopPreviousThreads called");
 		canRun = false;
 	}
 	
@@ -65,7 +68,7 @@ public class PrimeNumberServiceImpl implements PrimeNumberService {
 		BigInteger bigResult = null;
 		int numTries = 0;
 		Instant instantStart = Instant.now();
-		while (!good) {
+		while (!good && canRun) {
 			numTries++;
 			BitSet bs = new BitSet(numBits);
 			for (int i=0;i<numBits;i++) {
@@ -91,16 +94,20 @@ public class PrimeNumberServiceImpl implements PrimeNumberService {
 				for (int i=1001;i<25_000_000;i+=2) {
 					BigInteger bigAdditional = BigInteger.valueOf(i);
 					BigInteger[] bigTest = bigResult.divideAndRemainder(bigAdditional);
-					if (bigTest[1].intValue() == 0) {
+					if (bigTest[1].intValue() == 0 || !canRun) {
 						good = false;
 						break;
 					}				
 				}
 			}
 		}
-		Instant instantEnd = Instant.now();
-		PrimeNumberResult pnr = new PrimeNumberResult(bigResult, numBits, numTries, instantEnd.toEpochMilli() - instantStart.toEpochMilli());
-		return pnr;
+		if (canRun) {
+			Instant instantEnd = Instant.now();
+			PrimeNumberResult pnr = new PrimeNumberResult(bigResult, numBits, numTries, instantEnd.toEpochMilli() - instantStart.toEpochMilli());
+			return pnr;
+		}
+		return null;
 	}
 }
+
 

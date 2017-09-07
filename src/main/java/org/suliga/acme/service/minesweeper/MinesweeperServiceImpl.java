@@ -28,6 +28,7 @@ public class MinesweeperServiceImpl implements MinesweeperService {
 
 	@Override
 	public GameGrid newGame(String sessionId, int numCols, int numRows) {
+		logger.debug("newGame called");
 		gameGrid.put(sessionId,  new GameGrid(numCols, numRows));
 		return gameGrid.get(sessionId);
 	}

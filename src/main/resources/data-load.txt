@@ -31,6 +31,7 @@ NutrientItem: Zinc 11 mg true
 
 FoodItem: Avocado
 FoodItem: Banana
+FoodItem: Bell_Pepper
 FoodItem: Black_Beans
 FoodItem: Blueberries
 FoodItem: Bread_1_slice
@@ -57,6 +58,7 @@ FoodItem: Sardines
 FoodItem: Soy_Milk
 FoodItem: Tomato
 FoodItem: Tuna
+FoodItem: Walnuts
 FoodItem: Yogurt
 
 FoodNutrient: Avocado Carbs 8.53
@@ -99,6 +101,26 @@ FoodNutrient: Banana Manganese 0.27
 FoodNutrient: Banana Phosphorus 22
 FoodNutrient: Banana Potassium 358
 FoodNutrient: Banana Zinc 0.15
+
+FoodNutrient: Bell_Pepper Carbs 5
+FoodNutrient: Bell_Pepper Protein 1
+FoodNutrient: Bell_Pepper Fiber 2
+FoodNutrient: Bell_Pepper A 2%
+FoodNutrient: Bell_Pepper B1 5%
+FoodNutrient: Bell_Pepper B2 2%
+FoodNutrient: Bell_Pepper B3 3%
+FoodNutrient: Bell_Pepper B5 2%
+FoodNutrient: Bell_Pepper B6 17%
+FoodNutrient: Bell_Pepper B9 3%
+FoodNutrient: Bell_Pepper C 97%
+FoodNutrient: Bell_Pepper E 2%
+FoodNutrient: Bell_Pepper K 7%
+FoodNutrient: Bell_Pepper Iron 3%
+FoodNutrient: Bell_Pepper Magnesium 3%
+FoodNutrient: Bell_Pepper Manganese 6%
+FoodNutrient: Bell_Pepper Phosphorus 3%
+FoodNutrient: Bell_Pepper Potassium 4%
+FoodNutrient: Bell_Pepper Zinc 1%
 
 FoodNutrient: Black_Beans Carbs 23.71
 FoodNutrient: Black_Beans Fat 0.5
@@ -391,21 +413,13 @@ FoodNutrient: Salsa A 4%
 FoodNutrient: Salsa C 6%
 FoodNutrient: Salsa Sodium 240
 
-FoodNutrient: Sardines Carbs 8
-FoodNutrient: Sardines Fat 9
-FoodNutrient: Sardines Protein 14
-FoodNutrient: Sardines A 8%
-FoodNutrient: Sardines B3 30%
-FoodNutrient: Sardines B12 338%
-FoodNutrient: Sardines D 44%
-FoodNutrient: Sardines Calcium 4%
-FoodNutrient: Sardines Copper 19%
-FoodNutrient: Sardines Choline 16%
-FoodNutrient: Sardines Selenium 87%
-FoodNutrient: Sardines Phosphorus 64%
+FoodNutrient: Sardines Fat 16
+FoodNutrient: Sardines Protein 16
+FoodNutrient: Sardines A 2%
+FoodNutrient: Sardines Calcium 25%
 FoodNutrient: Sardines Omega-3 61%
-FoodNutrient: Sardines Iron 60%
-FoodNutrient: Sardines Sodium 280
+FoodNutrient: Sardines Iron 8%
+FoodNutrient: Sardines Sodium 420
 
 FoodNutrient: Soy_Milk Fat 4
 FoodNutrient: Soy_Milk Protein 7
@@ -435,6 +449,27 @@ FoodNutrient: Tuna A 1200
 FoodNutrient: Tuna B6 0.26
 FoodNutrient: Tuna B12 3.375
 FoodNutrient: Tuna Magnesium 52
+
+FoodNutrient: Walnuts Carbs 3
+FoodNutrient: Walnuts Fat 16
+FoodNutrient: Walnuts Protein 4
+FoodNutrient: Walnuts Fiber 2
+FoodNutrient: Walnuts B1 8%
+FoodNutrient: Walnuts B2 3%
+FoodNutrient: Walnuts B3 2%
+FoodNutrient: Walnuts B5 3%
+FoodNutrient: Walnuts B6 10%
+FoodNutrient: Walnuts B9 6%
+FoodNutrient: Walnuts C 1%
+FoodNutrient: Walnuts E 1%
+FoodNutrient: Walnuts K 1%
+FoodNutrient: Walnuts Calcium 2%
+FoodNutrient: Walnuts Iron 5%
+FoodNutrient: Walnuts Magnesium 11%
+FoodNutrient: Walnuts Manganese 41%
+FoodNutrient: Walnuts Phosphorus 12%
+FoodNutrient: Walnuts Potassium 2%
+FoodNutrient: Walnuts Zinc 8%
 
 FoodNutrient: Yogurt Carbs 18
 FoodNutrient: Yogurt Protein 12
