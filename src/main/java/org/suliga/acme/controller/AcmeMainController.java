@@ -16,9 +16,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.suliga.acme.model.dailydiet.FoodItem;
-import org.suliga.acme.model.dailydiet.NumServings;
+import org.suliga.acme.model.dailydiet.StompNumServings;
 import org.suliga.acme.model.dailydiet.NutrientAggregate;
 import org.suliga.acme.model.dailydiet.NutrientDisplaySummary;
+import org.suliga.acme.model.dailydiet.StompFoodItemId;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
 import org.suliga.acme.model.primegen.PrimegenStart;
@@ -88,44 +89,20 @@ public class AcmeMainController {
 	
 	@MessageMapping("/dailydiet/getOneServingNutrients")
 	@SendTo("/topic/result/getOneServingNutrients")
-	public List<NutrientAggregate> handleDailyDiet(String incoming) {
-		logger.info("/dailydiet/getOneServingNutrients: incoming = " + incoming);
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			@SuppressWarnings("unchecked")
-			Map<String, String> map = mapper.readValue(incoming, Map.class);
-			String foodItemId = map.get("foodItemId").substring("foodItem-".length());
-			logger.info("foodItemId=" + foodItemId);
-			FoodItem foodItem = dailyDietService.getFoodItemById(foodItemId);
-			logger.info("cashews = " + foodItem);
-			return foodItem.getNutrients();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+	public List<NutrientAggregate> handleDailyDiet(StompFoodItemId stompFoodItemId) {
+		FoodItem foodItem = dailyDietService.getFoodItemById(stompFoodItemId.getFoodItemId());
+		return foodItem.getNutrients();
 	}
 	
 	@MessageMapping("/dailydiet/numServingsChanged")
 	@SendTo("/topic/result/nutrientDisplaySummary")
-	public List<NutrientDisplaySummary> handleDailyDietNumServingsChanged(String incoming) {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			NumServings numServings = mapper.readValue(incoming, NumServings.class);
-			logger.info("dailyDietName = " + numServings.getDailyDietName());
-			String tempId = numServings.getNumServingsId();
-			tempId = tempId.substring(0, tempId.indexOf("-count-"));
-			tempId = tempId.substring(tempId.indexOf("-") + 1);
-			logger.info("tempId = " + tempId);
-			FoodItem foodItem = dailyDietService.getFoodItemById(tempId);
-			int count = numServings.getCount();
-			if (!numServings.isSelected()) {
-				count = 0;
-			}
-			return dailyDietService.getNutrientDisplaySummary(numServings.getDailyDietName(), foodItem, count);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+	public List<NutrientDisplaySummary> handleDailyDietNumServingsChanged(StompNumServings numServings) {
+		FoodItem foodItem = dailyDietService.getFoodItemById(numServings.getNumServingsId());
+		int count = numServings.getCount();
+		if (!numServings.isSelected()) {
+			count = 0;
 		}
+		return dailyDietService.getNutrientDisplaySummary(numServings.getDailyDietName(), foodItem, count);
 	}
 	
 	@GetMapping("/mazegen")
