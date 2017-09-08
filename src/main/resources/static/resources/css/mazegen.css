@@ -3,6 +3,7 @@
 h1 {
 	width: 1088px;
 	text-align: center;
+	margin: 0 0 8px 0;
 }
 
 header {
@@ -22,7 +23,7 @@ button.myButton {
 }
 
 div#mazeGrid {
-	background-color: red;
+	background-color: #bbb;
 }
 
 div.cell {

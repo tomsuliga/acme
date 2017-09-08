@@ -1,6 +1,10 @@
 package org.suliga.acme.service.earthquakes;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -26,10 +30,31 @@ public class EarthquakesServiceImpl implements EarthquakesService {
 		try {
 			earthquakeEvent = om.readValue(monthlyJson, EarthquakeEvent.class);
 			logger.info("****** event features size = " + earthquakeEvent.getFeatures().size());
+			
+			// here?
+			earthquakeEvent.getFeatures().forEach(e -> {
+				Long time = (Long) e.getProperties().get("time");
+				String formattedTime = eqDate(time);
+				e.getProperties().put("time", formattedTime);
+			});
+			
+			// sort descending order
+			earthquakeEvent.getFeatures().sort((e1,e2) -> {
+				double d1 = (double) e1.getProperties().get("mag");
+				double d2 = (double) e2.getProperties().get("mag");
+				return (int) (Math.round(d2 * 10) - Math.round(d1 * 10));
+			});
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private String eqDate(Long longDate) {
+		Instant date = Instant.ofEpochMilli(longDate);
+		ZonedDateTime z = ZonedDateTime.ofInstant(date, ZoneId.of("UTC+0"));
+		return DateTimeFormatter.ofPattern("MMM dd hh:mm a").format(z);
 	}
 	
 	@Override

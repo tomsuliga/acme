@@ -26,18 +26,18 @@
 <table>
 	<tr>
 		<th>Nutrients</th>
-		<th class=percent>Percent</th>
 		<th>Total</th>
+		<th class=percent>Percent</th>
 		<th>RDA</th>
 		<th>Menu Item</th>
 	</tr>
 	<tr th:each="nutrientItem:${nutrientItems}">
 			<td th:if="${!nutrientItem.selectable}"class='foodPart' th:id='${"nutrientName-" + nutrientItem.id}' th:text='${nutrientItem.name}' >V1</td>
 			<td th:if="${nutrientItem.selectable}" class='ingredient selectable' th:id='${"nutrientName-" + nutrientItem.id}' th:text='${nutrientItem.name}' >V1</td>
-		<td th:id='${"nutrientPercent-" + nutrientItem.id}' class='vitamineInfo'></td>
-		<td th:id='${"nutrientTotal-" + nutrientItem.id}'   class='vitamineInfo'>0</td>
-		<td th:id='${"nutrientRDA-" + nutrientItem.id}'     class='vitamineInfo' th:text='${nutrientItem.rda + " " + nutrientItem.units}'></td>
-		<td th:id='${"nutrientServing-" + nutrientItem.id}' class='vitamineInfo'></td>
+		<td th:id='${"nutrientTotal-" + nutrientItem.id}'   class='vitaminInfo'>0</td>
+		<td th:id='${"nutrientPercent-" + nutrientItem.id}' class='vitaminInfo'></td>
+		<td th:id='${"nutrientRDA-" + nutrientItem.id}'     class='vitaminInfo' th:text='${nutrientItem.rda + " " + nutrientItem.units}'></td>
+		<td th:id='${"nutrientServing-" + nutrientItem.id}' class='vitaminInfo'></td>
 	</tr>
 </table>
 </aside>

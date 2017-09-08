@@ -21,7 +21,6 @@ $('.selectable').on('click', function() {
 		var payload = JSON.stringify({ 'numServingsId':e.attr('id'), 
 									   'selected':e.hasClass('selected'), 
 									   'dailyDietName':$('#dailyDietName').attr('data-dailyDietName')});
-		//alert(payload);
 		nutrientAggregates = stomp.send('/stomp/dailydiet/numServingsChanged', {}, payload);
 				
 		let eMenuItemPrev = $('.menuItem.selected');
@@ -84,11 +83,6 @@ stomp.connect({}, function(frame) {
         	let totalAmount = nutrientDisplaySummaryList[i].totalAmount;
         	let percentId = '#' + nutrientDisplaySummaryList[i].percentId;
         	let percentAmount = nutrientDisplaySummaryList[i].percentAmount;
-        	//
-        	//console.log("totalId=" + totalId);
-        	//console.log("totalAmount=" + totalAmount);
-           	//console.log("percentId=" + percentId);
-        	//console.log("percentAmount=" + percentAmount);
         	$(totalId).text(totalAmount);
         	if (percentAmount == 0) {
         		$(percentId).text('');
@@ -108,11 +102,7 @@ function clearNutrientServing() {
     	let nutrient = lastNutrients[i];
     	let nutrientServingId = "#nutrientServing-" + nutrient.nutrientItem.id;
     	$(nutrientServingId).text("");
-    	// temp
-    	//let nutrientTotalId = "#nutrientTotal-" + nutrient.nutrientItem.id;
-    	//$(nutrientTotalId).text("0");
-
-    }
+     }
 }
 
 

@@ -1,10 +1,11 @@
 package org.suliga.acme.model.mazegen;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ public class MazeGrid {
 	private MazeCell[][] mazeCells;
 	private int numCols;
 	private int numRows;
-	private List<Integer> numsToCheck;
+	private List<Integer> directionsToCheck;
 
 	public MazeGrid() {
 		this(32, 22);
@@ -52,6 +53,7 @@ public class MazeGrid {
 	}
 
 	private void init() {
+		logger.debug("init called");
 		mazeCells = new MazeCell[numCols][numRows];
 
 		for (int col = 0; col < numCols; col++) {
@@ -60,12 +62,7 @@ public class MazeGrid {
 			}
 		}
 		
-		numsToCheck = new ArrayList<>();
-		numsToCheck.add(0);
-		numsToCheck.add(1);
-		numsToCheck.add(2);
-		numsToCheck.add(3);
-
+		directionsToCheck = Stream.of(0,1,2,3).collect(Collectors.toList());
 		recursiveBacktrack(mazeCells[5][1]);
 
 		mazeCells[3][0].setViewText("S"); 
@@ -75,9 +72,6 @@ public class MazeGrid {
 		mazeCells[28][20].removeClass("south");
 
 		verifyDoubleEdge();
-		
-		// temp
-		//solve();
 	}
 
 	private void verifyDoubleEdge() {
@@ -118,10 +112,10 @@ public class MazeGrid {
 
 			MazeCell nextCell = null;
 			// pick random direction
-			Collections.shuffle(numsToCheck);
+			Collections.shuffle(directionsToCheck);
 			
 			for (int i=0;i<4;i++) {
-				switch (numsToCheck.get(i)) {
+				switch (directionsToCheck.get(i)) {
 				case 0:
 					if (!mazeCells[col][row - 1].isVisited()) {
 						nextCell = mazeCells[col][row - 1];
@@ -196,11 +190,11 @@ public class MazeGrid {
 		int row = cell.getRow();
 		
  		// pick random direction
-		Collections.shuffle(numsToCheck);
+		Collections.shuffle(directionsToCheck);
 		boolean found = false;
 		
 		for (int i=0;i<4;i++) {
-			switch (numsToCheck.get(i)) {
+			switch (directionsToCheck.get(i)) {
 			case 0:
 				if (!cell.getViewClass().contains("south") && !mazeCells[col][row+1].isSolveVisited()) {
 					nextCell = mazeCells[col][row+1];

@@ -1,0 +1,141 @@
+@charset "ISO-8859-1";
+
+* {
+	margin-bottom: 0;
+	padding: 0 0 0 0;
+}
+
+body, div#main-crossword {
+	width: 1024px;
+	height: 800px;
+	background-color: white;
+}
+
+body {
+	margin-left: 1em;
+}
+
+div#crosswordGrid {
+	width: 540px;
+	height: 640px;
+	background-color: white;
+	float: left;
+}
+
+.clear {
+	clear: both;
+}
+
+header {
+	margin: 0;
+	padding: 0;
+}
+
+#moby-dick-image {
+	 width: 225px;
+	 height:72px;"
+}
+
+.shadowfont {
+	margin-top: 10px;
+	float: left;
+	width: 635px;
+	height: 72px;
+	
+	font-family: sans-serif, serif;
+	font-size: 3em;
+	font-weight: 600;
+	color: #c33;
+	/* how far to left or right the shadow should fall
+	   distance to top or bottom the shadow should fall
+	   amount of blur 
+	*/
+	text-shadow: 3px 3px 3px #000;
+}
+
+div#myButtons {
+	text-align: center;
+	height: 100px;
+	line-height: 100px;
+}
+
+button.myButton {
+	font-family: 'Bookman', sans-serif;
+	font-size: large;
+	margin: 10px;	
+	padding: 10px;
+}
+
+div.acrossOrDownTextLiteral {
+	float:left;
+	font-size: 1.5em;
+	width: 100px;
+	margin-left: 1em;
+}
+
+div.numberAndLetter {
+	width: 36px;
+	height: 36px;
+	float: left;
+	font-family: 'Bookman', sans-serif;
+	background-color: white;
+	border: 1px solid #222;
+	box-sizing: border-box;
+}
+
+div.cellNumber {
+	cursor: default;
+	width: 36px;
+	height: 11px;
+	font-size: .85em;
+}
+
+div.cellNumberBlock {
+	width: 36px;
+	height: 11px;
+	background-color: #117;
+}
+
+div.cellLetter {
+	cursor: default;
+	width: 36px;
+	height: 23px;
+  	line-height: 24px; /* center vertically */
+	font-size: 1.4em;
+	font-weight: 500;
+   	text-align: center;
+}
+div.cellLetterBlock {
+	background-color: #117;
+	width: 36px;
+	height: 23px;
+}
+
+div.clues {
+	width: 410px;
+	height: 285px;
+	float: left;
+	margin-left: 15px;
+	margin-bottom: 5px;
+	margin-top: 0px;
+	overflow-y: auto;
+	font-size: 16px;
+	padding-left: 5px;
+	border-style: double;
+	background-color: #d8d685;
+}
+
+.selectedPrimary {
+	background-color: #69f !important;
+}
+
+.selectedSecondary {
+	background-color: #ccf !important;
+}
+
+footer {
+	margin-top: 1em;
+	text-align: center;
+}
+
+

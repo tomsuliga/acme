@@ -1,12 +1,14 @@
 package org.suliga.acme.model.dailydiet;
 
-public class NumServings {
+public class StompNumServings {
 	private String numServingsId;
 	private boolean selected;
 	private String dailyDietName;
 	
 	public String getNumServingsId() {
-		return numServingsId;
+		// foodItem-1-count-2
+		String temp = numServingsId.substring(0,numServingsId.indexOf("-count-"));
+		return temp.substring("foodItem-".length());
 	}
 	public void setNumServingsId(String numServingsId) {
 		this.numServingsId = numServingsId;

@@ -1,8 +1,6 @@
 package org.suliga.acme.controller;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,21 +9,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.suliga.acme.model.crossword.CrosswordGrid;
 import org.suliga.acme.model.dailydiet.FoodItem;
-import org.suliga.acme.model.dailydiet.NumServings;
+import org.suliga.acme.model.dailydiet.StompNumServings;
 import org.suliga.acme.model.dailydiet.NutrientAggregate;
 import org.suliga.acme.model.dailydiet.NutrientDisplaySummary;
+import org.suliga.acme.model.dailydiet.StompFoodItemId;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
+import org.suliga.acme.model.primegen.PrimegenStart;
+import org.suliga.acme.service.crossword.CrosswordPuzzleService;
 import org.suliga.acme.service.dailydiet.DailyDietService;
 import org.suliga.acme.service.earthquakes.EarthquakesService;
 import org.suliga.acme.service.mazegen.MazegenService;
 import org.suliga.acme.service.minesweeper.MinesweeperService;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.suliga.acme.service.primegen.PrimeNumberService;
 
 @Controller
 public class AcmeMainController {
@@ -35,6 +37,9 @@ public class AcmeMainController {
 	@Autowired private DailyDietService dailyDietService;
 	@Autowired private MazegenService mazegenService;
 	@Autowired private EarthquakesService earthquakesService;
+	@Autowired private PrimeNumberService primeNumberService;
+	@Autowired private SimpMessagingTemplate simpMessagingTemplate;
+	@Autowired private CrosswordPuzzleService crosswordPuzzleService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -83,43 +88,20 @@ public class AcmeMainController {
 	
 	@MessageMapping("/dailydiet/getOneServingNutrients")
 	@SendTo("/topic/result/getOneServingNutrients")
-	public List<NutrientAggregate> handleDailyDiet(String incoming) {
-		logger.info("/dailydiet/getOneServingNutrients: incoming = " + incoming);
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			Map<String, String> map = mapper.readValue(incoming, Map.class);
-			String foodItemId = map.get("foodItemId").substring("foodItem-".length());
-			logger.info("foodItemId=" + foodItemId);
-			FoodItem foodItem = dailyDietService.getFoodItemById(foodItemId);
-			logger.info("cashews = " + foodItem);
-			return foodItem.getNutrients();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+	public List<NutrientAggregate> handleDailyDiet(StompFoodItemId stompFoodItemId) {
+		FoodItem foodItem = dailyDietService.getFoodItemById(stompFoodItemId.getFoodItemId());
+		return foodItem.getNutrients();
 	}
 	
 	@MessageMapping("/dailydiet/numServingsChanged")
 	@SendTo("/topic/result/nutrientDisplaySummary")
-	public List<NutrientDisplaySummary> handleDailyDietNumServingsChanged(String incoming) {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			NumServings numServings = mapper.readValue(incoming, NumServings.class);
-			logger.info("dailyDietName = " + numServings.getDailyDietName());
-			String tempId = numServings.getNumServingsId();
-			tempId = tempId.substring(0, tempId.indexOf("-count-"));
-			tempId = tempId.substring(tempId.indexOf("-") + 1);
-			logger.info("tempId = " + tempId);
-			FoodItem foodItem = dailyDietService.getFoodItemById(tempId);
-			int count = numServings.getCount();
-			if (!numServings.isSelected()) {
-				count = 0;
-			}
-			return dailyDietService.getNutrientDisplaySummary(numServings.getDailyDietName(), foodItem, count);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+	public List<NutrientDisplaySummary> handleDailyDietNumServingsChanged(StompNumServings numServings) {
+		FoodItem foodItem = dailyDietService.getFoodItemById(numServings.getNumServingsId());
+		int count = numServings.getCount();
+		if (!numServings.isSelected()) {
+			count = 0;
 		}
+		return dailyDietService.getNutrientDisplaySummary(numServings.getDailyDietName(), foodItem, count);
 	}
 	
 	@GetMapping("/mazegen")
@@ -149,6 +131,34 @@ public class AcmeMainController {
 		model.addAttribute("formattedJson", earthquakesService.getFormattedJson());
 		model.addAttribute("earthquakeFeatures", earthquakesService.getEarthquakeFeatures());
 		return "earthquakes";
+	}
+
+	@GetMapping("/primegen")
+	public String getPrimeGen(Model model) {
+		return "primegen";
+	}
+	
+	@MessageMapping("/primegen/start")
+	public void handlePrimegenStart(PrimegenStart primegenStart) {
+		logger.info("primegenStart=" + primegenStart);
+		primeNumberService.generatePrimeNumber(primegenStart.getNumBits(), primegenStart.getNumThreads(), simpMessagingTemplate);
+	}
+	
+	@MessageMapping("/primegen/stop")
+	public void handlePrimegenStop() {
+		primeNumberService.stopPreviousThreads();
+	}
+	
+	@GetMapping("/crossword")
+	public String getCrossword(Model model, HttpServletRequest req) {
+		String sessionId = req.getSession().getId();
+		CrosswordGrid crosswordGrid = crosswordPuzzleService.getCrosswordGrid(sessionId);
+		model.addAttribute("crosswordGrid", crosswordGrid);
+		model.addAttribute("crosswordCells", crosswordGrid.getCrosswordCells());
+		model.addAttribute("acrossClues", crosswordGrid.getAcrossClues());
+		model.addAttribute("downClues", crosswordGrid.getDownClues());
+		model.addAttribute("sessionId", sessionId);
+		return "crossword";
 	}
 }
 

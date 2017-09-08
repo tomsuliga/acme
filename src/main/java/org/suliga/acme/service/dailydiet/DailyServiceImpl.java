@@ -95,6 +95,7 @@ public class DailyServiceImpl implements DailyDietService {
 
 	@Override
 	public void clearAll() {
+		logger.debug("clearAll called");
 		foodItems = new HashMap<>();
 	}
 }
