@@ -167,6 +167,16 @@ public class CrosswordGrid {
 				}
 			}
 		}
+		
+		// TODO temp
+		crosswordCells[0][0].setUserLetter("m");
+		crosswordCells[1][0].setUserLetter("o");
+		crosswordCells[2][0].setUserLetter("b");
+		crosswordCells[3][0].setUserLetter("y");
+		crosswordCells[4][0].setUserLetter("d");
+		crosswordCells[5][0].setUserLetter("i");
+		crosswordCells[6][0].setUserLetter("c");
+		crosswordCells[7][0].setUserLetter("k");
 	}
 	
 	public CrosswordCell[][] getCrosswordCells() {

@@ -32,7 +32,7 @@ public class CrosswordCell {
 	}
 
 	public void setUserLetter(String userLetter) {
-		this.userLetter = userLetter;
+		this.userLetter = userLetter.toUpperCase();
 	}
 
 	public String getRealLetter() {
@@ -40,7 +40,7 @@ public class CrosswordCell {
 	}
 
 	public void setRealLetter(String realLetter) {
-		this.realLetter = realLetter;
+		this.realLetter = realLetter.toUpperCase();
 	}
 
 	public String getAcrossClue() {
