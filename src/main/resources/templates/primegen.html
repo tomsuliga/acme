@@ -10,48 +10,46 @@
 <h1 class='shadowfont'>Prime Number Generator</h1>
 <div id='main-primegen'>
 <div>
-<select id='selectBits'>
-  <option value="64" selected>64 bits</option>
-  <option value="128">128 bits</option>
-  <option value="256">256 bits</option>
-  <option value="512">512 bits</option>
-  <option value="1024">1024 bits</option>
-</select>
-<select id='selectThreads'>
-  <option value="1" selected>1 thread</option>
-  <option value="2">2 threads</option>
-  <option value="3">3 threads</option>
-  <option value="4">4 threads</option>
-  <option value="8">8 threads</option>
-  <option value="16">16 threads</option>
-  <option value="32">32 threads</option>
-  <option value="64">64 threads</option>
-</select>
-<button class='myButton' id='btnStart'>Start</button>
-<button class='myButton' id='btnStop' disabled>Stop</button>
-<button class='myButton' id='btnClear'>Clear Results</button>
+	<select id='selectBits'>
+	  <option value="64" selected>64 bits</option>
+	  <option value="128">128 bits</option>
+	  <option value="256">256 bits</option>
+	  <option value="512">512 bits</option>
+	  <option value="1024">1024 bits</option>
+	</select>
+	<select id='selectThreads'>
+	  <option value="1" selected>1 thread</option>
+	  <option value="2">2 threads</option>
+	  <option value="3">3 threads</option>
+	  <option value="4">4 threads</option>
+	  <option value="8">8 threads</option>
+	  <option value="16">16 threads</option>
+	  <option value="32">32 threads</option>
+	  <option value="64">64 threads</option>
+	</select>
+	<button class='myButton' id='btnStart'>Start</button>
+	<button class='myButton' id='btnStop' disabled>Stop</button>
+	<button class='myButton' id='btnClear'>Clear Results</button>
 </div>
 <br>
 <div>
-<label class='myLabel'>Status:</label>
-<label class='myLabel' id='statusMsgRunning'>Stopped</label>
-<label class='myLabel'>Count:</label>
-<label class='myLabel' id='statusMsgCount'>0</label>
-<label class='myLabel'>Avg Time Millis:</label>
-<label class='myLabel' id='statusMsgAvgTime'>0</label>
+	<label class='myLabel'>Status:</label>
+	<label class='myLabel' id='statusMsgRunning'>Stopped</label>
+	<label class='myLabel'>Count:</label>
+	<label class='myLabel' id='statusMsgCount'>0</label>
+	<label class='myLabel'>Avg Time Millis:</label>
+	<label class='myLabel' id='statusMsgAvgTime'>0</label>
 </div>
 <br>
 <div>
-<span>Thread Id | Bits | Tries | Time Millis | Prime Number</span>
+	<span>Thread Id | Bits | Tries | Time Millis | Prime Number</span>
 </div>
-<textarea id='taResult' rows="40" cols="160"></textarea>
-<div>
+	<textarea id='taResult' rows="40" cols="160"></textarea>
+	<footer><a href="home">Home</a></footer>
 </div>
-<footer><a href="home">Home</a></footer>
-</div>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script type="text/javascript" src="resources/js/primegen.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script type="text/javascript" src="resources/js/primegen.js"></script>
 </body>
 </html>

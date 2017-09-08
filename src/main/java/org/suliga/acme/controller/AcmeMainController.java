@@ -1,8 +1,6 @@
 package org.suliga.acme.controller;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.suliga.acme.model.crossword.CrosswordGrid;
 import org.suliga.acme.model.dailydiet.FoodItem;
 import org.suliga.acme.model.dailydiet.StompNumServings;
 import org.suliga.acme.model.dailydiet.NutrientAggregate;
@@ -23,13 +22,12 @@ import org.suliga.acme.model.dailydiet.StompFoodItemId;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
 import org.suliga.acme.model.primegen.PrimegenStart;
+import org.suliga.acme.service.crossword.CrosswordPuzzleService;
 import org.suliga.acme.service.dailydiet.DailyDietService;
 import org.suliga.acme.service.earthquakes.EarthquakesService;
 import org.suliga.acme.service.mazegen.MazegenService;
 import org.suliga.acme.service.minesweeper.MinesweeperService;
 import org.suliga.acme.service.primegen.PrimeNumberService;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 public class AcmeMainController {
@@ -41,6 +39,7 @@ public class AcmeMainController {
 	@Autowired private EarthquakesService earthquakesService;
 	@Autowired private PrimeNumberService primeNumberService;
 	@Autowired private SimpMessagingTemplate simpMessagingTemplate;
+	@Autowired private CrosswordPuzzleService crosswordPuzzleService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -148,6 +147,18 @@ public class AcmeMainController {
 	@MessageMapping("/primegen/stop")
 	public void handlePrimegenStop() {
 		primeNumberService.stopPreviousThreads();
+	}
+	
+	@GetMapping("/crossword")
+	public String getCrossword(Model model, HttpServletRequest req) {
+		String sessionId = req.getSession().getId();
+		CrosswordGrid crosswordGrid = crosswordPuzzleService.getCrosswordGrid(sessionId);
+		model.addAttribute("crosswordGrid", crosswordGrid);
+		model.addAttribute("crosswordCells", crosswordGrid.getCrosswordCells());
+		model.addAttribute("acrossClues", crosswordGrid.getAcrossClues());
+		model.addAttribute("downClues", crosswordGrid.getDownClues());
+		model.addAttribute("sessionId", sessionId);
+		return "crossword";
 	}
 }
 
