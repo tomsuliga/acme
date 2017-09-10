@@ -12,8 +12,8 @@ public class CrosswordGrid {
 	private CrosswordCell[][] crosswordCells;
 	private int numCols;
 	private int numRows;
-	private List<String> acrossClues;
-	private List<String> downClues;
+	private List<CrosswordClue> acrossClues;
+	private List<CrosswordClue> downClues;
 	
 	public CrosswordGrid() {
 		numCols = 15;
@@ -159,24 +159,18 @@ public class CrosswordGrid {
 		for (int row=0;row<numRows;row++) {
 			for (int col=0;col<numCols;col++) {
 				if (crosswordCells[col][row].getAcrossClue() != null) {
-					acrossClues.add(crosswordCells[col][row].getClueNumber() + " " + crosswordCells[col][row].getAcrossClue());
+					String id = "across_clue_" + col + "_" + row;
+					String text = crosswordCells[col][row].getClueNumber() + " " + crosswordCells[col][row].getAcrossClue();
+					acrossClues.add(new CrosswordClue(id, text, "across"));
 					
 				}
 				if (crosswordCells[col][row].getDownClue() != null) {
-					downClues.add(crosswordCells[col][row].getClueNumber() + " " + crosswordCells[col][row].getDownClue());
+					String id = "down_clue_" + col + "_" + row;
+					String text = crosswordCells[col][row].getClueNumber() + " " + crosswordCells[col][row].getDownClue();
+					downClues.add(new CrosswordClue(id, text, "down"));
 				}
 			}
-		}
-		
-		// TODO temp
-		crosswordCells[0][0].setUserLetter("m");
-		crosswordCells[1][0].setUserLetter("o");
-		crosswordCells[2][0].setUserLetter("b");
-		crosswordCells[3][0].setUserLetter("y");
-		crosswordCells[4][0].setUserLetter("d");
-		crosswordCells[5][0].setUserLetter("i");
-		crosswordCells[6][0].setUserLetter("c");
-		crosswordCells[7][0].setUserLetter("k");
+		}	
 	}
 	
 	public CrosswordCell[][] getCrosswordCells() {
@@ -206,19 +200,19 @@ public class CrosswordGrid {
 		this.numRows = rows;
 	}
 
-	public List<String> getAcrossClues() {
+	public List<CrosswordClue> getAcrossClues() {
 		return acrossClues;
 	}
 
-	public void setAcrossClues(List<String> acrossClues) {
+	public void setAcrossClues(List<CrosswordClue> acrossClues) {
 		this.acrossClues = acrossClues;
 	}
 
-	public List<String> getDownClues() {
+	public List<CrosswordClue> getDownClues() {
 		return downClues;
 	}
 
-	public void setDownClues(List<String> downClues) {
+	public void setDownClues(List<CrosswordClue> downClues) {
 		this.downClues = downClues;
 	}
 }

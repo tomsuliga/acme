@@ -135,6 +135,10 @@ div.clues {
 	background-color: #ccf !important;
 }
 
+.selectedClueLine {
+		background-color: #69f !important;
+}
+
 footer {
 	margin-top: 1em;
 	text-align: center;

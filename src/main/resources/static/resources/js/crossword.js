@@ -1,10 +1,10 @@
 /**
  * 
  */
-
 var globalLastSelectedId = null;
 var globalDirection = 'across';
 var globalShowErrors = false;
+var globalLastClueLineId = null;
 
 $('.numberAndLetter').on('click', function() {
 	numberAndLetterClicked(this);
@@ -50,6 +50,55 @@ function numberAndLetterClicked(elem) {
 		
 	globalLastSelectedId = id;
 	//console.log(id + ' ' + col + ' ' + row);
+	
+	selectClueLine(col, row);
+}
+
+function selectClueLine(col, row) {
+	// find head cell for clue line
+	if (globalDirection == 'across') {
+		while (true) {
+			if (col == 0) {
+				break;
+			}
+			col--;
+			let e = $('#cellLetter_' + col + '_' + row);
+			if (e.hasClass('cellLetterBlock')) {
+				col++;
+				break;
+			}
+		}
+	} else {
+		while (true) {
+			if (row == 0) {
+				break;
+			}
+			row--;
+			let e = $('#cellLetter_' + col + '_' + row);
+			if (e.hasClass('cellLetterBlock')) {
+				row++;
+				break;
+			}
+		}
+		
+	}
+	let clueLineId = '#' + globalDirection + '_clue_' + col + '_' + row;
+	if (clueLineId == globalLastClueLineId) {
+		// same ell, but cannot toggle direction
+		return;
+	}
+	let clueLine = $(clueLineId);
+	clueLine.addClass('selectedClueLine');
+	if (globalLastClueLineId != null) {
+		$(globalLastClueLineId).removeClass('selectedClueLine');
+	}
+	globalLastClueLineId = clueLineId;
+	
+	// scroll
+	var temp = document.getElementById(globalDirection + '_clue_' + col + '_' + row);
+	if (temp != null) {
+		temp.scrollIntoView(false);
+	}
 }
 
 function isAcrossWord(col,row) {
@@ -183,7 +232,22 @@ function toggleDown(col,row) {
 }
 
 $('button#btnSolveLetter').on('click', function() {
+	if (globalLastSelectedId == null) {
+		return;
+	}
+	
 	console.log("solve letter");
+	let parent = $('#' + globalLastSelectedId);
+	let col = parseInt(parent.attr('data-col'));
+	let row = parseInt(parent.attr('data-row'));
+	let cell = $('#cellLetter_' + col + '_' + row);
+	let realLetter = cell.attr('data-realLetter');
+	
+	if (cell.text() != realLetter) {
+		cell.text(realLetter);
+	}
+	
+	nextLetter(col, row);
 });
 
 $('button#btnShowErrors').on('click', function() {
@@ -198,13 +262,31 @@ $('button#btnShowErrors').on('click', function() {
 	}
 });
 
+window.onkeydown = function(e) {
+	let key = e.keyCode ? e.keyCode : e.which;
+	console.log(key);
+	
+	const DELETE_KEY = 46;
+	
+	if (key == DELETE_KEY) {
+		let parent = $('#' + globalLastSelectedId);
+		let col = parseInt(parent.attr('data-col'));
+		let row = parseInt(parent.attr('data-row'));
+		let cell = $('#cellLetter_' + col + '_' + row);
+		cell.text('');
+	}
+}
+
 window.onkeypress = function(e) {
 	let key = e.keyCode ? e.keyCode : e.which;
 	console.log(key);
 	
-	// a = 65
-	// z = 122
-	if (key < 65 || (key>=91 && key<=96) || key > 122 || globalLastSelectedId == null) {
+	const LETTER_A = 65;
+	const LETTER_z = 122;
+	// BACKSPACE = 8;
+	// SPACE = 32;
+
+	if (key < LETTER_A || (key>=91 && key<=96) || key > LETTER_z || globalLastSelectedId == null) {
 		return;
 	}
 	
