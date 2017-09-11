@@ -4,14 +4,18 @@ public class CrosswordClue {
 	private String id;
 	private String text;
 	private String direction;
+	private int col;
+	private int row;
 	
 	public CrosswordClue() {}
 
-	public CrosswordClue(String id, String text, String direction) {
+	public CrosswordClue(String id, String text, String direction, int col, int row) {
 		super();
 		this.id = id;
 		this.text = text;
 		this.direction = direction;
+		this.col = col;
+		this.row = row;
 	}
 
 	public String getId() {
@@ -35,5 +39,21 @@ public class CrosswordClue {
 
 	public void setDirection(String direction) {
 		this.direction = direction;
+	}
+
+	public int getCol() {
+		return col;
+	}
+
+	public void setCol(int col) {
+		this.col = col;
+	}
+
+	public int getRow() {
+		return row;
+	}
+
+	public void setRow(int row) {
+		this.row = row;
 	}
 }

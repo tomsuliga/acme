@@ -6,6 +6,34 @@ var globalDirection = 'across';
 var globalShowErrors = false;
 var globalLastClueLineId = null;
 
+$('.acrossClue').on('click', function() {
+	let clue = $(this);
+	let col = parseInt(clue.attr('data-col'));
+	let row = parseInt(clue.attr('data-row'));
+	console.log('acrossClue clicked ' + col + ' ' + row);
+	
+	removePrvious();
+	globalDirection = 'across';
+	togglePrimary(col,row);
+	toggleAcross(col,row);	
+	globalLastSelectedId = 'numberAndLetter_' + col + '_' + row;
+	selectClueLine(col,row);
+});
+
+$('.downClue').on('click', function() {
+	let clue = $(this);
+	let col = parseInt(clue.attr('data-col'));
+	let row = parseInt(clue.attr('data-row'));
+	console.log('downClue clicked ' + col + ' ' + row);
+	
+	removePrvious();
+	globalDirection = 'down';
+	togglePrimary(col,row);
+	toggleDown(col,row);			
+	globalLastSelectedId = 'numberAndLetter_' + col + '_' + row;
+	selectClueLine(col,row);
+});
+
 $('.numberAndLetter').on('click', function() {
 	numberAndLetterClicked(this);
 });
@@ -49,7 +77,7 @@ function numberAndLetterClicked(elem) {
 	}
 		
 	globalLastSelectedId = id;
-	//console.log(id + ' ' + col + ' ' + row);
+	console.log(id + ' ' + col + ' ' + row);
 	
 	selectClueLine(col, row);
 }
@@ -245,21 +273,35 @@ $('button#btnSolveLetter').on('click', function() {
 	
 	if (cell.text() != realLetter) {
 		cell.text(realLetter);
+		if (cell.hasClass('cellLetterBad')) {
+			cell.removeClass('cellLetterBad');
+		}
 	}
 	
 	nextLetter(col, row);
 });
 
 $('button#btnShowErrors').on('click', function() {
-	console.log("show errors");
 	let e = $(this);
 	if (globalShowErrors) {
+		console.log("hide errors");
 		e.text('Show Any Errors');
 		globalShowErrors = false;
+		$('.cellLetterBad').each(function(i, obj) {
+			let cell = $(obj);
+			cell.removeClass('cellLetterBad');
+		});
 	} else {
+		console.log("show errors");
 		e.text('Hide All Errors');
 		globalShowErrors = true;
-	}
+		$('.cellLetter').each(function(i, obj) {
+			let cell = $(obj);
+			if (cell.text() != null && cell.text().length > 0 && cell.attr('data-realLetter') != cell.text())  {
+				cell.addClass('cellLetterBad');
+			}
+		});
+	}	
 });
 
 window.onkeydown = function(e) {
@@ -295,6 +337,13 @@ window.onkeypress = function(e) {
 	let row = parseInt(parent.attr('data-row'));
 	let cell = $('#cellLetter_' + col + '_' + row);
 	cell.text(String.fromCharCode(key).toUpperCase());
+	
+	if (cell.hasClass('cellLetterBad') && cell.attr('data-realLetter') == cell.text()) {
+		cell.removeClass('cellLetterBad');
+	} else if (globalShowErrors && cell.attr('data-realLetter') != cell.text() && !cell.hasClass('cellLetterBad')) {
+		cell.addClass('cellLetterBad');
+	}
+		
 	nextLetter(col, row);
 }
 

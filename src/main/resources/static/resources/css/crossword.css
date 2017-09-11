@@ -114,6 +114,7 @@ div.cellLetterBlock {
 }
 
 div.clues {
+	cursor: default;
 	width: 410px;
 	height: 285px;
 	float: left;
@@ -137,6 +138,11 @@ div.clues {
 
 .selectedClueLine {
 		background-color: #69f !important;
+}
+
+.cellLetterBad {
+	color: #e00;
+	font-weight: 700 !important;
 }
 
 footer {

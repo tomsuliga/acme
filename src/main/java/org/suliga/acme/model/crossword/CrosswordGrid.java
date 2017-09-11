@@ -161,13 +161,13 @@ public class CrosswordGrid {
 				if (crosswordCells[col][row].getAcrossClue() != null) {
 					String id = "across_clue_" + col + "_" + row;
 					String text = crosswordCells[col][row].getClueNumber() + " " + crosswordCells[col][row].getAcrossClue();
-					acrossClues.add(new CrosswordClue(id, text, "across"));
+					acrossClues.add(new CrosswordClue(id, text, "across", col, row));
 					
 				}
 				if (crosswordCells[col][row].getDownClue() != null) {
 					String id = "down_clue_" + col + "_" + row;
 					String text = crosswordCells[col][row].getClueNumber() + " " + crosswordCells[col][row].getDownClue();
-					downClues.add(new CrosswordClue(id, text, "down"));
+					downClues.add(new CrosswordClue(id, text, "down", col, row));
 				}
 			}
 		}	
