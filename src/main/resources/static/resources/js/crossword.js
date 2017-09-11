@@ -287,16 +287,22 @@ $('button#btnShowErrors').on('click', function() {
 		console.log("hide errors");
 		e.text('Show Any Errors');
 		globalShowErrors = false;
-		$('.cellLetterBad').each(function(i, obj) {
-			let cell = $(obj);
-			cell.removeClass('cellLetterBad');
-		});
+		
+		// Explicit iteration:
+		//$('.cellLetterBad').each(function(index) {
+		//	let cell = $(this); // this is loop object
+		//	cell.removeClass('cellLetterBad');
+		//});
+		
+		// Implicit iteration:
+		$('.cellLetterBad').removeClass('cellLetterBad'); // Nice!
+		
 	} else {
 		console.log("show errors");
 		e.text('Hide All Errors');
 		globalShowErrors = true;
-		$('.cellLetter').each(function(i, obj) {
-			let cell = $(obj);
+		$('.cellLetter').each(function(index) {
+			let cell = $(this); // this is loop object
 			if (cell.text() != null && cell.text().length > 0 && cell.attr('data-realLetter') != cell.text())  {
 				cell.addClass('cellLetterBad');
 			}
@@ -356,6 +362,8 @@ function nextLetter(col, row) {
 				row++;
 				if (row > 14) {
 					row = 0;
+					removePrvious();
+					globalLastSelectedId = null;
 					globalDirection = 'down';
 					break;
 				}
@@ -380,6 +388,8 @@ function nextLetter(col, row) {
 				col++;
 				if (col > 14) {
 					col = 0;
+					removePrvious();
+					globalLastSelectedId = null;
 					globalDirection = 'across';
 					break;
 				}
