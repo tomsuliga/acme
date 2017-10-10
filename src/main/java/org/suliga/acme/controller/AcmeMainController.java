@@ -178,6 +178,11 @@ public class AcmeMainController {
 		model.addAttribute("priorityQueue", javaTestService.priorityQueue(5,8,3,2,1,9));
 		return "javatest";
 	}
+	
+	@GetMapping("/backgammon")
+	public String getBackgammon(Model model) {
+		return "backgammon";
+	}
 }
 
 
