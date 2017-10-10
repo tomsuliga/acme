@@ -25,9 +25,11 @@ import org.suliga.acme.model.primegen.PrimegenStart;
 import org.suliga.acme.service.crossword.CrosswordPuzzleService;
 import org.suliga.acme.service.dailydiet.DailyDietService;
 import org.suliga.acme.service.earthquakes.EarthquakesService;
+import org.suliga.acme.service.javatest.JavaTestService;
 import org.suliga.acme.service.mazegen.MazegenService;
 import org.suliga.acme.service.minesweeper.MinesweeperService;
 import org.suliga.acme.service.primegen.PrimeNumberService;
+import org.suliga.acme.service.rss.RssService;
 
 @Controller
 public class AcmeMainController {
@@ -40,6 +42,8 @@ public class AcmeMainController {
 	@Autowired private PrimeNumberService primeNumberService;
 	@Autowired private SimpMessagingTemplate simpMessagingTemplate;
 	@Autowired private CrosswordPuzzleService crosswordPuzzleService;
+	@Autowired private RssService rssService;
+	@Autowired private JavaTestService javaTestService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -160,6 +164,21 @@ public class AcmeMainController {
 		model.addAttribute("sessionId", sessionId);
 		return "crossword";
 	}
+	
+	@GetMapping("/rss")
+	public String getRss(Model model) {
+		model.addAttribute("articleText", rssService.getArticleSummaries());
+		return "rss";
+	}
+	
+	@GetMapping("/javatest")
+	public String getJavaTest(Model model) {
+		model.addAttribute("factorial", javaTestService.factorial(6));
+		model.addAttribute("anagram", javaTestService.anagram("toms"));
+		model.addAttribute("priorityQueue", javaTestService.priorityQueue(5,8,3,2,1,9));
+		return "javatest";
+	}
 }
+
 
 

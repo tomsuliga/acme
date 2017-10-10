@@ -24,7 +24,7 @@
 					</div>
 					<div th:class='${(crosswordCells[col][row].isBlock() ? "cellLetterBlock" : "cellLetter")}'
 						 th:id="${'cellLetter_' + col + '_' + row}" 
-						 th:attr="data-col=${col}, data-row=${row}"
+						 th:attr="data-col=${col}, data-row=${row}, data-realLetter=${crosswordCells[col][row].getRealLetter()}"
 						 th:text='${crosswordCells[col][row].getUserLetter()}'>
 					</div>
 				</div>
@@ -39,13 +39,19 @@
 	<div class='acrossOrDownTextLiteral'>Across</div>
 	<div class='clues'>
 		<block th:each="clue:${crosswordGrid.getAcrossClues()}">
-			<div th:text="${clue}"></div>
+			<div th:id="${clue.getId()}"
+				 class='acrossClue'
+			     th:text="${clue.getText()}"
+			     th:attr="data-direction=${clue.getDirection()}, data-col=${clue.getCol()}, data-row=${clue.getRow()}"></div>
 		<block>
 	</div>
 	<div class='acrossOrDownTextLiteral'>Down</div>
 	<div class='clues'>
 		<block th:each="clue:${crosswordGrid.getDownClues()}">
-			<div th:text="${clue}"></div>
+			<div th:id="${clue.getId()}" 
+				 class='downClue'
+			     th:text="${clue.getText()}"
+			     th:attr="data-direction=${clue.getDirection()}, data-col=${clue.getCol()}, data-row=${clue.getRow()}"></div>
 		<block>
 	</div>
 	<div class="clear"></div>

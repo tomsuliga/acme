@@ -40,8 +40,20 @@ public class EarthquakesServiceImpl implements EarthquakesService {
 			
 			// sort descending order
 			earthquakeEvent.getFeatures().sort((e1,e2) -> {
-				double d1 = (double) e1.getProperties().get("mag");
-				double d2 = (double) e2.getProperties().get("mag");
+				Object ob = e1.getProperties().get("mag");
+				double d1 = 0.0;
+				if (ob instanceof Long)  {
+					d1 = ((Long) ob).longValue();
+				} else if (ob instanceof Double) {
+					d1 = ((Double) ob).doubleValue();
+				}
+				Object ob2 = e2.getProperties().get("mag");
+				double d2 = 0.0;
+				if (ob2 instanceof Long)  {
+					d2 = ((Long) ob2).longValue();
+				} else if (ob2 instanceof Double) {
+					d2 = ((Double) ob2).doubleValue();
+				}
 				return (int) (Math.round(d2 * 10) - Math.round(d1 * 10));
 			});
 			

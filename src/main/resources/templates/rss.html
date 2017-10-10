@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang='en' xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Acme</title>
+	<link href="resources/css/main.css" type="text/css" rel="stylesheet">
+	<link href="resources/css/rss.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<div id='maindiv'>
+<header id='mainheader'>
+	<h1 class='shadowfont'>RSS News Feed</h1>
+</header>
+
+<nav id='rssnav' class='center'>
+	RSS Sites
+</nav>
+<nav id='mynav' class='center'>
+	<input type = "radio" name = "articles_or_story" id = "r_articles" value = "r_articles" checked = "checked" />
+    <label for = "r_articles">Articles</label>
+    
+    <input type = "radio" name = "articles_or_story" id = "r_story" value = "r_story" />
+    <label for = "r_story">Story</label>
+</nav>
+
+<div id='leftpane'>
+<aside id='rssfeeds'>
+	<input type="checkbox" id="cb_cnn" name="cb_cnn" value="cb_cnn">
+    <label for="cb_cnn">CNN</label><br>
+    
+    <input type="checkbox" id="cb_guardian" name="cb_guardian" value="cb_guardian" checked>
+    <label for="cb_guardian">The Guardian</label><br>
+    
+    <input type="checkbox" id="cb_slashdot" name="cb_slashdot" value="cb_slashdot">
+    <label for="cb_slashdot">Slashdot</label><br>
+</aside>
+<nav id='navsubjects' class='center'>
+	RSS Subjects
+</nav>
+<aside id='subjects'>
+	<input type="checkbox" id="cb_health" name="cb_health" value="cb_health">
+    <label for="cb_health">Health</label><br>
+    
+    <input type="checkbox" id="cb_science" name="cb_science" value="cb_science">
+    <label for="cb_science">Science</label><br>
+    
+    <input type="checkbox" id="cb_us" name="cb_us" value="cb_us">
+    <label for="cb_us">U.S.</label><br>
+</aside>
+</div>
+
+<section id='mainsection'>
+	<p th:text='${articleText}'>Articles or Story</p>
+</section>
+<footer class='clearFloat'>
+	<a href="home">Home</a>
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="resources/js/rss.js"></script>
+
+</body>
+</html>
