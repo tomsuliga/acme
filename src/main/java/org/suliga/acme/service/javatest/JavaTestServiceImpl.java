@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.springframework.stereotype.Service;
 
@@ -74,5 +75,15 @@ public class JavaTestServiceImpl implements JavaTestService {
 		}
 		return sb.toString();
 	}
+	
+	private int b = 2;
+	private void testLambda(int a) {
+		b = 0;
+		Function<Integer,Integer> f1 = n -> n + a + b;
+		b = 3;
+	}
+	
+	//public Function<Integer, Integer> factorialBad = x -> x <= 1 ? 1 : factorialBad.apply(x-1);
+	public Function<Integer, Integer> factorialGood = x -> x <= 1 ? 1 : this.factorialGood.apply(x-1);
 }
 

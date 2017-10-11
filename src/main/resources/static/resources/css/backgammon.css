@@ -1,1 +1,13 @@
 @charset "ISO-8859-1";
+
+.PLAYER_1 {
+	color: blue;
+}
+
+.PLAYER_2 {
+	color: red;
+}
+
+input {
+	margin: .25em;
+}

@@ -13,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.suliga.acme.model.backgammon.Game;
 import org.suliga.acme.model.crossword.CrosswordGrid;
 import org.suliga.acme.model.dailydiet.FoodItem;
 import org.suliga.acme.model.dailydiet.StompNumServings;
@@ -22,6 +23,7 @@ import org.suliga.acme.model.dailydiet.StompFoodItemId;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
 import org.suliga.acme.model.primegen.PrimegenStart;
+import org.suliga.acme.service.backgammon.BackgammonService;
 import org.suliga.acme.service.crossword.CrosswordPuzzleService;
 import org.suliga.acme.service.dailydiet.DailyDietService;
 import org.suliga.acme.service.earthquakes.EarthquakesService;
@@ -44,6 +46,7 @@ public class AcmeMainController {
 	@Autowired private CrosswordPuzzleService crosswordPuzzleService;
 	@Autowired private RssService rssService;
 	@Autowired private JavaTestService javaTestService;
+	@Autowired private BackgammonService backgammonService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -180,7 +183,16 @@ public class AcmeMainController {
 	}
 	
 	@GetMapping("/backgammon")
-	public String getBackgammon(Model model) {
+	public String getBackgammon(Model model, HttpServletRequest req) {
+		String sessionId = req.getSession().getId();
+		Game game = backgammonService.getGame(sessionId);
+		model.addAttribute("game", game);
+		model.addAttribute("board", game.getBoard());
+		model.addAttribute("points", game.getBoard().getPoints());
+		model.addAttribute("dice", game.getBoard().roll());
+		model.addAttribute("bar", game.getBoard().getBar());
+		model.addAttribute("bear", game.getBoard().getBear());
+		model.addAttribute("legalMoves", game.getBoard().getLegalMoves());
 		return "backgammon";
 	}
 }

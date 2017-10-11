@@ -8,7 +8,36 @@
 </head>
 <body>
 <h1 class='shadowfont'>Backgammon</h1>
-
+<label>Points 0...23</label>
+<div th:each="point:${points}">
+	<span th:class='${point.playerSide}' th:text='${point.numPips + " " + point.playerSide}'>Dummy</span>
+</div>
+<label>Bar</label>
+<div>
+	<span th:text='${"Player1 " + bar.player1Count}'></span>
+	<br>
+	<span th:text='${"Player2 " + bar.player2Count}'></span>
+</div>
+<label>Bear</label>
+<div>
+	<span th:text='${"Player1 " + bear.player1Count}'></span>
+	<br>
+	<span th:text='${"Player2 " + bear.player2Count}'></span>
+</div>
+<div>
+	<button id='btnRollDice'>Roll Dice</button>
+	<span th:text='${dice.first + "," + dice.second}'>Dummy</span>
+	<label>Legal moves</label>
+	<span th:each='m:${legalMoves}'><span th:text='${m.toString()}'></span></span>
+</div>
+<div>
+	<label>From point</label><input type="text"/><label>To point</label><input type="text"><button id='btnMovePip'>Move Pip</button>
+</div>
+<div>
+	<button>Prev</button>
+	<button>Current</button>
+	<button>Next</button>
+</div>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
