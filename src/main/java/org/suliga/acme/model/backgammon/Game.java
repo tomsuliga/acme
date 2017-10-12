@@ -1,7 +1,5 @@
 package org.suliga.acme.model.backgammon;
 
-import java.util.List;
-
 public class Game {
 	private Player player1;
 	private Player player2;

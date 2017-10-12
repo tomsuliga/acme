@@ -13,5 +13,13 @@ public class Move {
 	public String toString() {
 		return "(" + fromPoint.getIndex() + "," + toPoint.getIndex() + ")";
 	}
+
+	public Point getFromPoint() {
+		return fromPoint;
+	}
+
+	public Point getToPoint() {
+		return toPoint;
+	}
 }
 

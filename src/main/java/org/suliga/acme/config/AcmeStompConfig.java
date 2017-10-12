@@ -25,6 +25,7 @@ public class AcmeStompConfig extends AbstractWebSocketMessageBrokerConfigurer {
 		registry.addEndpoint("/dailydiet").withSockJS();
 		registry.addEndpoint("/mazegen").withSockJS();
 		registry.addEndpoint("/primegen").withSockJS();
+		registry.addEndpoint("/backgammon").withSockJS();
 	}
 }
 

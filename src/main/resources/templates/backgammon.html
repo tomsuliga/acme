@@ -8,6 +8,20 @@
 </head>
 <body>
 <h1 class='shadowfont'>Backgammon</h1>
+
+<div id='board' th:attr="data-sessionId=${sessionId}">
+	<div class="row" th:each="row:${#numbers.sequence(0, 13-1)}"> <!-- Inclusive -->
+		<div class="col" th:each="col:${#numbers.sequence(0, 14-1)}">
+			<div th:class='${"myCell"}'
+				 th:id='${row + "_" + col}' th:text='${""}' 
+				 th:attr="data-row=${row},
+				          data-col=${col}">Dummy</div>
+		</div>
+		<br>
+	</div>
+</div>
+<div class='clear'></div>
+
 <label>Points 0...23</label>
 <div th:each="point:${points}">
 	<span th:class='${point.playerSide}' th:text='${point.numPips + " " + point.playerSide}'>Dummy</span>
@@ -29,6 +43,8 @@
 	<span th:text='${dice.first + "," + dice.second}'>Dummy</span>
 	<label>Legal moves</label>
 	<span th:each='m:${legalMoves}'><span th:text='${m.toString()}'></span></span>
+	<label>Legal points</label>
+	<span th:each='i:${legalPointIndexes}'><span th:text='${i}'></span></span>
 </div>
 <div>
 	<label>From point</label><input type="text"/><label>To point</label><input type="text"><button id='btnMovePip'>Move Pip</button>

@@ -1,7 +1,9 @@
 package org.suliga.acme.model.backgammon;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Board {
 	private static final int NUM_POINTS = 24;
@@ -20,7 +22,7 @@ public class Board {
 	}
 	
 	public Dice roll() {
-		currentTurn = new Turn(PlayerSide.PLAYER_2);
+		currentTurn = new Turn(PlayerSide.PLAYER_1);
 		return currentTurn.roll();
 	}
 	
@@ -65,6 +67,13 @@ public class Board {
 		return bear;
 	}
 	
+	public Set<Integer> getLegalPointIndexes() {
+		List<Move> legalMoves = getLegalMoves();
+		Set<Integer> indexes = new HashSet<>();
+		legalMoves.forEach(m -> indexes.add(m.getFromPoint().getIndex()));
+		return indexes;
+	}
+	
 	public List<Move> getLegalMoves() {
 		List<Move> legalMoves = new ArrayList<>();
 		int[] both = currentTurn.getDice().getBoth();
@@ -79,15 +88,33 @@ public class Board {
 			if (pointFrom.isOwned(ps)) {
 				for (int j=0;j<2;j++) {
 					int indexTo = i + (both[j] * addOrSubtract);
-					if (indexTo >= NUM_POINTS 
-					 || indexTo < 0) {
-						continue;
-					}
-					Point pointTo = points[indexTo];
-					if (pointTo.isEmpty()
-					 || pointTo.isOwned(ps)
-					 || pointTo.getNumPips() == 1) {
-						legalMoves.add(new Move(pointFrom, pointTo));
+					if (isLegalMove(pointFrom, indexTo)) {
+						Point pointTo = points[indexTo];
+						Move move = new Move(pointFrom, pointTo);
+						if (isMoveUnique(legalMoves, move)) {
+							legalMoves.add(move);
+						}
+						// try combination of moves
+						int otherDiceIndex = (j + 1) % 2;
+						int otherIndexTo = indexTo + (both[otherDiceIndex] * addOrSubtract);
+						// pointTo is now the pointFrom
+						if (isLegalMove(pointTo, otherIndexTo)) {
+							Point otherPointTo2 = points[otherIndexTo];
+							// original pointFrom and combo of dice 1 and 2
+							Move otherMove2 = new Move(pointFrom, otherPointTo2);
+							if (isMoveUnique(legalMoves, otherMove2)) {
+								legalMoves.add(otherMove2);
+							}
+							// doubles require 2 more checks
+							if (currentTurn.getDice().isDouble()) {
+								// The 3rd number
+								Point otherPointTo3 = tryNextMove(otherPointTo2, both, addOrSubtract, pointFrom, legalMoves);
+								if (otherPointTo3 != null) {
+									// Again for 4th number
+									tryNextMove(otherPointTo3, both, addOrSubtract, pointFrom, legalMoves);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -95,6 +122,48 @@ public class Board {
 		
 		return legalMoves;
 	}
+	
+	private Point tryNextMove(Point otherPointFrom3, int[] both, int addOrSubtract, Point pointFrom, List<Move> legalMoves) {
+		int otherIndexTo3 = otherPointFrom3.getIndex() + (both[0] * addOrSubtract);
+		if (isLegalMove(otherPointFrom3, otherIndexTo3)) {
+			Point otherPointTo3 = points[otherIndexTo3];
+			Move otherMove3 = new Move(pointFrom, otherPointTo3);
+			if (isMoveUnique(legalMoves, otherMove3)) {
+				legalMoves.add(otherMove3);
+			}
+			return otherPointTo3;
+		}
+		return null;
+	}
+	
+	private boolean isMoveUnique(List<Move> moves, Move move) {
+		for (int i=0;i<moves.size();i++) {
+			Move m = moves.get(i);
+			if (m.getFromPoint().getIndex() == move.getFromPoint().getIndex()
+			 && m.getToPoint().getIndex() == move.getToPoint().getIndex()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean isLegalMove(Point pointFrom, int indexTo) {
+		if (indexTo >= NUM_POINTS 
+		 || indexTo < 0) {
+			return false;
+		}
+		
+		Point pointTo = points[indexTo];
+		
+		if (pointTo.isEmpty()
+		 || pointTo.isOwned(currentTurn.getPlayerSide())
+		 || pointTo.getNumPips() == 1) {
+			return true;
+		}
+		
+		return false;
+	}
 }
+
 
 

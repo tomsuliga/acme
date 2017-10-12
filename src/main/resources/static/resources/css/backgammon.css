@@ -1,5 +1,10 @@
 @charset "ISO-8859-1";
 
+* {
+	margin: 0;
+	padding: 0;
+}
+
 .PLAYER_1 {
 	color: blue;
 }
@@ -11,3 +16,46 @@
 input {
 	margin: .25em;
 }
+
+div#board {
+	background-color: #b82;
+	width: 784px;
+	height: 728px;
+	margin: 10px;
+}
+
+div.myCell {
+	background-color: #b82;
+	width: 56px;
+	height: 56px;
+	float: left;
+}
+
+div.clear {
+	clear: both;
+}
+
+div.pip1, div.pip2 {
+	border: 2px solid black;
+	border-radius: 28px;
+	box-sizing: border-box;
+}
+
+div.pip1 {
+	background-color: blue;
+}
+
+div.pip2 {
+	background-color: red;
+}
+
+div.pipHigh {
+	border: 4px solid yellow;
+}
+
+div.bear {
+	background-color: #960;
+}
+
+
+

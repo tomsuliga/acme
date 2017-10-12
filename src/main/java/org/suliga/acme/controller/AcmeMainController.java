@@ -193,7 +193,15 @@ public class AcmeMainController {
 		model.addAttribute("bar", game.getBoard().getBar());
 		model.addAttribute("bear", game.getBoard().getBear());
 		model.addAttribute("legalMoves", game.getBoard().getLegalMoves());
+		model.addAttribute("legalPointIndexes", game.getBoard().getLegalPointIndexes());
+		model.addAttribute("sessionId", sessionId);
 		return "backgammon";
+	}
+	
+	@MessageMapping("/backgammon/initGame")
+	public void handleBackgammonInitGame(String incoming) {
+		logger.info("incoming=" + incoming);
+		//primeNumberService.stopPreviousThreads();
 	}
 }
 
