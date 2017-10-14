@@ -13,7 +13,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.suliga.acme.model.backgammon.Game;
+import org.suliga.acme.model.backgammon.Board;
+import org.suliga.acme.model.backgammon.Dice;
+import org.suliga.acme.model.backgammon.ClientServerMessage;
 import org.suliga.acme.model.crossword.CrosswordGrid;
 import org.suliga.acme.model.dailydiet.FoodItem;
 import org.suliga.acme.model.dailydiet.StompNumServings;
@@ -185,15 +187,6 @@ public class AcmeMainController {
 	@GetMapping("/backgammon")
 	public String getBackgammon(Model model, HttpServletRequest req) {
 		String sessionId = req.getSession().getId();
-		Game game = backgammonService.getGame(sessionId);
-		model.addAttribute("game", game);
-		model.addAttribute("board", game.getBoard());
-		model.addAttribute("points", game.getBoard().getPoints());
-		model.addAttribute("dice", game.getBoard().roll());
-		model.addAttribute("bar", game.getBoard().getBar());
-		model.addAttribute("bear", game.getBoard().getBear());
-		model.addAttribute("legalMoves", game.getBoard().getLegalMoves());
-		model.addAttribute("legalPointIndexes", game.getBoard().getLegalPointIndexes());
 		model.addAttribute("sessionId", sessionId);
 		return "backgammon";
 	}
@@ -201,7 +194,71 @@ public class AcmeMainController {
 	@MessageMapping("/backgammon/initGame")
 	public void handleBackgammonInitGame(String incoming) {
 		logger.info("incoming=" + incoming);
-		//primeNumberService.stopPreviousThreads();
+	}
+
+	@MessageMapping("/backgammon/roll")
+	public void handleBackgammonRoll(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		logger.info("incoming roll =" + sessionId);
+		Board board = backgammonService.getGame(sessionId).getBoard();
+		Dice dice = board.roll();
+		ClientServerMessage messageOut = new ClientServerMessage();
+		messageOut.setSessionId(sessionId);
+		messageOut.setDiceRolledEx(dice);
+		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/possibleSelect", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/continueTurn")
+	public void handleBackgammonContinueTurn(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		logger.info("incoming=" + sessionId);
+		Board board = backgammonService.getGame(sessionId).getBoard();
+		Dice dice = board.getCurrentTurn().getDice();
+		ClientServerMessage messageOut = new ClientServerMessage();
+		messageOut.setSessionId(sessionId);
+		messageOut.setDiceRolledEx(dice);
+		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/possibleSelect", messageOut);
+	}
+
+	@MessageMapping("/backgammon/possiblePipClicked")
+	public void handleBackgammonPointClicked(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		Board board = backgammonService.getGame(sessionId).getBoard();
+		ClientServerMessage messageOut = new ClientServerMessage();
+		messageOut.setSessionId(sessionId);
+		messageOut.setSelectedPoint(messageIn.getSelectedPoint());
+		messageOut.setMoveablePointsEx(board.getPossibleMoveIndexes(messageIn.getSelectedPoint()));
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/possibleMove", messageOut);
+	}	
+
+	@MessageMapping("/backgammon/pipDeselected")
+	public void handleBackgammonPipDeseleced(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		logger.info("incoming=" + sessionId);
+		Board board = backgammonService.getGame(sessionId).getBoard();
+		Dice dice = board.getCurrentTurn().getDice();
+		ClientServerMessage messageOut = new ClientServerMessage();
+		messageOut.setSessionId(sessionId);
+		messageOut.setDiceRolledEx(dice);
+		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/possibleSelect", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/movePip")
+	public void handleBackgammonMovePip(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		Board board = backgammonService.getGame(sessionId).getBoard();
+		Dice dice = board.getCurrentTurn().getDice();
+		ClientServerMessage messageOut = new ClientServerMessage();
+		messageOut.setSessionId(sessionId);
+		messageOut.setDiceRolledEx(dice);
+		messageOut.setFromPoint(messageIn.getFromPoint());
+		messageOut.setToPoint(messageIn.getToPoint());
+		board.movePip(messageIn.getFromPoint(), messageIn.getToPoint());
+		messageOut.calculateNumbersUsed();
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/movePip", messageOut);
 	}
 }
 

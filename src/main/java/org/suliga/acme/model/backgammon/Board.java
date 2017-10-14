@@ -5,7 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Board {
+	private static final Logger logger = LoggerFactory.getLogger(Board.class);
+
 	private static final int NUM_POINTS = 24;
 	private Point[] points;
 	private Bar bar;
@@ -26,6 +31,11 @@ public class Board {
 		return currentTurn.roll();
 	}
 	
+	
+	public Turn getCurrentTurn() {
+		return currentTurn;
+	}
+
 	public void init() {
 		points = new Point[NUM_POINTS];
 		
@@ -67,16 +77,30 @@ public class Board {
 		return bear;
 	}
 	
-	public Set<Integer> getLegalPointIndexes() {
+	public void movePip(int pipFrom, int pipTo) {
+		points[pipFrom].pop(); // also clears playerSide if 0
+		points[pipTo].push();
+		points[pipTo].setPlayerSide(points[pipFrom].getPlayerSide());
+	}
+	
+	public Set<Integer> getPossibleSelectIndexes() {
 		List<Move> legalMoves = getLegalMoves();
 		Set<Integer> indexes = new HashSet<>();
 		legalMoves.forEach(m -> indexes.add(m.getFromPoint().getIndex()));
+		indexes.forEach(m -> logger.info("index=" + m));
+		return indexes;
+	}
+	
+	public Set<Integer> getPossibleMoveIndexes(int pointIndexFrom) {
+		List<Move> legalMoves = getLegalMoves();
+		Set<Integer> indexes = new HashSet<>();
+		legalMoves.forEach(m -> { if (m.getFromPoint().getIndex() == pointIndexFrom) indexes.add(m.getToPoint().getIndex()); });
 		return indexes;
 	}
 	
 	public List<Move> getLegalMoves() {
 		List<Move> legalMoves = new ArrayList<>();
-		int[] both = currentTurn.getDice().getBoth();
+		int[] both = currentTurn.getDice().get();
 		PlayerSide ps = currentTurn.getPlayerSide();
 		int addOrSubtract = 1;
 		if (ps == PlayerSide.PLAYER_2) {

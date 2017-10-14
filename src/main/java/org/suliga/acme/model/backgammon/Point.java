@@ -7,15 +7,31 @@ public class Point {
 	
 	public Point(int index) {
 		this.index = index;
-		
 	}
+	
 	public void set(PlayerSide playerSide, int numPips) {
 		this.playerSide = playerSide;
 		this.numPips = numPips;
 	}
 	
+	public void pop() {
+		index--;
+		
+		if (index == 0) {
+			playerSide = null;
+		}
+	}
+	
+	public void push() {
+		index++;
+	}
+	
 	public PlayerSide getPlayerSide() {
 		return playerSide;
+	}
+	
+	public void setPlayerSide(PlayerSide ps) {
+		playerSide = ps;
 	}
 	
 	public int getNumPips() {
