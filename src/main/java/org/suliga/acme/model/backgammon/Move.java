@@ -9,17 +9,17 @@ public class Move {
 		this.toPoint = toPoint;
 	}
 	
-	@Override
-	public String toString() {
-		return "(" + fromPoint.getIndex() + "," + toPoint.getIndex() + ")";
-	}
-
 	public Point getFromPoint() {
 		return fromPoint;
 	}
 
 	public Point getToPoint() {
 		return toPoint;
+	}
+	
+	@Override
+	public String toString() {
+		return "Move from:" + fromPoint.getIndex() + ", to:" + toPoint.getIndex();
 	}
 }
 

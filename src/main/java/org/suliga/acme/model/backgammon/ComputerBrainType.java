@@ -1,5 +1,5 @@
 package org.suliga.acme.model.backgammon;
 
-public enum ComputerBrain {
+public enum ComputerBrainType {
 	DUMB, SMART, GENIUS
 }

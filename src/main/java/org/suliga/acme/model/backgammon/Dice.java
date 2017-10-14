@@ -3,21 +3,24 @@ package org.suliga.acme.model.backgammon;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Dice {
+	private static int diceCount = 0;
 	private int[] die;
 	private boolean[] used;
 	
 	public Dice() {
+		diceCount++;
 		die = new int[2];
 		used = new boolean[4];
 		die[0] = ThreadLocalRandom.current().nextInt(6) + 1;
 		die[1] = ThreadLocalRandom.current().nextInt(6) + 1;
 	}
 	
-	public Dice(int d1, int d2) {
-		die = new int[2];
-		used = new boolean[4];
-		die[0] = d1;
-		die[1] = d2;
+	public void setDieUsed(int num) {
+		if (die[0] == num && !used[0]) {
+			used[0] = true;
+		} else if (die[1] == num && !used[1]) {
+			used[1] = true;
+		}
 	}
 	
 	public int getDie(int d) {
@@ -38,5 +41,10 @@ public class Dice {
 	
 	public void setUsed(int d) {
 		used[d] = true;
+	}
+	
+	@Override
+	public String toString() {
+		return "Dice: " + diceCount + ", used:" + used[0] + " " + used[1] + " " + used[2] + " " + used[3];
 	}
 }

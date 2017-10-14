@@ -1,11 +1,12 @@
 
-var divBoardl
+var divBoard;
 var sessionId;
 var points = new Array();
 var openPips = new Array();
 var currentSide = 1;
-var state = "open";
+var currentState = "open";
 var currentSelectedPoint;
+var currentSelectedId;
 var possibleSelectMessage;
 
 $(document).ready(function() {
@@ -38,7 +39,7 @@ function initBoard() {
 		openPips[i] = id;
 	}
 	
-	// roll button
+	// create roll button
 	let b1 = document.createElement("button");
 	$(b1).addClass("btnRoll"); $(b1).attr("id", "btnRoll"); $(b1).text("Roll");
 	divBoard.append(b1);
@@ -47,7 +48,7 @@ function initBoard() {
 	    'left': 122 + 38 + 5 * 56}, 0
 	);
 	
-	// dice
+	// create dice
 	for (let i=0;i<4;i++) {
 		let d = document.createElement("div");
 		$(d).addClass("divDie"); $(d).attr("id", "divDie" + (i+1)); $(d).attr("hidden", "hidden");
@@ -95,61 +96,15 @@ function movePipToSpot(p1, point, delay, notifyServer) {
 	    'top': marginTop + startRow,
 	    'left': marginLeft + startCol}, delay, function() {
 	    	$(p1).css("z-index", 1);
-	    	if (state == "moving") {
-	    		if (notifyServer) {
-	    			var payload = JSON.stringify({ 'sessionId':sessionId});
-	    			stomp.send('/stomp/backgammon/continueTurn', {}, payload); // /stomp/minesweeper required
-	    		}
-	    	}
+	    	//if (currentState == "moving") {
+	    	//	if (notifyServer) {
+	    	//		var payload = JSON.stringify({ 'sessionId':sessionId});
+	    	//		stomp.send('/stomp/backgammon/continueTurn', {}, payload); // /stomp/minesweeper required
+	    	//	}
+	    	//}
 	    }
 	);		
 };
-
-// dynamic - works after class being added
-$(document).on('click', "div.pip", function() {	
-	let point = $(this).attr("data-point");
-
-	if (state == "possibleSelect") {
-		// is allowed side?
-		let side = $(this).attr("data-side");
-		if (currentSide != side) {
-			return;
-		}
-				
-		// is currently possible?
-		let pointLen = points[point].length;
-		let id = points[point][pointLen-1];	
-		if (!$('#' + id).hasClass("pipPossible")) {
-			return;
-		}
-	}
-	
-	if (state == "possibleMove") {
-		// if is currently selected, de-select
-		let pointLen = points[point].length;
-		let id = '#' + points[point][pointLen-1];	
-		if ($(id).hasClass("pipSelected")) {
-			pipDeselected(point);
-			return;
-		}
-		// if not action available on this dummy point, return
-		let dummyId = '#' + openPips[point];
-		if (!$(dummyId).hasClass("pipPossible")) {
-			return;
-		}
-	}
-	
-	console.log("class div.pip clicked for point: " + point);
-	possiblePipClicked(point);
-});
-
-//dynamic - works after class being added
-$(document).on('click', "div.openPip", function() {
-	// possible move?
-	console.log("move?");
-	let pointTo = $(this).attr("data-point");
-	movePip(currentSelectedPoint, pointTo);
-});
 
 var stompUrl = 'http://' + window.location.host + '/backgammon'; // _not_ /app/minesweeper
 var stompSock = new SockJS(stompUrl);
@@ -160,143 +115,208 @@ stomp.connect({}, function(frame) {
 		console.log('incoming received msg: ' + incoming);
 	});
 	
-	stomp.subscribe('/topic/backgammon/possibleSelect', function(incoming) { // /topic/result required
-		console.log('incoming received msg: ' + incoming);
-		let ob = JSON.parse(incoming.body);
-		
-		hideOpenPips();
+	stomp.subscribe('/topic/backgammon/showPipsAllowedToMove', function(incoming) {
+		showPipsAllowedToMove(incoming);
+	});
+	
+	stomp.subscribe('/topic/backgammon/selectDestinationPoint', function(incoming) { // /topic/result required
+		selectDestinationPoint(incoming);
+	});
+	
+	stomp.subscribe('/topic/backgammon/movingPip', function(incoming) { // /topic/result required
+		movingPip(incoming);
+	});
+});
 
-		if (state != "possibleMove") {
-			if (ob.diceRolled[0] == ob.diceRolled[1]) {
-				$('div#divDie1').text(ob.diceRolled[0]);
-				$('div#divDie2').text(ob.diceRolled[1]);
-				$('div#divDie3').text(ob.diceRolled[0]);
-				$('div#divDie4').text(ob.diceRolled[1]);
-				$('div#divDie1').show(300, "linear", function() {
-					$('div#divDie2').show(300, "linear", function() {
-						$('div#divDie3').show(300, "linear", function() {
-							$('div#divDie4').show(300, "linear", function() {
-								// highlight legal points
-								for (let i=0;i<ob.moveablePoints.length;i++) {
-									let point = ob.moveablePoints[i];
-									console.log("point=" + point + ", points.length=" + points.length);
-									let index = points[point].length;
-									let id = points[point][index-1];
-									$('#' + id).addClass('pipPossible');
-								}
-							});
+/////////////////////////////////////////////////////////////////////////////
+
+function showPipsAllowedToMove(incoming) {
+	console.log('incoming received msg: ' + incoming);
+	let ob = JSON.parse(incoming.body);
+	
+	hideOpenPips();
+
+	if (currentState != "possibleMove") { // why needed? Showing dice
+		$('div#divDie1').text(ob.diceRolled[0]);
+		$('div#divDie2').text(ob.diceRolled[1]);
+		if (ob.diceRolled[0] == ob.diceRolled[1]) {
+			$('div#divDie3').text(ob.diceRolled[0]);
+			$('div#divDie4').text(ob.diceRolled[1]);
+			$('div#divDie1').show(300, "linear", function() {
+				$('div#divDie2').show(300, "linear", function() {
+					$('div#divDie3').show(300, "linear", function() {
+						$('div#divDie4').show(300, "linear", function() {
+							highlightLegalPips(ob);
 						});
 					});
 				});
-			} else {
-				$('div#divDie1').text(ob.diceRolled[0]);
-				$('div#divDie2').text(ob.diceRolled[1]);
-				$('div#divDie3').text('');
-				$('div#divDie4').text('');
-				$('div#divDie1').show(400, "linear", function() {
-					$('div#divDie2').show(400, "linear", function() {
-						// highlight legal points
-						for (let i=0;i<ob.moveablePoints.length;i++) {
-							let point = ob.moveablePoints[i];
-							console.log("point=" + point + ", points.length=" + points.length);
-							let index = points[point].length;
-							let id = points[point][index-1];
-							$('#' + id).addClass('pipPossible');
-						}
-					});
-				});
-			}
+			});
 		} else {
-			for (let i=0;i<ob.moveablePoints.length;i++) {
-				let point = ob.moveablePoints[i];
-				let index = points[point].length;
-				let id = points[point][index-1];
-				$('#' + id).addClass('pipPossible');
-			}
+			$('div#divDie1').show(400, "linear", function() {
+				$('div#divDie2').show(400, "linear", function() {
+					highlightLegalPips(ob);
+				});
+			});
 		}
-		state = "possibleSelect";
-	});
-	
-	stomp.subscribe('/topic/backgammon/possibleMove', function(incoming) { // /topic/result required
-		console.log("possibleMove")
-		const ob = JSON.parse(incoming.body);
+	} else { // why here? not showing dice
+		highlightLegalPips(ob);
+	}
+	currentState = "possibleSelect";
+}
 
-		// turn off all points and select from point
-		for (let i=0;i<points.length;i++) {
-			let stack = points[i];
-			if (stack.length > 0) {
-				let id = stack[stack.length-1];
-				$("#" + id).removeClass("pipPossible");
-				$("#" + id).removeClass("pipSelected");
-				// select from point
-				if (i == ob.fromPoint) {
-					$("#" + id).addClass("pipSelected");
-					currentSelectedPoint = i;
-				}
-			}
-			hideOpenPips();
-		}
-		// turn on all move to points
-		for (let i=0;i<ob.legalPoints.length;i++) {
-			let point = ob.legalPoints[i];
-			console.log("point=" + point);
-			let id = '#' + openPips[point];
-			movePipToSpot(id, point, 0);
-			$(id).addClass("pipPossible");
-			$(id).show();
-		}
-
-		state = "possibleMove";
-	});
-	
-	stomp.subscribe('/topic/backgammon/movePip', function(incoming) { // /topic/result required
-		console.log("movePip")
-		const ob = JSON.parse(incoming.body);
-		console.log("from=" + ob.pointFrom + ", to=" + ob.pointTo);
-		let len = points[ob.pointFrom].length;
-		let pip = points[ob.pointFrom].pop();
-		state = "moving";
-		movePipToSpot("#" + pip, ob.pointTo, 1000, true);
-		points[ob.pointTo].push(pip);
-		console.log("isDone=" + ob.done);
-		
-		if (!ob.done) {
-			state = "possibleSelect";
-		}
-	});
-});
+function highlightLegalPips(ob) {
+	// highlight legal pips
+	for (let i=0;i<ob.moveablePoints.length;i++) {
+		let point = ob.moveablePoints[i];
+		let index = points[point].length;
+		let id = points[point][index-1];
+		$('#' + id).removeClass('pipSelectedToMove');
+		$('#' + id).addClass('pipAllowedToMove');
+	}	
+}
 
 function hideOpenPips() {
 	for (let i=0;i<24;i++) {
 		let id = '#' + openPips[i];
-		$(id).removeClass("pipPossible");
-		$(id).removeClass("pipSelected");
 		$(id).hide();
 	}
 }
 
-$(document).on('click', "button#btnRoll", function() {
-	$('button#btnRoll').hide();
-	console.log('btnRoll clicked');
-	var payload = JSON.stringify({ 'sessionId':sessionId, 'state':'roll', 'gameOver':false});
-	stomp.send('/stomp/backgammon/roll', {}, payload); // /stomp/minesweeper required
+//dynamic - works after class being added
+$(document).on('click', "div.pip", function() {	
+	let point = $(this).attr("data-point");
+
+	if (currentState == "possibleSelect") {
+		// is allowed side?
+		let side = $(this).attr("data-side");
+		if (currentSide != side) {
+			return;
+		}
+				
+		// is currently possible?
+		let pointLen = points[point].length;
+		let id = points[point][pointLen-1];	
+		if (!$('#' + id).hasClass("pipAllowedToMove")) {
+			return;
+		}
+	}
+	
+	if (currentState == "possibleMove") {
+		// if is currently selected, de-select
+		let pointLen = points[point].length;
+		let id = '#' + points[point][pointLen-1];	
+		if ($(id).hasClass("pipSelectedToMove")) {
+			pipDeselected(point);
+			return;
+		}
+		// if not action available on this dummy point, return
+		let dummyId = '#' + openPips[point];
+		if (!$(dummyId).hasClass("pipAllowedToMove")) {
+			return;
+		}
+	}
+	
+	console.log("class div.pip clicked for point: " + point);
+	pipSelectedToMove(point);
 });
 
-function possiblePipClicked(point) {
+function selectDestinationPoint(incoming) {
+	console.log("selectDestinationPoint")
+	const ob = JSON.parse(incoming.body);
+
+	// turn off other pip points and select single pip from point
+	for (let i=0;i<points.length;i++) {
+		let stack = points[i];
+		if (stack.length > 0) {
+			let id = stack[stack.length-1];
+			$("#" + id).removeClass("pipAllowedToMove");
+			$("#" + id).removeClass("pipSelectedToMove");
+			// select from point
+			if (i == ob.selectedPoint) {
+				$("#" + id).addClass("pipSelectedToMove");
+				currentSelectedPoint = i;
+			}
+		}
+		hideOpenPips();
+	}
+	// turn on all move to open points
+	for (let i=0;i<ob.moveablePoints.length;i++) {
+		let point = ob.moveablePoints[i];
+		console.log("point=" + point);
+		let id = '#' + openPips[point];
+		movePipToSpot(id, point, 0);
+		$(id).show();
+	}
+
+	currentState = "possibleMove";
+}
+
+async function movingPip(incoming) {
+	console.log("movingPip")
+	const ob = JSON.parse(incoming.body);
+	console.log("from=" + ob.fromPoint + ", to=" + ob.toPoint);
+	//let len = points[ob.fromPoint].length;
+	let pip = points[ob.fromPoint].pop();
+	currentState = "moving";
+	movePipToSpot("#" + pip, ob.toPoint, 1000, true);
+	await sleep(1000);
+	points[ob.toPoint].push(pip);
+	console.log("isDone=" + ob.done);
+	$("#" + pip).removeClass('pipSelectedToMove');
+	
+	if (!ob.done) {
+		currentState = "possibleSelect";
+	}
+	
+	for (let i=0;i<ob.diceUsed.length;i++) {
+		if (ob.diceUsed[i] == true) {
+			let id = "#divDie" + (i+1);
+			$(id).addClass("dieUsed");
+		}
+	}
+	
+	if (ob.turnOver) {
+		hideOpenPips();
+		for (let i=1;i<5;i++) {
+			$('#divDie' + i).hide();
+			$('#divDie' + i).removeClass('dieUsed');
+		}
+		$('#btnRoll').show();
+	} else {
+		let payload = JSON.stringify({ 'sessionId':sessionId });
+		stomp.send('/stomp/backgammon/continueTurn', {}, payload);
+	}
+}
+
+//dynamic - works after class being added
+$(document).on('click', "button#btnRoll", function() {
+	$('button#btnRoll').hide();
+	var payload = JSON.stringify({ 'sessionId':sessionId });
+	stomp.send('/stomp/backgammon/comeOutRoll', {}, payload); // /stomp/minesweeper required
+});
+
+function pipSelectedToMove(point) {
 	console.log('point clicked: ' + point);
-	var payload = JSON.stringify({ 'sessionId':sessionId, 'point':point});
-	stomp.send('/stomp/backgammon/possiblePipClicked', {}, payload); // /stomp/minesweeper required
+	var payload = JSON.stringify({ 'sessionId':sessionId, 'selectedPoint':point});
+	stomp.send('/stomp/backgammon/pipSelectedToMove', {}, payload);
 };
 
 function pipDeselected(point) {
 	var payload = JSON.stringify({ 'sessionId':sessionId});
-	stomp.send('/stomp/backgammon/pipDeselected', {}, payload); // /stomp/minesweeper required
+	stomp.send('/stomp/backgammon/pipDeselected', {}, payload);
 }
 
-function movePip(pointFrom, pointTo) {
-	var payload = JSON.stringify({ 'sessionId':sessionId, 'pointFrom':pointFrom, 'pointTo':pointTo });
-	stomp.send('/stomp/backgammon/movePip', {}, payload); // /stomp/minesweeper required
+$(document).on('click', "div.openPip", function() {
+	let pointTo = $(this).attr("data-point");
+	var payload = JSON.stringify({ 'sessionId':sessionId, 'fromPoint':currentSelectedPoint, 'toPoint':pointTo });
+	stomp.send('/stomp/backgammon/movePip', {}, payload);
+});
+
+$(document).on('click', '#btnNewGame', function() {
+	var payload = JSON.stringify({ 'sessionId':sessionId});
+	stomp.send('/stomp/backgammon/newGame', {}, payload);
+});
+
+function sleep(ms) {
+	  return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-
-

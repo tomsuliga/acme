@@ -1,6 +1,11 @@
 package org.suliga.acme.model.backgammon;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Point {
+	private static final Logger logger = LoggerFactory.getLogger(Point.class);
+
 	private int index;
 	private PlayerSide playerSide;
 	private int numPips;
@@ -15,15 +20,20 @@ public class Point {
 	}
 	
 	public void pop() {
-		index--;
+		numPips--;
 		
-		if (index == 0) {
+		if (numPips == 0) {
 			playerSide = null;
+		}
+		
+		if (numPips < 0) {
+			logger.error("**** numPips should not be less than 0: " + numPips);
+			numPips = 0;
 		}
 	}
 	
 	public void push() {
-		index++;
+		numPips++;
 	}
 	
 	public PlayerSide getPlayerSide() {

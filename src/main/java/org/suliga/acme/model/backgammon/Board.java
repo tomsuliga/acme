@@ -78,9 +78,10 @@ public class Board {
 	}
 	
 	public void movePip(int pipFrom, int pipTo) {
+		PlayerSide ps = points[pipFrom].getPlayerSide();
 		points[pipFrom].pop(); // also clears playerSide if 0
 		points[pipTo].push();
-		points[pipTo].setPlayerSide(points[pipFrom].getPlayerSide());
+		points[pipTo].setPlayerSide(ps);
 	}
 	
 	public Set<Integer> getPossibleSelectIndexes() {
@@ -100,64 +101,51 @@ public class Board {
 	
 	public List<Move> getLegalMoves() {
 		List<Move> legalMoves = new ArrayList<>();
-		int[] both = currentTurn.getDice().get();
+		Dice dice = currentTurn.getDice();
 		PlayerSide ps = currentTurn.getPlayerSide();
-		int addOrSubtract = 1;
+		int temp = 1;
 		if (ps == PlayerSide.PLAYER_2) {
-			addOrSubtract = -1;
+			temp = -1;
 		}
+		int addOrSubtract = temp;
 		
+		Set<Integer> diceNums = new HashSet<>();
+		if (!dice.isUsed(0)) diceNums.add(dice.getDie(0));
+		if (!dice.isUsed(1)) diceNums.add(dice.getDie(1));
+		if (!dice.isUsed(0) && !dice.isUsed(1)) diceNums.add(dice.getDie(0) + dice.getDie(1));
+		if (dice.isDouble()) {
+			int count = 0;
+			for (int i=0;i<4;i++) {
+				if (!dice.isUsed(i)) {
+					count++;
+				}
+			}
+			int value = dice.getDie(0);
+			int max = value * count;
+			for (int i=max;i>0;i-=value) {
+				diceNums.add(i);
+			}
+		}
+		// diceNums is now all possible die combinations
 		for (int i=0;i<NUM_POINTS;i++) {
 			Point pointFrom = points[i];
 			if (pointFrom.isOwned(ps)) {
-				for (int j=0;j<2;j++) {
-					int indexTo = i + (both[j] * addOrSubtract);
-					if (isLegalMove(pointFrom, indexTo)) {
+				// try all nums
+				int index = i;
+				diceNums.forEach(a -> {
+					int indexTo = index + (a * addOrSubtract);
+					if (isLegalPoint(pointFrom, indexTo, ps)) {
 						Point pointTo = points[indexTo];
 						Move move = new Move(pointFrom, pointTo);
 						if (isMoveUnique(legalMoves, move)) {
 							legalMoves.add(move);
-						}
-						// try combination of moves
-						int otherDiceIndex = (j + 1) % 2;
-						int otherIndexTo = indexTo + (both[otherDiceIndex] * addOrSubtract);
-						// pointTo is now the pointFrom
-						if (isLegalMove(pointTo, otherIndexTo)) {
-							Point otherPointTo2 = points[otherIndexTo];
-							// original pointFrom and combo of dice 1 and 2
-							Move otherMove2 = new Move(pointFrom, otherPointTo2);
-							if (isMoveUnique(legalMoves, otherMove2)) {
-								legalMoves.add(otherMove2);
-							}
-							// doubles require 2 more checks
-							if (currentTurn.getDice().isDouble()) {
-								// The 3rd number
-								Point otherPointTo3 = tryNextMove(otherPointTo2, both, addOrSubtract, pointFrom, legalMoves);
-								if (otherPointTo3 != null) {
-									// Again for 4th number
-									tryNextMove(otherPointTo3, both, addOrSubtract, pointFrom, legalMoves);
-								}
-							}
+							logger.info("getLegalMoves added: " + move.toString());
 						}
 					}
-				}
+				});
 			}
 		}
-		
 		return legalMoves;
-	}
-	
-	private Point tryNextMove(Point otherPointFrom3, int[] both, int addOrSubtract, Point pointFrom, List<Move> legalMoves) {
-		int otherIndexTo3 = otherPointFrom3.getIndex() + (both[0] * addOrSubtract);
-		if (isLegalMove(otherPointFrom3, otherIndexTo3)) {
-			Point otherPointTo3 = points[otherIndexTo3];
-			Move otherMove3 = new Move(pointFrom, otherPointTo3);
-			if (isMoveUnique(legalMoves, otherMove3)) {
-				legalMoves.add(otherMove3);
-			}
-			return otherPointTo3;
-		}
-		return null;
 	}
 	
 	private boolean isMoveUnique(List<Move> moves, Move move) {
@@ -171,7 +159,7 @@ public class Board {
 		return true;
 	}
 	
-	private boolean isLegalMove(Point pointFrom, int indexTo) {
+	private boolean isLegalPoint(Point pointFrom, int indexTo, PlayerSide ps) {
 		if (indexTo >= NUM_POINTS 
 		 || indexTo < 0) {
 			return false;
@@ -180,7 +168,7 @@ public class Board {
 		Point pointTo = points[indexTo];
 		
 		if (pointTo.isEmpty()
-		 || pointTo.isOwned(currentTurn.getPlayerSide())
+		 || pointTo.isOwned(ps)
 		 || pointTo.getNumPips() == 1) {
 			return true;
 		}
