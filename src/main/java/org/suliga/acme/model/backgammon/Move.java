@@ -1,25 +1,25 @@
 package org.suliga.acme.model.backgammon;
 
 public class Move {
-	private Point fromPoint;
-	private Point toPoint;
+	private int fromPoint;
+	private int toPoint;
 	
-	public Move(Point fromPoint, Point toPoint) {
+	public Move(int fromPoint, int toPoint) {
 		this.fromPoint = fromPoint;
 		this.toPoint = toPoint;
 	}
 	
-	public Point getFromPoint() {
+	public int getFromPoint() {
 		return fromPoint;
 	}
 
-	public Point getToPoint() {
+	public int getToPoint() {
 		return toPoint;
 	}
 	
 	@Override
 	public String toString() {
-		return "Move from:" + fromPoint.getIndex() + ", to:" + toPoint.getIndex();
+		return "Move from:" + fromPoint + ", to:" + toPoint;
 	}
 }
 

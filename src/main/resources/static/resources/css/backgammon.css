@@ -110,12 +110,19 @@ button.myButton {
 	padding-right: .75em;
 }
 
-div.divDie {
-	color: #00c;
+div.p1Die, div.p2Die {
 	font-size: 3em;
 	font-weight: bold;
 	text-align: center;
 	position: absolute;
+}
+
+div.p1Die {
+	color: #00c;
+}
+
+div.p2Die {
+	color: #c00;
 }
 
 div.dieUsed {

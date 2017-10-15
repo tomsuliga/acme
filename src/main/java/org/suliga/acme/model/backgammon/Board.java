@@ -1,6 +1,7 @@
 package org.suliga.acme.model.backgammon;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ public class Board {
 	private Bar bar;
 	private Bear bear;
 	private Turn currentTurn;
+	private PlayerSide currentPlayerSide;
 	
 	public Board() {
 	}
@@ -27,13 +29,17 @@ public class Board {
 	}
 	
 	public Dice roll() {
-		currentTurn = new Turn(PlayerSide.PLAYER_1);
+		currentTurn = new Turn(currentPlayerSide);
 		return currentTurn.roll();
 	}
 	
 	
 	public Turn getCurrentTurn() {
 		return currentTurn;
+	}
+	
+	public void switchSides() {
+		currentPlayerSide = currentPlayerSide == PlayerSide.PLAYER_1 ? PlayerSide.PLAYER_2 : PlayerSide.PLAYER_1;
 	}
 
 	public void init() {
@@ -55,10 +61,7 @@ public class Board {
 		bear = new Bear();
 		
 		// temp
-		bar.setPlayer1Count(3);
-		bar.setPlayer2Count(2);
-		bear.setPlayer1Count(5);
-		bear.setPlayer2Count(4);
+		currentPlayerSide = PlayerSide.PLAYER_1;
 	}
 	
 	public Point[] getPoints() {
@@ -87,7 +90,7 @@ public class Board {
 	public Set<Integer> getPossibleSelectIndexes() {
 		List<Move> legalMoves = getLegalMoves();
 		Set<Integer> indexes = new HashSet<>();
-		legalMoves.forEach(m -> indexes.add(m.getFromPoint().getIndex()));
+		legalMoves.forEach(m -> indexes.add(m.getFromPoint()));
 		indexes.forEach(m -> logger.info("index=" + m));
 		return indexes;
 	}
@@ -95,7 +98,7 @@ public class Board {
 	public Set<Integer> getPossibleMoveIndexes(int pointIndexFrom) {
 		List<Move> legalMoves = getLegalMoves();
 		Set<Integer> indexes = new HashSet<>();
-		legalMoves.forEach(m -> { if (m.getFromPoint().getIndex() == pointIndexFrom) indexes.add(m.getToPoint().getIndex()); });
+		legalMoves.forEach(m -> { if (m.getFromPoint() == pointIndexFrom) indexes.add(m.getToPoint()); });
 		return indexes;
 	}
 	
@@ -103,56 +106,74 @@ public class Board {
 		List<Move> legalMoves = new ArrayList<>();
 		Dice dice = currentTurn.getDice();
 		PlayerSide ps = currentTurn.getPlayerSide();
-		int temp = 1;
-		if (ps == PlayerSide.PLAYER_2) {
-			temp = -1;
-		}
-		int addOrSubtract = temp;
+		int directionSign = ps == PlayerSide.PLAYER_1 ? 1 : -1;
 		
-		Set<Integer> diceNums = new HashSet<>();
-		if (!dice.isUsed(0)) diceNums.add(dice.getDie(0));
-		if (!dice.isUsed(1)) diceNums.add(dice.getDie(1));
-		if (!dice.isUsed(0) && !dice.isUsed(1)) diceNums.add(dice.getDie(0) + dice.getDie(1));
-		if (dice.isDouble()) {
-			int count = 0;
-			for (int i=0;i<4;i++) {
-				if (!dice.isUsed(i)) {
-					count++;
-				}
-			}
-			int value = dice.getDie(0);
-			int max = value * count;
-			for (int i=max;i>0;i-=value) {
-				diceNums.add(i);
+		List<List<Integer>> nums = new ArrayList<>();
+		if (!dice.isUsed(0)) {
+			nums.add(Arrays.asList(dice.getDie(0)));
+		}
+		if (!dice.isUsed(1)) {
+			nums.add(Arrays.asList(dice.getDie(1)));
+		}
+		if (!dice.isUsed(0) && !dice.isUsed(1)) {
+			nums.add(Arrays.asList(dice.getDie(0), dice.getDie(1)));
+			if (!dice.isDouble()) {
+				nums.add(Arrays.asList(dice.getDie(1), dice.getDie(0)));
 			}
 		}
-		// diceNums is now all possible die combinations
+		if (dice.isDouble()) {
+			// all 4 numbers are same
+			if (dice.isUsed(0) && dice.isUsed(1) && (!dice.isUsed(2) || !dice.isUsed(3))) {
+				nums.add(Arrays.asList(dice.getDie(0)));
+			}
+			if (!dice.isUsed(2) && !dice.isUsed(3)) {
+				nums.add(Arrays.asList(dice.getDie(0), dice.getDie(0)));
+			}
+			if (!dice.isUsed(1) && !dice.isUsed(2) && !dice.isUsed(3)) {
+				nums.add(Arrays.asList(dice.getDie(0), dice.getDie(0), dice.getDie(0)));
+			}
+			if (!dice.isUsed(0) && !dice.isUsed(1) && !dice.isUsed(2) && !dice.isUsed(3)) {
+				nums.add(Arrays.asList(dice.getDie(0), dice.getDie(0), dice.getDie(0), dice.getDie(0)));
+			}
+		}
+		
 		for (int i=0;i<NUM_POINTS;i++) {
 			Point pointFrom = points[i];
 			if (pointFrom.isOwned(ps)) {
-				// try all nums
-				int index = i;
-				diceNums.forEach(a -> {
-					int indexTo = index + (a * addOrSubtract);
-					if (isLegalPoint(pointFrom, indexTo, ps)) {
-						Point pointTo = points[indexTo];
-						Move move = new Move(pointFrom, pointTo);
-						if (isMoveUnique(legalMoves, move)) {
-							legalMoves.add(move);
-							logger.info("getLegalMoves added: " + move.toString());
+				for (int j=0;j<nums.size();j++) {
+					// try all combo's from this point
+					int total = 0;
+					boolean allGood = true;
+					List<Integer> seq = nums.get(j);
+					for (int k=0;k<seq.size();k++) {
+						int indexTo = i + ((total + seq.get(k) * directionSign));
+						if (!isLegalPoint(pointFrom, indexTo, ps)) {
+							allGood = false;
+							break;
+						} else {
+							total += seq.get(k);
 						}
 					}
-				});
+					if (allGood) {
+						int indexTo = i + (total * directionSign);
+						Move move = new Move(i, indexTo);
+						if (isMoveUnique(legalMoves, move)) {
+							legalMoves.add(move);
+							logger.info("*** getLegalMoves added: " + move.toString());
+						}
+					}
+				}
 			}
 		}
+		
 		return legalMoves;
 	}
 	
 	private boolean isMoveUnique(List<Move> moves, Move move) {
 		for (int i=0;i<moves.size();i++) {
 			Move m = moves.get(i);
-			if (m.getFromPoint().getIndex() == move.getFromPoint().getIndex()
-			 && m.getToPoint().getIndex() == move.getToPoint().getIndex()) {
+			if (m.getFromPoint() == move.getFromPoint()
+			 && m.getToPoint() == move.getToPoint()) {
 				return false;
 			}
 		}

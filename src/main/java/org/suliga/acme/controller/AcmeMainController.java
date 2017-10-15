@@ -268,6 +268,28 @@ public class AcmeMainController {
 		String sessionId = messageIn.getSessionId();
 		backgammonService.getGame(sessionId).getBoard().init();
 	}
+	
+	@MessageMapping("/backgammon/switchSides")
+	public void handleBackgammonSwitchSides(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		Board board = backgammonService.getGame(sessionId).getBoard();
+		board.switchSides();
+		Dice dice = board.roll();
+		ClientServerMessage messageOut = new ClientServerMessage();
+		messageOut.setSessionId(sessionId);
+		messageOut.setDiceRolledEx(dice);
+		// temp
+		messageOut.setSide(2);
+		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
+		
+		// temp
+		messageOut.setFromPoint(7);
+		messageOut.setToPoint(5);
+		//board.movePip(7, 5);
+		//messageOut.calculateNumbersUsed(dice);
+
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/switchSides", messageOut);
+	}
 }
 
 

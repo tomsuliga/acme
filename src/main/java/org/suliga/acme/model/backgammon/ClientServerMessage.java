@@ -52,6 +52,11 @@ public class ClientServerMessage {
 	}
 	
 	public void setMoveablePointsEx(Set<Integer> set) {
+		if (set.size() == 0) {
+			turnOver = true;
+			return;
+		}
+		
 		moveablePoints = new int[set.size()];
 		int index = 0;
 		Iterator<Integer> iter = set.iterator();
