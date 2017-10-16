@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.suliga.acme.model.backgammon.Board;
 import org.suliga.acme.model.backgammon.Dice;
+import org.suliga.acme.model.backgammon.PlayerSide;
 import org.suliga.acme.model.backgammon.ClientServerMessage;
 import org.suliga.acme.model.crossword.CrosswordGrid;
 import org.suliga.acme.model.dailydiet.FoodItem;
@@ -198,9 +199,13 @@ public class AcmeMainController {
 		String sessionId = messageIn.getSessionId();
 		logger.info("incoming roll =" + sessionId);
 		Board board = backgammonService.getGame(sessionId).getBoard();
+		if (board.getCurrentTurn() != null && board.getCurrentTurn().getPlayerSide() == PlayerSide.PLAYER_2) {
+			board.switchSides();
+		}
 		Dice dice = board.roll();
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setSessionId(sessionId);
+		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
@@ -215,6 +220,7 @@ public class AcmeMainController {
 		logger.info("Dice = " + dice.toString());
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setSessionId(sessionId);
+		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
@@ -228,6 +234,7 @@ public class AcmeMainController {
 		Dice dice = board.getCurrentTurn().getDice();
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setSessionId(sessionId);
+		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setSelectedPoint(messageIn.getSelectedPoint());
 		messageOut.setMoveablePointsEx(board.getPossibleMoveIndexes(messageIn.getSelectedPoint()));
@@ -242,6 +249,7 @@ public class AcmeMainController {
 		Dice dice = board.getCurrentTurn().getDice();
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setSessionId(sessionId);
+		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
@@ -255,6 +263,7 @@ public class AcmeMainController {
 		//dice.setDieUsed(Math.abs(messageIn.getFromPoint() - messageIn.getToPoint()));
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setSessionId(sessionId);
+		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setFromPoint(messageIn.getFromPoint());
 		messageOut.setToPoint(messageIn.getToPoint());
@@ -269,26 +278,47 @@ public class AcmeMainController {
 		backgammonService.getGame(sessionId).getBoard().init();
 	}
 	
-	@MessageMapping("/backgammon/switchSides")
+	@MessageMapping("/backgammon/switchToComputerSide")
 	public void handleBackgammonSwitchSides(ClientServerMessage messageIn) {
 		String sessionId = messageIn.getSessionId();
 		Board board = backgammonService.getGame(sessionId).getBoard();
 		board.switchSides();
 		Dice dice = board.roll();
+		// temp
+		dice.setDieValue(0, 3);
+		dice.setDieValue(1, 4);
+		
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setSessionId(sessionId);
+		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
-		// temp
-		messageOut.setSide(2);
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
 		
 		// temp
 		messageOut.setFromPoint(7);
-		messageOut.setToPoint(5);
-		//board.movePip(7, 5);
-		//messageOut.calculateNumbersUsed(dice);
+		messageOut.setToPoint(4);
 
-		simpMessagingTemplate.convertAndSend("/topic/backgammon/switchSides", messageOut);
+		messageOut.calculateNumbersUsed(dice);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/switchToComputerSide", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/continueComputerSide")
+	public void handleBackgammonContinueComputerSide(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		Board board = backgammonService.getGame(sessionId).getBoard();
+		Dice dice = board.getCurrentTurn().getDice();
+		ClientServerMessage messageOut = new ClientServerMessage();
+		messageOut.setSessionId(sessionId);
+		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
+		messageOut.setDiceRolledEx(dice);
+		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
+		
+		// temp
+		messageOut.setFromPoint(7);
+		messageOut.setToPoint(3);
+
+		messageOut.calculateNumbersUsed(dice);		
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/continueComputerSide", messageOut);
 	}
 }
 

@@ -130,8 +130,12 @@ stomp.connect({}, function(frame) {
 		movingPip(incoming);
 	});
 
-	stomp.subscribe('/topic/backgammon/switchSides', function(incoming) {
-		switchSides(incoming);
+	stomp.subscribe('/topic/backgammon/switchToComputerSide', function(incoming) {
+		switchToComputerSide(incoming);
+	});
+	
+	stomp.subscribe('/topic/backgammon/continueComputerSide', function(incoming) {
+		continueComputerSide(incoming);
 	});
 });
 
@@ -151,7 +155,7 @@ function showPipsAllowedToMove(incoming) {
 	hideOpenPips();
 
 	if (currentState != "possibleMove") { // here - need to show dice
-		revealDice(ob, 1);
+		revealDice(ob, ob.side);
 	} else { // here - do not need to show dice
 		highlightLegalPips(ob, true);
 	}
@@ -279,9 +283,9 @@ function selectDestinationPoint(incoming) {
 	for (let i=0;i<ob.moveablePoints.length;i++) {
 		let point = ob.moveablePoints[i];
 		console.log("point=" + point);
-		let id = '#' + openPips[point];
-		movePipToSpot(id, point, 0);
-		$(id).show();
+		let openId = '#' + openPips[point];
+		movePipToSpot(openId, point, 0);
+		$(openId).show();
 	}
 
 	currentState = "possibleMove";
@@ -304,12 +308,7 @@ async function movingPip(incoming) {
 		currentState = "possibleSelect";
 	}
 	
-	for (let i=0;i<ob.diceUsed.length;i++) {
-		if (ob.diceUsed[i] == true) {
-			let id = "#p1Die" + (i+1);
-			$(id).addClass("dieUsed");
-		}
-	}
+	hideDiceUsed(ob);
 	
 	if (ob.turnOver) {
 		$('#btnRoll').text("Roll");
@@ -320,20 +319,34 @@ async function movingPip(incoming) {
 	}
 }
 
+function hideDiceUsed(ob) {
+	for (let i=0;i<ob.diceUsed.length;i++) {
+		if (ob.diceUsed[i] == true) {
+			let id = "#p" + currentSide + "Die" + (i+1);
+			$(id).addClass("dieUsed");
+		}
+	}
+}
+
 function handleTurnOver() {
 	hideOpenPips();
 	hideDice();
 	
-	// todo - put back somewhere
-	//$('#btnRoll').show();
-	
 	var payload = JSON.stringify({ 'sessionId':sessionId });
-	stomp.send('/stomp/backgammon/switchSides', {}, payload);
+	stomp.send('/stomp/backgammon/switchToComputerSide', {}, payload);
 }
 
-async function switchSides(incoming) {
-	const ob = JSON.parse(incoming.body);
+function handleTurnOverComputer() {
+	hideOpenPips();
+	hideDice();
 	
+	currentSide = 1;
+	$('#btnRoll').show();
+}
+
+async function switchToComputerSide(incoming) {
+	const ob = JSON.parse(incoming.body);
+	currentSide = ob.side;
 	revealDice(ob, 2);
 	
 	await sleep(1000);
@@ -358,9 +371,57 @@ async function switchSides(incoming) {
 	points[ob.toPoint].push(pip);
 	await sleep(1000);
 	
+	hideDiceUsed(ob);
+		
 	// all selectable for next move, if any
 	hideOpenPips();
 	$("#" + pip).removeClass("pipSelectedToMove");
+	
+	// second move
+	var payload = JSON.stringify({ 'sessionId':sessionId });
+	stomp.send('/stomp/backgammon/continueComputerSide', {}, payload);
+}
+
+async function continueComputerSide(incoming) {
+	const ob = JSON.parse(incoming.body);
+	currentSide = ob.side;
+	//revealDice(ob, 2);
+	
+	//await sleep(1000);
+	highlightLegalPips(ob, true);
+	await sleep(1000);
+	
+	let len = points[ob.fromPoint].length;
+	let id = points[ob.fromPoint][len-1];
+	$("#" + id).addClass("pipSelectedToMove");
+	currentSelectedPoint = ob.fromPoint;
+
+	await sleep(1000);
+	highlightLegalPips(ob, false);
+	let openId = '#' + openPips[ob.toPoint];
+	movePipToSpot(openId, ob.toPoint, 0);
+	$(openId).show();
+
+	await sleep(1000);
+	let pip = points[ob.fromPoint].pop();
+	currentState = "moving";
+	movePipToSpot("#" + pip, ob.toPoint, 1000, false);
+	points[ob.toPoint].push(pip);
+	await sleep(1000);
+	
+	hideDiceUsed(ob);
+		
+	// all selectable for next move, if any
+	hideOpenPips();
+	$("#" + pip).removeClass("pipSelectedToMove");
+	
+	// end turn?
+	if (ob.turnOver) {
+		handleTurnOverComputer();
+	} else {
+		var payload = JSON.stringify({ 'sessionId':sessionId });
+		stomp.send('/stomp/backgammon/continueComputerSide', {}, payload);
+	}
 }
 
 //dynamic - works after class being added

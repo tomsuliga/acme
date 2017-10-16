@@ -47,4 +47,9 @@ public class Dice {
 	public String toString() {
 		return "Dice: " + diceCount + ", used:" + used[0] + " " + used[1] + " " + used[2] + " " + used[3];
 	}
+
+		public void setDieValue(int index, int value) {
+		this.die[index] = value;
+	}
+	
 }

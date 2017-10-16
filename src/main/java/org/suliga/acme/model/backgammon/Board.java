@@ -62,6 +62,7 @@ public class Board {
 		
 		// temp
 		currentPlayerSide = PlayerSide.PLAYER_1;
+		currentTurn = null;
 	}
 	
 	public Point[] getPoints() {
