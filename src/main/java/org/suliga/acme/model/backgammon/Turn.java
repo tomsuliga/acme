@@ -17,6 +17,10 @@ public class Turn {
 		return dice;
 	}
 	
+	public void setDice(Dice dice) {
+		this.dice = dice;
+	}
+	
 	public PlayerSide getPlayerSide() {
 		return playerSide;
 	}

@@ -34,7 +34,20 @@ public class Board {
 		return currentTurn.roll();
 	}
 	
-	
+	public Dice firstRoll() {
+		Dice dice = new Dice();
+		while (dice.isDouble()) {
+			dice = new Dice();
+		}
+		if (dice.getDie(0) > dice.getDie(1)) {
+			currentTurn = new Turn(PlayerSide.PLAYER_1);
+		} else {
+			currentTurn = new Turn(PlayerSide.PLAYER_2);
+		}
+		currentTurn.setDice(dice);
+		return currentTurn.getDice();
+	}
+		
 	public Turn getCurrentTurn() {
 		return currentTurn;
 	}

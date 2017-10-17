@@ -1,24 +1,40 @@
 
 var divBoard;
 var sessionId;
-var points = new Array();
-var openPips = new Array();
-var bar1 = new Array();
-var bar2 = new Array();
-var currentSide; // 1 or 2
-var currentState = "open";
+var points;
+var openPips;
+var bar1;
+var bar2;
+var bear1;
+var bear2;
+var currentSide;
+var currentState;
 var currentSelectedPoint;
-var currentSelectedId;
-var possibleSelectMessage;
+var firstMove;
 
 $(document).ready(function() {
-	divBoard = $("div#board");
-	sessionId = divBoard.attr("data-sessionId");
-	initBoard();
+	init();
 });
 
-function initBoard() {
-	currentSide = 1;
+$(document).on('click', '#btnNewGame', function() {
+	let payload = JSON.stringify({ 'sessionId':sessionId});
+	stomp.send('/stomp/backgammon/newGame', {}, payload);
+	window.location.reload();
+});
+
+function init() {
+	divBoard = $("div#board");
+	sessionId = divBoard.attr("data-sessionId");
+	points = [];
+	openPips = [];
+	bar1 = [];
+	bar2 = [];
+	bear1 = [];
+	bear2 = [];
+	currentSide = 1; // 1 or 2
+	currentState = "open";
+	currentSelectedPoint = -1;
+	firstMove = true;
 	
 	for (let i=0;i<24;i++) {
 		points[i] = new Array();
@@ -45,19 +61,16 @@ function initBoard() {
 	
 	// create roll button
 	let b1 = document.createElement("button");
-	$(b1).addClass("btnRoll"); $(b1).attr("id", "btnRoll"); $(b1).text("Roll");
+	$(b1).addClass("btnRoll"); $(b1).attr("id", "btnRoll"); $(b1).text("Roll Single Die");
 	divBoard.append(b1);
 	$(b1).animate({
 	    'top': 65 + 12 + 6 * 56,
-	    'left': 122 + 38 + 5 * 56}, 0
+	    'left': 122 + 37 + 4 * 56}, 0
 	);
 	
 	// playerSide, position
 	createDice(1,2);
 	createDice(2,8);
-	
-	bar1 = [];
-	bar2 = [];
 };
 
 function createDice(ps, pos) {
@@ -76,8 +89,10 @@ function createDice(ps, pos) {
 
 function createAndMovePip(index, point, side) {
 	let p1 = document.createElement("div");
-	$(p1).addClass("pip pip_" + side); $(p1).attr("id", "pip_" + side + "_" + index);
-	$(p1).attr("data-point", point); $(p1).attr("data-side", side);
+	$(p1).addClass("pip pip_" + side); 
+	$(p1).attr("id", "pip_" + side + "_" + index);
+	$(p1).attr("data-point", point); 
+	$(p1).attr("data-side", side);
 	divBoard.append(p1);
 	movePipToSpot(p1, point, 0);
 	let id = $(p1).attr("id");
@@ -156,12 +171,8 @@ stomp.connect({}, function(frame) {
 		movingPip(incoming);
 	});
 
-	stomp.subscribe('/topic/backgammon/switchToComputerSide', function(incoming) {
-		switchToComputerSide(incoming);
-	});
-	
-	stomp.subscribe('/topic/backgammon/continueComputerSide', function(incoming) {
-		continueComputerSide(incoming);
+	stomp.subscribe('/topic/backgammon/doComputerSide', function(incoming) {
+		doComputerSide(incoming);
 	});
 });
 
@@ -192,6 +203,16 @@ async function showPipsAllowedToMove(incoming) {
 }
 
 function revealDice(ob, ps) { // ps is playerSide
+	if (ob.firstMove) {
+		$('div#p1Die1').text(ob.diceRolled[0]);
+		$('div#p2Die2').text(ob.diceRolled[1]);
+		$('div#p1Die1').show(500, "linear", function() {
+			$('div#p2Die2').show(500, "linear", function() {
+			});
+		});
+		return;
+	}
+	
 	$('div#p' + ps + 'Die1').text(ob.diceRolled[0]);
 	$('div#p' + ps + 'Die2').text(ob.diceRolled[1]);
 	if (ob.diceRolled[0] == ob.diceRolled[1]) {
@@ -201,7 +222,6 @@ function revealDice(ob, ps) { // ps is playerSide
 			$('div#p' + ps + 'Die2').show(250, "linear", function() {
 				$('div#p' + ps + 'Die3').show(250, "linear", function() {
 					$('div#p' + ps + 'Die4').show(250, "linear", function() {
-						//highlightLegalPips(ob, true);
 					});
 				});
 			});
@@ -209,7 +229,6 @@ function revealDice(ob, ps) { // ps is playerSide
 	} else {
 		$('div#p' + ps + 'Die1').show(500, "linear", function() {
 			$('div#p' + ps + 'Die2').show(500, "linear", function() {
-				//highlightLegalPips(ob, true);
 			});
 		});
 	}
@@ -354,7 +373,7 @@ async function movingPip(incoming) {
 	hideDiceUsed(ob);
 	
 	if (ob.turnOver) {
-		$('#btnRoll').text("Roll");
+		$('#btnRoll').text("Roll Dice");
 		handleTurnOver();
 	} else {
 		let payload = JSON.stringify({ 'sessionId':sessionId });
@@ -387,14 +406,14 @@ function handleTurnOverComputer() {
 	$('#btnRoll').show();
 }
 
-async function switchToComputerSide(incoming) {
+async function doComputerSide(incoming) {
 	const ob = JSON.parse(incoming.body);
 	currentSide = ob.side;
-	revealDice(ob, 2);	
-	await sleep(1000);
-	
-	//highlightLegalPips(ob, true);
-	//await sleep(1000);
+
+	if (ob.startTurn) {
+		revealDice(ob, 2);	
+		await sleep(1000);	
+	}
 	
 	let len = points[ob.fromPoint].length;
 	let id = points[ob.fromPoint][len-1];
@@ -402,49 +421,6 @@ async function switchToComputerSide(incoming) {
 	currentSelectedPoint = ob.fromPoint;
 	await sleep(1000);
 	
-	//highlightLegalPips(ob, false);
-	let openId = '#' + openPips[ob.toPoint];
-	movePipToSpot(openId, ob.toPoint, 0);
-	$(openId).show();
-
-	await sleep(1000);
-	let pip = points[ob.fromPoint].pop();
-	currentState = "moving";
-	movePipToSpot("#" + pip, ob.toPoint, 1000);
-	points[ob.toPoint].push(pip);
-	await sleep(1000);
-	
-	hideDiceUsed(ob);
-		
-	// all selectable for next move, if any
-	hideOpenPips();
-	$("#" + pip).removeClass("pipSelectedToMove");
-	
-	// second move
-	var payload = JSON.stringify({ 'sessionId':sessionId });
-	stomp.send('/stomp/backgammon/continueComputerSide', {}, payload);
-}
-
-async function continueComputerSide(incoming) {
-	const ob = JSON.parse(incoming.body);
-	currentSide = ob.side;
-	//revealDice(ob, 2);
-	
-	//await sleep(1000);
-	//highlightLegalPips(ob, true);
-	//await sleep(1000);
-	
-	let len = points[ob.fromPoint].length;
-	let id = points[ob.fromPoint][len-1];
-	$("#" + id).addClass("pipSelectedToMove");
-	currentSelectedPoint = ob.fromPoint;
-
-	await sleep(1000);
-	//highlightLegalPips(ob, false);
-	let openId = '#' + openPips[ob.toPoint];
-	movePipToSpot(openId, ob.toPoint, 0);
-	$(openId).show();
-
 	await sleep(1000);
 	let pip = points[ob.fromPoint].pop();
 	currentState = "moving";
@@ -470,33 +446,39 @@ async function continueComputerSide(incoming) {
 //dynamic - works after class being added
 $(document).on('click', "button#btnRoll", function() {
 	$('button#btnRoll').hide();
-	var payload = JSON.stringify({ 'sessionId':sessionId });
-	stomp.send('/stomp/backgammon/comeOutRoll', {}, payload);
+	let payload = JSON.stringify({ 'sessionId':sessionId });
+	if (firstMove) {
+		firstMove = false;
+		$('button#btnRoll').text("Roll Dice");
+		$('button#btnRoll').animate({
+		    'top': 65 + 12 + 6 * 56,
+		    'left': 122 + 10 + 5 * 56}, 0
+		);
+		stomp.send('/stomp/backgammon/firstMove', {}, payload);
+	} else {
+		stomp.send('/stomp/backgammon/startPlayerTurn', {}, payload);
+	}
 });
 
 function pipSelectedToMove(point) {
 	console.log('point clicked: ' + point);
-	var payload = JSON.stringify({ 'sessionId':sessionId, 'selectedPoint':point});
+	let payload = JSON.stringify({ 'sessionId':sessionId, 'selectedPoint':point});
 	stomp.send('/stomp/backgammon/pipSelectedToMove', {}, payload);
 };
 
 function pipDeselected(point) {
-	var payload = JSON.stringify({ 'sessionId':sessionId});
+	let payload = JSON.stringify({ 'sessionId':sessionId});
 	stomp.send('/stomp/backgammon/pipDeselected', {}, payload);
 }
 
 $(document).on('click', "div.openPip", function() {
 	let pointTo = $(this).attr("data-point");
-	var payload = JSON.stringify({ 'sessionId':sessionId, 'fromPoint':currentSelectedPoint, 'toPoint':pointTo });
+	let payload = JSON.stringify({ 'sessionId':sessionId, 'fromPoint':currentSelectedPoint, 'toPoint':pointTo });
 	stomp.send('/stomp/backgammon/movePip', {}, payload);
-});
-
-$(document).on('click', '#btnNewGame', function() {
-	var payload = JSON.stringify({ 'sessionId':sessionId});
-	stomp.send('/stomp/backgammon/newGame', {}, payload);
-	window.location.reload();
 });
 
 function sleep(ms) {
 	  return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+

@@ -18,7 +18,10 @@ public class ClientServerMessage {
 	private boolean turnOver;
 	private boolean gameOver;
 	private boolean barHop;
+	private boolean noMove;
+	private boolean startTurn; // to reveal dice
 	private String state; // Roll
+	private boolean firstMove; // only at start of game
 	
 	public ClientServerMessage() {}
 
@@ -253,5 +256,29 @@ public class ClientServerMessage {
 
 	public void setBar2Count(int bar2Count) {
 		this.bar2Count = bar2Count;
+	}
+
+	public boolean isFirstMove() {
+		return firstMove;
+	}
+
+	public void setFirstMove(boolean firstMove) {
+		this.firstMove = firstMove;
+	}
+
+	public boolean isNoMove() {
+		return noMove;
+	}
+
+	public void setNoMove(boolean noMove) {
+		this.noMove = noMove;
+	}
+
+	public boolean isStartTurn() {
+		return startTurn;
+	}
+
+	public void setStartTurn(boolean startTurn) {
+		this.startTurn = startTurn;
 	}
 }
