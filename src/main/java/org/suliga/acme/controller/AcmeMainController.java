@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.suliga.acme.model.backgammon.Board;
 import org.suliga.acme.model.backgammon.Dice;
+import org.suliga.acme.model.backgammon.Game;
 import org.suliga.acme.model.backgammon.PlayerSide;
 import org.suliga.acme.model.backgammon.ClientServerMessage;
 import org.suliga.acme.model.crossword.CrosswordGrid;
@@ -208,6 +209,8 @@ public class AcmeMainController {
 		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
+		messageOut.setBar1Count(board.getBar().getPlayer1Count());
+		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
 	}
 	
@@ -223,6 +226,8 @@ public class AcmeMainController {
 		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
+		messageOut.setBar1Count(board.getBar().getPlayer1Count());
+		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
 	}
 
@@ -238,6 +243,8 @@ public class AcmeMainController {
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setSelectedPoint(messageIn.getSelectedPoint());
 		messageOut.setMoveablePointsEx(board.getPossibleMoveIndexes(messageIn.getSelectedPoint()));
+		messageOut.setBar1Count(board.getBar().getPlayer1Count());
+		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/selectDestinationPoint", messageOut);
 	}
 	
@@ -252,6 +259,8 @@ public class AcmeMainController {
 		messageOut.setSide(board.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
+		messageOut.setBar1Count(board.getBar().getPlayer1Count());
+		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
 	}
 	
@@ -268,6 +277,9 @@ public class AcmeMainController {
 		messageOut.setFromPoint(messageIn.getFromPoint());
 		messageOut.setToPoint(messageIn.getToPoint());
 		board.movePip(messageIn.getFromPoint(), messageIn.getToPoint());
+		messageOut.setBarHop(board.isBarHop());
+		messageOut.setBar1Count(board.getBar().getPlayer1Count());
+		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		messageOut.calculateNumbersUsed(dice);
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/movingPip", messageOut);
 	}
@@ -275,18 +287,26 @@ public class AcmeMainController {
 	@MessageMapping("/backgammon/newGame")
 	public void handleBackgammonNewGame(ClientServerMessage messageIn) {
 		String sessionId = messageIn.getSessionId();
+		backgammonService.getGame(sessionId).init();
 		backgammonService.getGame(sessionId).getBoard().init();
 	}
 	
 	@MessageMapping("/backgammon/switchToComputerSide")
 	public void handleBackgammonSwitchSides(ClientServerMessage messageIn) {
 		String sessionId = messageIn.getSessionId();
-		Board board = backgammonService.getGame(sessionId).getBoard();
+		Game game = backgammonService.getGame(sessionId);
+		Board board = game.getBoard();
+		game.getTurns().push(board.getCurrentTurn());
 		board.switchSides();
 		Dice dice = board.roll();
+		
 		// temp
-		dice.setDieValue(0, 3);
-		dice.setDieValue(1, 4);
+		if (game.getTurns().getNumTurns() == 2) {
+			dice.setDieValue(0, 1);
+			dice.setDieValue(1, 3);
+		} else {
+			dice = board.getCurrentTurn().roll();
+		}
 		
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setSessionId(sessionId);
@@ -295,9 +315,17 @@ public class AcmeMainController {
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
 		
 		// temp
-		messageOut.setFromPoint(7);
-		messageOut.setToPoint(4);
+		if (game.getTurns().getNumTurns() == 2) {
+			messageOut.setFromPoint(7);
+			messageOut.setToPoint(6);
+		} else {
+			// first move
+		}
 
+		board.movePip(messageOut.getFromPoint(), messageOut.getToPoint());
+		messageOut.setBarHop(board.isBarHop());
+		messageOut.setBar1Count(board.getBar().getPlayer1Count());
+		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		messageOut.calculateNumbersUsed(dice);
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/switchToComputerSide", messageOut);
 	}
@@ -305,7 +333,8 @@ public class AcmeMainController {
 	@MessageMapping("/backgammon/continueComputerSide")
 	public void handleBackgammonContinueComputerSide(ClientServerMessage messageIn) {
 		String sessionId = messageIn.getSessionId();
-		Board board = backgammonService.getGame(sessionId).getBoard();
+		Game game = backgammonService.getGame(sessionId);
+		Board board = game.getBoard();
 		Dice dice = board.getCurrentTurn().getDice();
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setSessionId(sessionId);
@@ -314,9 +343,17 @@ public class AcmeMainController {
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes());
 		
 		// temp
-		messageOut.setFromPoint(7);
-		messageOut.setToPoint(3);
+		if (game.getTurns().getNumTurns() == 2) {
+			messageOut.setFromPoint(7);
+			messageOut.setToPoint(4);
+		} else {
+			// second move
+		}
 
+		board.movePip(messageOut.getFromPoint(), messageOut.getToPoint());
+		messageOut.setBarHop(board.isBarHop());
+		messageOut.setBar1Count(board.getBar().getPlayer1Count());
+		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		messageOut.calculateNumbersUsed(dice);		
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/continueComputerSide", messageOut);
 	}

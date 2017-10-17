@@ -11,10 +11,13 @@ public class ClientServerMessage {
 	private int[] destinationPoints;
 	private int fromPoint;
 	private int toPoint;
+	private int bar1Count;
+	private int bar2Count;
 	private int[] diceRolled;
 	private boolean[] diceUsed;
 	private boolean turnOver;
 	private boolean gameOver;
+	private boolean barHop;
 	private String state; // Roll
 	
 	public ClientServerMessage() {}
@@ -226,5 +229,29 @@ public class ClientServerMessage {
 
 	public void setTurnOver(boolean turnOver) {
 		this.turnOver = turnOver;
+	}
+
+	public boolean isBarHop() {
+		return barHop;
+	}
+
+	public void setBarHop(boolean barHop) {
+		this.barHop = barHop;
+	}
+
+	public int getBar1Count() {
+		return bar1Count;
+	}
+
+	public void setBar1Count(int bar1Count) {
+		this.bar1Count = bar1Count;
+	}
+
+	public int getBar2Count() {
+		return bar2Count;
+	}
+
+	public void setBar2Count(int bar2Count) {
+		this.bar2Count = bar2Count;
 	}
 }

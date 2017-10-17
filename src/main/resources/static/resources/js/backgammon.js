@@ -3,6 +3,8 @@ var divBoard;
 var sessionId;
 var points = new Array();
 var openPips = new Array();
+var bar1 = new Array();
+var bar2 = new Array();
 var currentSide; // 1 or 2
 var currentState = "open";
 var currentSelectedPoint;
@@ -53,6 +55,9 @@ function initBoard() {
 	// playerSide, position
 	createDice(1,2);
 	createDice(2,8);
+	
+	bar1 = [];
+	bar2 = [];
 };
 
 function createDice(ps, pos) {
@@ -74,12 +79,12 @@ function createAndMovePip(index, point, side) {
 	$(p1).addClass("pip pip_" + side); $(p1).attr("id", "pip_" + side + "_" + index);
 	$(p1).attr("data-point", point); $(p1).attr("data-side", side);
 	divBoard.append(p1);
-	movePipToSpot(p1, point, 0, false);
+	movePipToSpot(p1, point, 0);
 	let id = $(p1).attr("id");
 	points[point].push(id);
 };
 
-function movePipToSpot(p1, point, delay, notifyServer) {
+function movePipToSpot(p1, point, delay) {
 	let marginTop = 65;
 	let marginLeft = 122;
 	let startCol = 0;
@@ -105,6 +110,27 @@ function movePipToSpot(p1, point, delay, notifyServer) {
 	    'top': marginTop + startRow,
 	    'left': marginLeft + startCol}, delay, function() {
 	    	$(p1).css("z-index", 1);
+	    }
+	);		
+};
+
+function movePipToBar(pip, side, delay) {
+	let rowPos = 65 + 6 * 56;
+	const colPos = 122 + 6 * 56;
+	let bar = [];
+	
+	if (side == 1) {
+		rowPos += 56 * (2 + bar1.length) * -1;
+	} else {
+		rowPos -= 56 * (2 + bar2.length) * 1;
+	}
+	
+//	$(pip).attr("data-point", point);
+	$(pip).css("z-index", 11);
+	$(pip).animate({
+	    'top': rowPos,
+	    'left': colPos}, delay, function() {
+	    	$(pip).css("z-index", 1);
 	    }
 	);		
 };
@@ -141,7 +167,7 @@ stomp.connect({}, function(frame) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-function showPipsAllowedToMove(incoming) {
+async function showPipsAllowedToMove(incoming) {
 	console.log('incoming received msg: ' + incoming);
 	let ob = JSON.parse(incoming.body);
 	
@@ -156,6 +182,9 @@ function showPipsAllowedToMove(incoming) {
 
 	if (currentState != "possibleMove") { // here - need to show dice
 		revealDice(ob, ob.side);
+		await sleep(1000);
+		highlightLegalPips(ob, true);
+
 	} else { // here - do not need to show dice
 		highlightLegalPips(ob, true);
 	}
@@ -172,7 +201,7 @@ function revealDice(ob, ps) { // ps is playerSide
 			$('div#p' + ps + 'Die2').show(250, "linear", function() {
 				$('div#p' + ps + 'Die3').show(250, "linear", function() {
 					$('div#p' + ps + 'Die4').show(250, "linear", function() {
-						highlightLegalPips(ob, true);
+						//highlightLegalPips(ob, true);
 					});
 				});
 			});
@@ -180,7 +209,7 @@ function revealDice(ob, ps) { // ps is playerSide
 	} else {
 		$('div#p' + ps + 'Die1').show(500, "linear", function() {
 			$('div#p' + ps + 'Die2').show(500, "linear", function() {
-				highlightLegalPips(ob, true);
+				//highlightLegalPips(ob, true);
 			});
 		});
 	}
@@ -298,8 +327,22 @@ async function movingPip(incoming) {
 	//let len = points[ob.fromPoint].length;
 	let pip = points[ob.fromPoint].pop();
 	currentState = "moving";
-	movePipToSpot("#" + pip, ob.toPoint, 1000, true);
+	movePipToSpot("#" + pip, ob.toPoint, 1000);
 	await sleep(1000);
+	
+	if (ob.barHop) {
+		let otherSidePip = points[ob.toPoint].pop();
+		movePipToBar("#" + otherSidePip, ob.side, 1000);
+		if (currentSide == 1) {
+			bar1.push(otherSidePip);
+		} else {
+			bar2.push(otherSidePip);
+		}
+		await sleep(1100);
+		movePipToSpot("#" + pip, ob.toPoint, 500);
+		await sleep(600);
+	}
+	
 	points[ob.toPoint].push(pip);
 	console.log("isDone=" + ob.done);
 	$("#" + pip).removeClass('pipSelectedToMove');
@@ -347,19 +390,19 @@ function handleTurnOverComputer() {
 async function switchToComputerSide(incoming) {
 	const ob = JSON.parse(incoming.body);
 	currentSide = ob.side;
-	revealDice(ob, 2);
+	revealDice(ob, 2);	
+	await sleep(1000);
 	
-	await sleep(1000);
-	highlightLegalPips(ob, true);
-	await sleep(1000);
+	//highlightLegalPips(ob, true);
+	//await sleep(1000);
 	
 	let len = points[ob.fromPoint].length;
 	let id = points[ob.fromPoint][len-1];
 	$("#" + id).addClass("pipSelectedToMove");
 	currentSelectedPoint = ob.fromPoint;
-
 	await sleep(1000);
-	highlightLegalPips(ob, false);
+	
+	//highlightLegalPips(ob, false);
 	let openId = '#' + openPips[ob.toPoint];
 	movePipToSpot(openId, ob.toPoint, 0);
 	$(openId).show();
@@ -367,7 +410,7 @@ async function switchToComputerSide(incoming) {
 	await sleep(1000);
 	let pip = points[ob.fromPoint].pop();
 	currentState = "moving";
-	movePipToSpot("#" + pip, ob.toPoint, 1000, false);
+	movePipToSpot("#" + pip, ob.toPoint, 1000);
 	points[ob.toPoint].push(pip);
 	await sleep(1000);
 	
@@ -388,8 +431,8 @@ async function continueComputerSide(incoming) {
 	//revealDice(ob, 2);
 	
 	//await sleep(1000);
-	highlightLegalPips(ob, true);
-	await sleep(1000);
+	//highlightLegalPips(ob, true);
+	//await sleep(1000);
 	
 	let len = points[ob.fromPoint].length;
 	let id = points[ob.fromPoint][len-1];
@@ -397,7 +440,7 @@ async function continueComputerSide(incoming) {
 	currentSelectedPoint = ob.fromPoint;
 
 	await sleep(1000);
-	highlightLegalPips(ob, false);
+	//highlightLegalPips(ob, false);
 	let openId = '#' + openPips[ob.toPoint];
 	movePipToSpot(openId, ob.toPoint, 0);
 	$(openId).show();
@@ -405,7 +448,7 @@ async function continueComputerSide(incoming) {
 	await sleep(1000);
 	let pip = points[ob.fromPoint].pop();
 	currentState = "moving";
-	movePipToSpot("#" + pip, ob.toPoint, 1000, false);
+	movePipToSpot("#" + pip, ob.toPoint, 1000);
 	points[ob.toPoint].push(pip);
 	await sleep(1000);
 	
@@ -451,6 +494,7 @@ $(document).on('click', "div.openPip", function() {
 $(document).on('click', '#btnNewGame', function() {
 	var payload = JSON.stringify({ 'sessionId':sessionId});
 	stomp.send('/stomp/backgammon/newGame', {}, payload);
+	window.location.reload();
 });
 
 function sleep(ms) {

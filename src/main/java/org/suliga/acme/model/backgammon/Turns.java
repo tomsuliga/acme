@@ -14,11 +14,14 @@ public class Turns {
 	}
 	
 	public void push(Turn turn) {
-		
+		turns.add(turn);
 	}
 	
-	public void pop() {
-		
+	public Turn pop() {
+		if (turns.size() > 0) {
+			return turns.remove(turns.size()-1);
+		}
+		return null;
 	}
 	
 	public Turn next() {
@@ -31,5 +34,9 @@ public class Turns {
 	
 	public Turn current() {
 		return turns.get(turns.size()-1);
+	}
+	
+	public int getNumTurns() {
+		return turns.size();
 	}
 }

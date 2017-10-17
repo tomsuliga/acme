@@ -18,6 +18,7 @@ public class Board {
 	private Bear bear;
 	private Turn currentTurn;
 	private PlayerSide currentPlayerSide;
+	private boolean barHop;
 	
 	public Board() {
 	}
@@ -58,6 +59,7 @@ public class Board {
 		}
 		
 		bar = new Bar();
+		barHop = false;
 		bear = new Bear();
 		
 		// temp
@@ -82,10 +84,22 @@ public class Board {
 	}
 	
 	public void movePip(int pipFrom, int pipTo) {
-		PlayerSide ps = points[pipFrom].getPlayerSide();
+		PlayerSide fromPs = points[pipFrom].getPlayerSide();
+		PlayerSide toPs = points[pipTo].getPlayerSide();
 		points[pipFrom].pop(); // also clears playerSide if 0
 		points[pipTo].push();
-		points[pipTo].setPlayerSide(ps);
+		points[pipTo].setPlayerSide(fromPs);
+		if (fromPs != toPs && toPs != PlayerSide.NONE_0 && toPs != null) {
+			if (toPs == PlayerSide.PLAYER_1) {
+				bar.player1Push();
+			} else {
+				bar.player2Push();
+			}
+			barHop = true;
+			logger.info("setting barHop to true 1");
+		} else {
+			barHop = false;
+		}
 	}
 	
 	public Set<Integer> getPossibleSelectIndexes() {
@@ -196,6 +210,15 @@ public class Board {
 		}
 		
 		return false;
+	}
+
+	public boolean isBarHop() {
+		return barHop;
+	}
+
+	public void setBarHop(boolean barHop) {
+		logger.info("setting barHop to: " + barHop);
+		this.barHop = barHop;
 	}
 }
 

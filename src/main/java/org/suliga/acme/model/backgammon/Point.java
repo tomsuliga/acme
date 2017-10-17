@@ -23,7 +23,7 @@ public class Point {
 		numPips--;
 		
 		if (numPips == 0) {
-			playerSide = null;
+			playerSide = PlayerSide.NONE_0;
 		}
 		
 		if (numPips < 0) {

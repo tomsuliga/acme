@@ -16,11 +16,12 @@ public class Game {
 		}
 	}
 	
-	private void init() {
+	public void init() {
 		boolean init = true;
 		board = new Board(init);
 		turns = new Turns();
 		turns.init();
+		gameOver = false;
 	}
 	
 	public Turns getTurns() {
