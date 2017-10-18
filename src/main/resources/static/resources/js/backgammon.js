@@ -24,7 +24,7 @@ $(document).on('click', '#btnNewGame', function() {
 
 function init() {
 	divBoard = $("div#board");
-	sessionId = divBoard.attr("data-sessionId");
+	sessionId = divBoard.attr("data-sessionId"); // from Controller and HTML 
 	points = [];
 	openPips = [];
 	bar1 = [];
@@ -134,7 +134,7 @@ function movePipToBar(pip, side, delay) {
 	const colPos = 122 + 6 * 56;
 	let bar = [];
 	
-	if (side == 1) {
+	if (side == 2) {
 		rowPos += 56 * (2 + bar1.length) * 1;
 	} else {
 		rowPos -= 56 * (2 + bar2.length) * 1;
@@ -191,7 +191,7 @@ async function showPipsAllowedToMove(incoming) {
 	
 	hideOpenPips();
 
-	if (currentState != "possibleMove") { // here - need to show dice
+	if (ob.startTurn) { // here - need to show dice
 		revealDice(ob, ob.side);
 		await sleep(1000);
 		highlightLegalPips(ob, true);
@@ -344,6 +344,7 @@ async function movingPip(incoming) {
 	const ob = JSON.parse(incoming.body);
 	console.log("from=" + ob.fromPoint + ", to=" + ob.toPoint);
 	//let len = points[ob.fromPoint].length;
+	
 	let pip = points[ob.fromPoint].pop();
 	currentState = "moving";
 	movePipToSpot("#" + pip, ob.toPoint, 1000);
@@ -353,9 +354,9 @@ async function movingPip(incoming) {
 		let otherSidePip = points[ob.toPoint].pop();
 		movePipToBar("#" + otherSidePip, ob.side, 1000);
 		if (currentSide == 1) {
-			bar1.push(otherSidePip);
-		} else {
 			bar2.push(otherSidePip);
+		} else {
+			bar1.push(otherSidePip);
 		}
 		await sleep(1100);
 		movePipToSpot("#" + pip, ob.toPoint, 500);
@@ -363,29 +364,38 @@ async function movingPip(incoming) {
 	}
 	
 	points[ob.toPoint].push(pip);
-	console.log("isDone=" + ob.done);
+	hideDiceUsed(ob);
+	hideOpenPips();
 	$("#" + pip).removeClass('pipSelectedToMove');
-	
+
 	if (!ob.done) {
 		currentState = "possibleSelect";
 	}
-	
-	hideDiceUsed(ob);
 	
 	if (ob.turnOver) {
 		$('#btnRoll').text("Roll Dice");
 		handleTurnOver();
 	} else {
 		let payload = JSON.stringify({ 'sessionId':sessionId });
-		stomp.send('/stomp/backgammon/continueTurn', {}, payload);
+		stomp.send('/stomp/backgammon/continuePlayerTurn', {}, payload);
 	}
 }
 
 function hideDiceUsed(ob) {
 	for (let i=0;i<ob.diceUsed.length;i++) {
 		if (ob.diceUsed[i] == true) {
-			let id = "#p" + currentSide + "Die" + (i+1);
-			$(id).addClass("dieUsed");
+			if (ob.firstMove) {
+				if (i==0) {
+					let id = "#p1Die" + (i+1);
+					$(id).addClass("dieUsed");
+				} else {
+					let id = "#p2Die" + (i+1);
+					$(id).addClass("dieUsed");					
+				}
+			} else {
+				let id = "#p" + currentSide + "Die" + (i+1);
+				$(id).addClass("dieUsed");
+			}
 		}
 	}
 }
@@ -415,56 +425,50 @@ async function doComputerSide(incoming) {
 		await sleep(1000);	
 	}
 	
+	// Highlight pip to move
 	let len = points[ob.fromPoint].length;
 	let id = points[ob.fromPoint][len-1];
-	$("#" + id).addClass("pipSelectedToMove");
+	$("#" + id).addClass("pipSelectedToMove"); // yellow
 	currentSelectedPoint = ob.fromPoint;
 	await sleep(1000);
 	
-	
-	// new 9
+	// Highlight destination point - open pip
 	let toPoint = ob.toPoint;
 	console.log("to point=" + toPoint);
 	let openId = '#' + openPips[toPoint];
 	movePipToSpot(openId, toPoint, 0);
 	$(openId).show();
-
-	
 	await sleep(1000);
+	
 	let pip = points[ob.fromPoint].pop();
 	currentState = "moving";
+	movePipToSpot("#" + pip, ob.toPoint, 1000);
+	await sleep(1000);
 	
-	
-	// new 9
 	if (ob.barHop) {
 		let otherSidePip = points[ob.toPoint].pop();
 		movePipToBar("#" + otherSidePip, ob.side, 1000);
 		if (currentSide == 1) {
-			bar1.push(otherSidePip);
-		} else {
 			bar2.push(otherSidePip);
+		} else {
+			bar1.push(otherSidePip);
 		}
 		await sleep(1100);
+		movePipToSpot("#" + pip, ob.toPoint, 500);
+		await sleep(600);
 	}
-
 	
-	
-	movePipToSpot("#" + pip, ob.toPoint, 1000);
 	points[ob.toPoint].push(pip);
-	await sleep(1000);
-	
 	hideDiceUsed(ob);
-		
-	// all selectable for next move, if any
 	hideOpenPips();
-	$("#" + pip).removeClass("pipSelectedToMove");
+	$("#" + pip).removeClass('pipSelectedToMove');
 	
 	// end turn?
 	if (ob.turnOver) {
 		handleTurnOverComputer();
 	} else {
 		var payload = JSON.stringify({ 'sessionId':sessionId });
-		stomp.send('/stomp/backgammon/continueComputerSide', {}, payload);
+		stomp.send('/stomp/backgammon/continueComputerTurn', {}, payload);
 	}
 }
 
@@ -474,12 +478,12 @@ $(document).on('click', "button#btnRoll", function() {
 	let payload = JSON.stringify({ 'sessionId':sessionId });
 	if (firstMove) {
 		firstMove = false;
-		$('button#btnRoll').text("Roll Dice");
+		$('button#btnRoll').text("Roll Dice"); // hidden, for next reveal
 		$('button#btnRoll').animate({
 		    'top': 65 + 12 + 6 * 56,
 		    'left': 122 + 10 + 5 * 56}, 0
 		);
-		stomp.send('/stomp/backgammon/firstMove', {}, payload);
+		stomp.send('/stomp/backgammon/startOfGameFirstRoll', {}, payload);
 	} else {
 		stomp.send('/stomp/backgammon/startPlayerTurn', {}, payload);
 	}
@@ -505,5 +509,20 @@ $(document).on('click', "div.openPip", function() {
 function sleep(ms) {
 	  return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+$(document).on('click', '#btnDebugPoints', function() {
+	for (let i=0;i<24;i++) {
+		if (points[i].length > 0) {
+			let pip = points[i][0];
+			console.log(i + ' ' + points[i].length + '  p' + $('#' + pip).attr("data-side"));
+		} else {
+			console.log(i + ' ' + points[i].length);			
+		}
+	}
+	console.log('bar1 ' + bar1.length);
+	console.log('bar2 ' + bar2.length);
+});
+
+
 
 

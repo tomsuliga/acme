@@ -33,7 +33,7 @@ public class Board {
 		return currentTurn.roll();
 	}
 	
-	public Dice firstRoll() {
+	public Dice startOfGameFirstRoll() {
 		Dice dice = new Dice();
 		while (dice.isDouble()) {
 			dice = new Dice();
@@ -129,45 +129,46 @@ public class Board {
 		PlayerSide ps = currentTurn.getPlayerSide();
 		int directionSign = ps == PlayerSide.PLAYER_1 ? 1 : -1;
 		
-		List<List<Integer>> nums = new ArrayList<>();
+		List<List<Integer>> diceNumsSeq = new ArrayList<>();
+		
 		if (!dice.isUsed(0)) {
-			nums.add(Arrays.asList(dice.getDie(0)));
+			diceNumsSeq.add(Arrays.asList(dice.getDie(0)));
 		}
 		if (!dice.isUsed(1)) {
-			nums.add(Arrays.asList(dice.getDie(1)));
+			diceNumsSeq.add(Arrays.asList(dice.getDie(1)));
 		}
 		if (!dice.isUsed(0) && !dice.isUsed(1)) {
-			nums.add(Arrays.asList(dice.getDie(0), dice.getDie(1)));
+			diceNumsSeq.add(Arrays.asList(dice.getDie(0), dice.getDie(1)));
 			if (!dice.isDouble()) {
-				nums.add(Arrays.asList(dice.getDie(1), dice.getDie(0)));
+				diceNumsSeq.add(Arrays.asList(dice.getDie(1), dice.getDie(0)));
 			}
 		}
 		if (dice.isDouble()) {
 			// all 4 numbers are same
 			if (dice.isUsed(0) && dice.isUsed(1) && (!dice.isUsed(2) || !dice.isUsed(3))) {
-				nums.add(Arrays.asList(dice.getDie(0)));
+				diceNumsSeq.add(Arrays.asList(dice.getDie(0)));
 			}
 			if (!dice.isUsed(2) && !dice.isUsed(3)) {
-				nums.add(Arrays.asList(dice.getDie(0), dice.getDie(0)));
+				diceNumsSeq.add(Arrays.asList(dice.getDie(0), dice.getDie(0)));
 			}
 			if (!dice.isUsed(1) && !dice.isUsed(2) && !dice.isUsed(3)) {
-				nums.add(Arrays.asList(dice.getDie(0), dice.getDie(0), dice.getDie(0)));
+				diceNumsSeq.add(Arrays.asList(dice.getDie(0), dice.getDie(0), dice.getDie(0)));
 			}
 			if (!dice.isUsed(0) && !dice.isUsed(1) && !dice.isUsed(2) && !dice.isUsed(3)) {
-				nums.add(Arrays.asList(dice.getDie(0), dice.getDie(0), dice.getDie(0), dice.getDie(0)));
+				diceNumsSeq.add(Arrays.asList(dice.getDie(0), dice.getDie(0), dice.getDie(0), dice.getDie(0)));
 			}
 		}
 		
 		for (int i=0;i<NUM_POINTS;i++) {
 			Point pointFrom = points[i];
 			if (pointFrom.isOwned(ps)) {
-				for (int j=0;j<nums.size();j++) {
+				for (int j=0;j<diceNumsSeq.size();j++) {
 					// try all combo's from this point
 					int total = 0;
 					boolean allGood = true;
-					List<Integer> seq = nums.get(j);
+					List<Integer> seq = diceNumsSeq.get(j);
 					for (int k=0;k<seq.size();k++) {
-						int indexTo = i + ((total + seq.get(k) * directionSign));
+						int indexTo = i + ((total + seq.get(k)) * directionSign);
 						if (!isLegalPoint(pointFrom, indexTo, ps)) {
 							allGood = false;
 							break;
@@ -180,7 +181,7 @@ public class Board {
 						Move move = new Move(i, indexTo);
 						if (isMoveUnique(legalMoves, move)) {
 							legalMoves.add(move);
-							logger.info("*** getLegalMoves added: " + move.toString());
+							logger.info("*** getLegalMoves added: " + move.toString() + ", i=" + i + ", total=" + total);
 						}
 					}
 				}
