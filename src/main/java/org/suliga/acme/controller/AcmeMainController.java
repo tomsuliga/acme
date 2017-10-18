@@ -216,12 +216,12 @@ public class AcmeMainController {
 	@MessageMapping("/backgammon/startPlayerTurn")
 	public void handleBackgammonStartPlayerTurn(ClientServerMessage messageIn) {
 		String sessionId = messageIn.getSessionId();
-		logger.info("incoming startTurn = " + sessionId);
+		logger.info("startPlayerTurn: incoming startTurn = " + sessionId);
 		Game game = backgammonService.getGame(sessionId);
 		Board board = game.getBoard();
+		logger.info("startPlayerTurn: previous current turn: " + board.getCurrentTurn().getPlayerSide().ordinal()); // s/b 2?
 		game.getTurns().push(board.getCurrentTurn());
-		board.switchSides();
-		board.roll();
+		board.roll(PlayerSide.PLAYER_1);
 		ClientServerMessage messageOut = new ClientServerMessage();
 		playerTurnCommon(sessionId, board, messageOut);
 	}
@@ -311,8 +311,7 @@ public class AcmeMainController {
 		Game game = backgammonService.getGame(sessionId);
 		Board board = game.getBoard();
 		game.getTurns().push(board.getCurrentTurn());
-		board.switchSides();
-		board.roll();
+		board.roll(PlayerSide.PLAYER_2);
 		ClientServerMessage messageOut = new ClientServerMessage();
 		messageOut.setStartTurn(true);
 		computerTurnCommon(sessionId, board, messageOut);

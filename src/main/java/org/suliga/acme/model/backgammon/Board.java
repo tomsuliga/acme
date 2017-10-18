@@ -17,7 +17,6 @@ public class Board {
 	private Bar bar;
 	private Bear bear;
 	private Turn currentTurn;
-	private PlayerSide currentPlayerSide;
 	private boolean barHop;
 	
 	public Board() {
@@ -29,8 +28,8 @@ public class Board {
 		}
 	}
 	
-	public Dice roll() {
-		currentTurn = new Turn(currentPlayerSide);
+	public Dice roll(PlayerSide ps) {
+		currentTurn = new Turn(ps);
 		return currentTurn.roll();
 	}
 	
@@ -52,10 +51,6 @@ public class Board {
 		return currentTurn;
 	}
 	
-	public void switchSides() {
-		currentPlayerSide = currentPlayerSide == PlayerSide.PLAYER_1 ? PlayerSide.PLAYER_2 : PlayerSide.PLAYER_1;
-	}
-
 	public void init() {
 		points = new Point[NUM_POINTS];
 		
@@ -75,8 +70,6 @@ public class Board {
 		barHop = false;
 		bear = new Bear();
 		
-		// temp
-		currentPlayerSide = PlayerSide.PLAYER_1;
 		currentTurn = null;
 	}
 	
@@ -109,7 +102,7 @@ public class Board {
 				bar.player2Push();
 			}
 			barHop = true;
-			logger.info("setting barHop to true 1");
+			logger.info("**** A - setting barHop to true");
 		} else {
 			barHop = false;
 		}
@@ -230,7 +223,7 @@ public class Board {
 	}
 
 	public void setBarHop(boolean barHop) {
-		logger.info("setting barHop to: " + barHop);
+		logger.info("**** B - setting barHop to " + barHop);
 		this.barHop = barHop;
 	}
 }

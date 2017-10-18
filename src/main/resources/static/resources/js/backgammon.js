@@ -130,12 +130,12 @@ function movePipToSpot(p1, point, delay) {
 };
 
 function movePipToBar(pip, side, delay) {
-	let rowPos = 65 + 6 * 56;
+	let rowPos = 65 + 6 * 56; // middle
 	const colPos = 122 + 6 * 56;
 	let bar = [];
 	
 	if (side == 1) {
-		rowPos += 56 * (2 + bar1.length) * -1;
+		rowPos += 56 * (2 + bar1.length) * 1;
 	} else {
 		rowPos -= 56 * (2 + bar2.length) * 1;
 	}
@@ -421,9 +421,34 @@ async function doComputerSide(incoming) {
 	currentSelectedPoint = ob.fromPoint;
 	await sleep(1000);
 	
+	
+	// new 9
+	let toPoint = ob.toPoint;
+	console.log("to point=" + toPoint);
+	let openId = '#' + openPips[toPoint];
+	movePipToSpot(openId, toPoint, 0);
+	$(openId).show();
+
+	
 	await sleep(1000);
 	let pip = points[ob.fromPoint].pop();
 	currentState = "moving";
+	
+	
+	// new 9
+	if (ob.barHop) {
+		let otherSidePip = points[ob.toPoint].pop();
+		movePipToBar("#" + otherSidePip, ob.side, 1000);
+		if (currentSide == 1) {
+			bar1.push(otherSidePip);
+		} else {
+			bar2.push(otherSidePip);
+		}
+		await sleep(1100);
+	}
+
+	
+	
 	movePipToSpot("#" + pip, ob.toPoint, 1000);
 	points[ob.toPoint].push(pip);
 	await sleep(1000);
