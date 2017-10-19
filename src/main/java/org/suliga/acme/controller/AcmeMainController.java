@@ -19,6 +19,7 @@ import org.suliga.acme.model.backgammon.Dice;
 import org.suliga.acme.model.backgammon.Game;
 import org.suliga.acme.model.backgammon.Move;
 import org.suliga.acme.model.backgammon.PlayerSide;
+import org.suliga.acme.model.backgammon.Point;
 import org.suliga.acme.model.backgammon.ClientServerMessage;
 import org.suliga.acme.model.crossword.CrosswordGrid;
 import org.suliga.acme.model.dailydiet.FoodItem;
@@ -358,6 +359,20 @@ public class AcmeMainController {
 		ClientServerMessage messageOut = new ClientServerMessage();
 		computerTurnCommon(sessionId, board, messageOut);
 	}	
+	
+	@MessageMapping("/backgammon/debugPoints")
+	public void handleBackgammonDebugPoints(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		Game game = backgammonService.getGame(sessionId);
+		Board board = game.getBoard();
+		Point[] points = board.getPoints();
+		for (int i=0;i<points.length;i++) {
+			Point point = points[i];
+			logger.info("point[" + i + "] = " + point.toString());
+		}
+	}
+	
+
 }
 
 

@@ -521,6 +521,9 @@ $(document).on('click', '#btnDebugPoints', function() {
 	}
 	console.log('bar1 ' + bar1.length);
 	console.log('bar2 ' + bar2.length);
+
+	let payload = JSON.stringify({ 'sessionId':sessionId});
+	stomp.send('/stomp/backgammon/debugPoints', {}, payload);
 });
 
 

@@ -93,9 +93,8 @@ public class Board {
 		PlayerSide fromPs = points[pipFrom].getPlayerSide();
 		PlayerSide toPs = points[pipTo].getPlayerSide();
 		points[pipFrom].pop(); // also clears playerSide if 0
-		points[pipTo].push();
-		points[pipTo].setPlayerSide(fromPs);
 		if (fromPs != toPs && toPs != PlayerSide.NONE_0 && toPs != null) {
+			points[pipTo].pop();
 			if (toPs == PlayerSide.PLAYER_1) {
 				bar.player1Push();
 			} else {
@@ -106,6 +105,8 @@ public class Board {
 		} else {
 			barHop = false;
 		}
+		points[pipTo].push();
+		points[pipTo].setPlayerSide(fromPs);
 	}
 	
 	public Set<Integer> getPossibleSelectIndexes() {

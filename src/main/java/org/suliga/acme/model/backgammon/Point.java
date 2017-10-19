@@ -67,4 +67,9 @@ public class Point {
 	public int getIndex() {
 		return index;
 	}
+	
+	@Override
+	public String toString() {
+		return index + " " + numPips + ((playerSide == null || playerSide == PlayerSide.NONE_0) ? "" : ("  p" + playerSide.ordinal()));
+	}
 }
