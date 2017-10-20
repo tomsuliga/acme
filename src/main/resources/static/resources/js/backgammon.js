@@ -10,7 +10,8 @@ var bear2;
 var currentSide;
 var currentState;
 var currentSelectedPoint;
-var firstMove;
+var startOfGameFirstRoll;
+var turnOver;
 
 $(document).ready(function() {
 	init();
@@ -34,7 +35,8 @@ function init() {
 	currentSide = 1; // 1 or 2
 	currentState = "open";
 	currentSelectedPoint = -1;
-	firstMove = true;
+	startOfGameFirstRoll = true;
+	turnOver = false;
 	
 	for (let i=0;i<24;i++) {
 		points[i] = new Array();
@@ -61,16 +63,18 @@ function init() {
 	
 	// create roll button
 	let b1 = document.createElement("button");
-	$(b1).addClass("btnRoll"); $(b1).attr("id", "btnRoll"); $(b1).text("Roll Single Die");
+	$(b1).addClass("btnRoll"); 
+	$(b1).attr("id", "btnRoll"); 
+	$(b1).text("Roll Dice");
 	divBoard.append(b1);
 	$(b1).animate({
 	    'top': 65 + 12 + 6 * 56,
-	    'left': 122 + 37 + 4 * 56}, 0
+	    'left': 122 + 10 + 5 * 56}, 0
 	);
 	
 	// playerSide, position
-	createDice(1,2);
-	createDice(2,8);
+	createDice(1,1);
+	createDice(2,9);
 };
 
 function createDice(ps, pos) {
@@ -183,10 +187,16 @@ async function showPipsAllowedToMove(incoming) {
 	let ob = JSON.parse(incoming.body);
 	
 	if (ob.turnOver) {
-		//handleTurnOver();
+		if (ob.startTurn) {
+			revealDice(ob, ob.side);
+			await sleep(1000);
+		}
 		$('#btnRoll').text("No Move");
 		$('#btnRoll').show();
+		turnOver = true;
 		return;
+	} else {
+		turnOver = false;
 	}
 	
 	hideOpenPips();
@@ -236,17 +246,28 @@ function revealDice(ob, ps) { // ps is playerSide
 
 function highlightLegalPips(ob, add) {
 	// highlight legal pips
-	for (let i=0;i<ob.moveablePoints.length;i++) {
-		let point = ob.moveablePoints[i];
-		let index = points[point].length;
-		let id = points[point][index-1];
-		if (add) {
-			$('#' + id).removeClass('pipSelectedToMove');
-			$('#' + id).addClass('pipAllowedToMove');
+	if (ob.barOff) {
+		let id = null;
+		if (currentSide == 1) {
+			id = bar1[bar1.length - 1];
 		} else {
-			$('#' + id).removeClass('pipAllowedToMove');
+			id = bar2[bar2.length - 1];		
 		}
-	}	
+		$('#' + id).removeClass('pipSelectedToMove');
+		$('#' + id).addClass('pipAllowedToMove');
+	} else {
+		for (let i=0;i<ob.moveablePoints.length;i++) {
+			let point = ob.moveablePoints[i];
+			let index = points[point].length;
+			let id = points[point][index-1];
+			if (add) {
+				$('#' + id).removeClass('pipSelectedToMove');
+				$('#' + id).addClass('pipAllowedToMove');
+			} else {
+				$('#' + id).removeClass('pipAllowedToMove');
+			}
+		}	
+	}
 }
 
 function hideOpenPips() {
@@ -254,6 +275,16 @@ function hideOpenPips() {
 		let id = '#' + openPips[i];
 		$(id).hide();
 	}
+}
+
+// temp - inefficient
+function hideAllowedToMovePips() {
+	for (let i=0;i<24;i++) {
+		if (points[i].length > 0) {
+			let id = '#' + points[i][points[i].length-1];
+			$(id).removeClass("pipAllowedToMove");
+		}
+	}	
 }
 
 function hideDice() {
@@ -281,15 +312,20 @@ $(document).on('click', "div.pip", function() {
 			return;
 		}
 				
-		// is currently possible?
-		let pointLen = points[point].length;
-		let id = points[point][pointLen-1];	
-		if (!$('#' + id).hasClass("pipAllowedToMove")) {
-			return;
+		if (point !== "bar1") {
+			// is currently possible?
+			let pointLen = points[point].length;
+			let id = points[point][pointLen-1];	
+			if (!$('#' + id).hasClass("pipAllowedToMove")) {
+				return;
+			}
 		}
 	}
 	
 	if (currentState == "possibleMove") {
+		if (point === "bar1") {
+			return;
+		}
 		// if is currently selected, de-select
 		let pointLen = points[point].length;
 		let id = '#' + points[point][pointLen-1];	
@@ -327,6 +363,18 @@ function selectDestinationPoint(incoming) {
 		}
 		hideOpenPips();
 	}
+	// select bar point
+	if (ob.barOff) {
+		let pip = null;
+		if (currentSide == 1) {
+			pip = bar1[bar1.length-1];
+		} else {
+			pip = bar2[bar2.length-1];
+		}
+		$('#' + pip).addClass("pipSelectedToMove");
+		currentSelectedPoint = -99;
+	}
+	
 	// turn on all move to open points
 	for (let i=0;i<ob.moveablePoints.length;i++) {
 		let point = ob.moveablePoints[i];
@@ -345,7 +393,16 @@ async function movingPip(incoming) {
 	console.log("from=" + ob.fromPoint + ", to=" + ob.toPoint);
 	//let len = points[ob.fromPoint].length;
 	
-	let pip = points[ob.fromPoint].pop();
+	let pip = null;
+	if (ob.barOff) {
+		if (currentSide == 1) {
+			pip = bar1.pop();
+		} else {
+			pip = bar2.pop();
+		}
+	} else {
+		pip = points[ob.fromPoint].pop();
+	}
 	currentState = "moving";
 	movePipToSpot("#" + pip, ob.toPoint, 1000);
 	await sleep(1000);
@@ -353,6 +410,7 @@ async function movingPip(incoming) {
 	if (ob.barHop) {
 		let otherSidePip = points[ob.toPoint].pop();
 		movePipToBar("#" + otherSidePip, ob.side, 1000);
+		$('#' + otherSidePip).attr("data-point", "bar" + (currentSide == 1 ? "2" : "1"));
 		if (currentSide == 1) {
 			bar2.push(otherSidePip);
 		} else {
@@ -366,6 +424,7 @@ async function movingPip(incoming) {
 	points[ob.toPoint].push(pip);
 	hideDiceUsed(ob);
 	hideOpenPips();
+	hideAllowedToMovePips();
 	$("#" + pip).removeClass('pipSelectedToMove');
 
 	if (!ob.done) {
@@ -374,7 +433,7 @@ async function movingPip(incoming) {
 	
 	if (ob.turnOver) {
 		$('#btnRoll').text("Roll Dice");
-		handleTurnOver();
+		handleTurnOverPlayer();
 	} else {
 		let payload = JSON.stringify({ 'sessionId':sessionId });
 		stomp.send('/stomp/backgammon/continuePlayerTurn', {}, payload);
@@ -400,10 +459,11 @@ function hideDiceUsed(ob) {
 	}
 }
 
-function handleTurnOver() {
+function handleTurnOverPlayer() {
 	hideOpenPips();
 	hideDice();
 	
+	turnOver = false;
 	var payload = JSON.stringify({ 'sessionId':sessionId });
 	stomp.send('/stomp/backgammon/switchToComputerSide', {}, payload);
 }
@@ -425,11 +485,29 @@ async function doComputerSide(incoming) {
 		await sleep(1000);	
 	}
 	
+	if (ob.noMove) {
+		$('#btnRoll').text("No Computer Move");
+		$('#btnRoll').show();
+		await sleep(1000);
+		$('#btnRoll').hide();
+		$('#btnRoll').text("Roll Dice");
+		handleTurnOverComputer();
+		return;
+	}
+	
 	// Highlight pip to move
-	let len = points[ob.fromPoint].length;
-	let id = points[ob.fromPoint][len-1];
-	$("#" + id).addClass("pipSelectedToMove"); // yellow
-	currentSelectedPoint = ob.fromPoint;
+	let pip = null;
+	if (ob.barOff) {
+		if (currentSide == 1) {
+			pip = bar1.pop();
+		} else {
+			pip = bar2.pop();
+		}
+	} else {
+		pip =     points[ob.fromPoint].pop();
+	}
+	
+	$("#" + pip).addClass("pipSelectedToMove"); // yellow
 	await sleep(1000);
 	
 	// Highlight destination point - open pip
@@ -440,7 +518,6 @@ async function doComputerSide(incoming) {
 	$(openId).show();
 	await sleep(1000);
 	
-	let pip = points[ob.fromPoint].pop();
 	currentState = "moving";
 	movePipToSpot("#" + pip, ob.toPoint, 1000);
 	await sleep(1000);
@@ -448,6 +525,7 @@ async function doComputerSide(incoming) {
 	if (ob.barHop) {
 		let otherSidePip = points[ob.toPoint].pop();
 		movePipToBar("#" + otherSidePip, ob.side, 1000);
+		$('#' + otherSidePip).attr("data-point", "bar" + (currentSide == 1 ? "2" : "1"));
 		if (currentSide == 1) {
 			bar2.push(otherSidePip);
 		} else {
@@ -476,22 +554,30 @@ async function doComputerSide(incoming) {
 $(document).on('click', "button#btnRoll", function() {
 	$('button#btnRoll').hide();
 	let payload = JSON.stringify({ 'sessionId':sessionId });
-	if (firstMove) {
-		firstMove = false;
+	if (startOfGameFirstRoll) {
+		startOfGameFirstRoll = false;
 		$('button#btnRoll').text("Roll Dice"); // hidden, for next reveal
 		$('button#btnRoll').animate({
 		    'top': 65 + 12 + 6 * 56,
 		    'left': 122 + 10 + 5 * 56}, 0
 		);
 		stomp.send('/stomp/backgammon/startOfGameFirstRoll', {}, payload);
-	} else {
+	} else if (turnOver) {
+		handleTurnOverPlayer();
+	}
+	else {
 		stomp.send('/stomp/backgammon/startPlayerTurn', {}, payload);
 	}
 });
 
 function pipSelectedToMove(point) {
 	console.log('point clicked: ' + point);
-	let payload = JSON.stringify({ 'sessionId':sessionId, 'selectedPoint':point});
+	let payload = null;
+	if (point == 'bar1') {
+		payload = JSON.stringify({ 'sessionId':sessionId, 'selectedPoint':-99, 'barOff':true});
+	} else {
+		payload = JSON.stringify({ 'sessionId':sessionId, 'selectedPoint':point});
+	}
 	stomp.send('/stomp/backgammon/pipSelectedToMove', {}, payload);
 };
 

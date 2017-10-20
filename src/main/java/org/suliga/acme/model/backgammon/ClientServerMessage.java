@@ -18,6 +18,7 @@ public class ClientServerMessage {
 	private boolean turnOver;
 	private boolean gameOver;
 	private boolean barHop;
+	private boolean barOff;
 	private boolean noMove;
 	private boolean startTurn; // to reveal dice
 	private String state; // Roll
@@ -125,8 +126,17 @@ public class ClientServerMessage {
 		}
 	}
 	
-	public void calculateNumbersUsed(Dice dice) {
+	public void calculateNumbersUsed(Dice dice, boolean barOff) {
+		
 		int num = Math.abs(fromPoint - toPoint);
+
+		if (barOff) {
+			num = toPoint + 1;
+			if (num > 6) {
+				num = 25 - num;
+			}
+		}
+		
 		boolean found = false;
 		
 		// not double
@@ -151,6 +161,9 @@ public class ClientServerMessage {
 		}
 		
 		if (found || (diceRolled[0] != diceRolled[1])) {
+			if (diceRolled[0] == diceRolled[1] && diceUsed[0] && diceUsed[1] && diceUsed[2] && diceUsed[3]) {
+				turnOver = true;
+			}
 			return;
 		}
 		
@@ -280,5 +293,13 @@ public class ClientServerMessage {
 
 	public void setStartTurn(boolean startTurn) {
 		this.startTurn = startTurn;
+	}
+
+	public boolean isBarOff() {
+		return barOff;
+	}
+
+	public void setBarOff(boolean barOff) {
+		this.barOff = barOff;
 	}
 }

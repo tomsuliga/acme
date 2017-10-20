@@ -16,39 +16,12 @@ public class Board {
 	private Point[] points;
 	private Bar bar;
 	private Bear bear;
-	private Turn currentTurn;
 	private boolean barHop;
+	private boolean barOff;
+	private PlayerSide currentPlayerSide;
 	
 	public Board() {
-	}
-	
-	public Board(boolean init) {
-		if (init) {
-			init();
-		}
-	}
-	
-	public Dice roll(PlayerSide ps) {
-		currentTurn = new Turn(ps);
-		return currentTurn.roll();
-	}
-	
-	public Dice startOfGameFirstRoll() {
-		Dice dice = new Dice();
-		while (dice.isDouble()) {
-			dice = new Dice();
-		}
-		if (dice.getDie(0) > dice.getDie(1)) {
-			currentTurn = new Turn(PlayerSide.PLAYER_1);
-		} else {
-			currentTurn = new Turn(PlayerSide.PLAYER_2);
-		}
-		currentTurn.setDice(dice);
-		return currentTurn.getDice();
-	}
-		
-	public Turn getCurrentTurn() {
-		return currentTurn;
+		init();
 	}
 	
 	public void init() {
@@ -68,11 +41,13 @@ public class Board {
 		
 		bar = new Bar();
 		barHop = false;
-		bear = new Bear();
-		
-		currentTurn = null;
-	}
+		bear = new Bear();		
+	}	
 	
+	public void setCurrentPlayerSide(PlayerSide currentPlayerSide) {
+		this.currentPlayerSide = currentPlayerSide;
+	}
+
 	public Point[] getPoints() {
 		return points;
 	}
@@ -90,10 +65,13 @@ public class Board {
 	}
 	
 	public void movePip(int pipFrom, int pipTo) {
-		PlayerSide fromPs = points[pipFrom].getPlayerSide();
+		if (barOff) {
+			bar.pop(currentPlayerSide);
+		} else {
+			points[pipFrom].pop(); // also clears playerSide if 0
+		}
 		PlayerSide toPs = points[pipTo].getPlayerSide();
-		points[pipFrom].pop(); // also clears playerSide if 0
-		if (fromPs != toPs && toPs != PlayerSide.NONE_0 && toPs != null) {
+		if (currentPlayerSide != toPs && toPs != PlayerSide.NONE_0 && toPs != null) {
 			points[pipTo].pop();
 			if (toPs == PlayerSide.PLAYER_1) {
 				bar.player1Push();
@@ -101,34 +79,32 @@ public class Board {
 				bar.player2Push();
 			}
 			barHop = true;
-			logger.info("**** A - setting barHop to true");
+			//logger.info("**** A - setting barHop to true");
 		} else {
 			barHop = false;
 		}
 		points[pipTo].push();
-		points[pipTo].setPlayerSide(fromPs);
+		points[pipTo].setPlayerSide(currentPlayerSide);
 	}
 	
-	public Set<Integer> getPossibleSelectIndexes() {
-		List<Move> legalMoves = getLegalMoves();
+	public Set<Integer> getPossibleSelectIndexes(Dice dice) {
+		List<Move> legalMoves = getLegalMoves(dice);
 		Set<Integer> indexes = new HashSet<>();
 		legalMoves.forEach(m -> indexes.add(m.getFromPoint()));
 		indexes.forEach(m -> logger.info("index=" + m));
 		return indexes;
 	}
 	
-	public Set<Integer> getPossibleMoveIndexes(int pointIndexFrom) {
-		List<Move> legalMoves = getLegalMoves();
+	public Set<Integer> getPossibleMoveIndexes(Dice dice, int pointIndexFrom) {
+		List<Move> legalMoves = getLegalMoves(dice);
 		Set<Integer> indexes = new HashSet<>();
 		legalMoves.forEach(m -> { if (m.getFromPoint() == pointIndexFrom) indexes.add(m.getToPoint()); });
 		return indexes;
 	}
 	
-	public List<Move> getLegalMoves() {
+	public List<Move> getLegalMoves(Dice dice) {
 		List<Move> legalMoves = new ArrayList<>();
-		Dice dice = currentTurn.getDice();
-		PlayerSide ps = currentTurn.getPlayerSide();
-		int directionSign = ps == PlayerSide.PLAYER_1 ? 1 : -1;
+		int directionSign = currentPlayerSide == PlayerSide.PLAYER_1 ? 1 : -1;
 		
 		List<List<Integer>> diceNumsSeq = new ArrayList<>();
 		
@@ -160,29 +136,56 @@ public class Board {
 			}
 		}
 		
-		for (int i=0;i<NUM_POINTS;i++) {
-			Point pointFrom = points[i];
-			if (pointFrom.isOwned(ps)) {
-				for (int j=0;j<diceNumsSeq.size();j++) {
-					// try all combo's from this point
-					int total = 0;
-					boolean allGood = true;
-					List<Integer> seq = diceNumsSeq.get(j);
-					for (int k=0;k<seq.size();k++) {
-						int indexTo = i + ((total + seq.get(k)) * directionSign);
-						if (!isLegalPoint(pointFrom, indexTo, ps)) {
-							allGood = false;
-							break;
-						} else {
-							total += seq.get(k);
-						}
+		int barCount = bar.getPlayerCount(currentPlayerSide);
+		
+		if (barCount > 0) {
+			// where can pip go?
+			// only the first seq num matters
+			// check all incase first 3 of double are already used
+			// die - 1 === pointTo index
+			for (int i=0;i<diceNumsSeq.size();i++) {
+				List<Integer> seq = diceNumsSeq.get(i);
+				int indexTo = -1;
+				if (currentPlayerSide == PlayerSide.PLAYER_1) {
+					indexTo = seq.get(0) - 1;
+				} else {
+					indexTo = 24 - seq.get(0);
+				}
+				if (isLegalPoint(indexTo, currentPlayerSide)) {
+					Move move = new Move(Move.FROM_BAR, indexTo);
+					barOff = true;
+					if (isMoveUnique(legalMoves, move)) {
+						legalMoves.add(move);
+						//logger.info("*** getLegalMoves added bar move: " + move.toString());
 					}
-					if (allGood) {
-						int indexTo = i + (total * directionSign);
-						Move move = new Move(i, indexTo);
-						if (isMoveUnique(legalMoves, move)) {
-							legalMoves.add(move);
-							logger.info("*** getLegalMoves added: " + move.toString() + ", i=" + i + ", total=" + total);
+				}
+			}
+		} else {
+			barOff = false;
+			for (int i=0;i<NUM_POINTS;i++) {
+				Point pointFrom = points[i];
+				if (pointFrom.isOwned(currentPlayerSide)) {
+					for (int j=0;j<diceNumsSeq.size();j++) {
+						// try all combo's from this point
+						int total = 0;
+						boolean allGood = true;
+						List<Integer> seq = diceNumsSeq.get(j);
+						for (int k=0;k<seq.size();k++) {
+							int indexTo = i + ((total + seq.get(k)) * directionSign);
+							if (!isLegalPoint(indexTo, currentPlayerSide)) {
+								allGood = false;
+								break;
+							} else {
+								total += seq.get(k);
+							}
+						}
+						if (allGood) {
+							int indexTo = i + (total * directionSign);
+							Move move = new Move(i, indexTo);
+							if (isMoveUnique(legalMoves, move)) {
+								legalMoves.add(move);
+								//logger.info("*** getLegalMoves added: " + move.toString() + ", i=" + i + ", total=" + total);
+							}
 						}
 					}
 				}
@@ -203,7 +206,7 @@ public class Board {
 		return true;
 	}
 	
-	private boolean isLegalPoint(Point pointFrom, int indexTo, PlayerSide ps) {
+	private boolean isLegalPoint(int indexTo, PlayerSide ps) {
 		if (indexTo >= NUM_POINTS 
 		 || indexTo < 0) {
 			return false;
@@ -225,8 +228,16 @@ public class Board {
 	}
 
 	public void setBarHop(boolean barHop) {
-		logger.info("**** B - setting barHop to " + barHop);
+		//logger.info("**** B - setting barHop to " + barHop);
 		this.barHop = barHop;
+	}
+
+	public boolean isBarOff() {
+		return barOff;
+	}
+
+	public void setBarOff(boolean barOff) {
+		this.barOff = barOff;
 	}
 }
 

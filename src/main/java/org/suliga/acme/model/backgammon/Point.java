@@ -27,7 +27,7 @@ public class Point {
 		}
 		
 		if (numPips < 0) {
-			logger.error("**** numPips should not be less than 0: " + numPips);
+			logger.error("**** numPips should not be less than 0: " + numPips, new Throwable());
 			numPips = 0;
 		}
 	}

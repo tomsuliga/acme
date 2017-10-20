@@ -33,5 +33,22 @@ public class Bar {
 	public void player2Pop() {
 		player2Count--;
 	}
+	
+	public int getPlayerCount(PlayerSide ps) {
+		if (ps == PlayerSide.PLAYER_1) {
+			return getPlayer1Count();
+		} else if (ps == PlayerSide.PLAYER_2) {
+			return getPlayer2Count();
+		}
+		return 0;
+	}
+
+	public void pop(PlayerSide ps) {
+		if (ps == PlayerSide.PLAYER_1) {
+			player1Pop();
+		} else if (ps == PlayerSide.PLAYER_2) {
+			player2Pop();
+		}
+	}
 }
 

@@ -1,6 +1,7 @@
 package org.suliga.acme.model.backgammon;
 
 public class Move {
+	public static final int FROM_BAR = -99;
 	private int fromPoint;
 	private int toPoint;
 	
@@ -19,7 +20,7 @@ public class Move {
 	
 	@Override
 	public String toString() {
-		return "Move from:" + fromPoint + ", to:" + toPoint;
+		return "Move " + (fromPoint == FROM_BAR ? "Bar" : fromPoint) + ":" + toPoint;
 	}
 }
 
