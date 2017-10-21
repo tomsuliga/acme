@@ -197,6 +197,7 @@ async function showPipsAllowedToMove(incoming) {
 		return;
 	} else {
 		turnOver = false;
+		$('#btnRoll').text("Roll Dice");
 	}
 	
 	hideOpenPips();

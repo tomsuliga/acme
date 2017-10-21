@@ -191,7 +191,7 @@ public class AcmeMainController {
 	}
 	
 	//////////////////////////////////////////////////////////////////
-	////   W I P   ///////////////////////////////////////////////////
+	////   B A C K G A M M O N  //////////////////////////////////////
 	//////////////////////////////////////////////////////////////////
 	@GetMapping("/backgammon")
 	public String getBackgammon(Model model, HttpServletRequest req) {
@@ -208,180 +208,62 @@ public class AcmeMainController {
 	
 	@MessageMapping("/backgammon/startOfGameFirstRoll")
 	public void handleBackgammonFirstMove(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		logger.info("startOfGameFirstRoll = " + sessionId);
-		Game game = backgammonService.getGame(sessionId);
-		game.startOfGameFirstRoll(); // roll dice, create turn, add turn to list
-		
-		ClientServerMessage messageOut = new ClientServerMessage();
-		messageOut.setFirstMove(true);
-		messageOut.setStartTurn(true);
-		if (game.getCurrentTurn().getPlayerSide() == PlayerSide.PLAYER_1) {
-			playerTurnCommon(sessionId, game, messageOut);
+		ClientServerMessage messageOut = backgammonService.startOfGameFirstRoll(messageIn);
+		if (messageOut.getSide() == 1) {
+			simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
 		} else {
-			computerTurnCommon(sessionId, game, messageOut);
+			simpMessagingTemplate.convertAndSend("/topic/backgammon/doComputerSide", messageOut);
 		}
 	}
 	
 	@MessageMapping("/backgammon/startPlayerTurn") // new player turn of many
 	public void handleBackgammonStartPlayerTurn(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		Game game = backgammonService.getGame(sessionId);
-		game.roll(); // roll dice, create turn, add turn to list
-		ClientServerMessage messageOut = new ClientServerMessage();
-		messageOut.setStartTurn(true);
-		playerTurnCommon(sessionId, game, messageOut);
+		ClientServerMessage messageOut = backgammonService.startPlayerTurn(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
 	}
 	
 	@MessageMapping("/backgammon/continuePlayerTurn")
 	public void handleBackgammonContinueTurn(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		Game game = backgammonService.getGame(sessionId);
-		ClientServerMessage messageOut = new ClientServerMessage();
-		playerTurnCommon(sessionId, game, messageOut);
-	}
-	
-	@MessageMapping("/backgammon/switchToComputerSide")
-	public void handleBackgammonSwitchSides(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		Game game = backgammonService.getGame(sessionId);
-		game.roll();
-		ClientServerMessage messageOut = new ClientServerMessage();
-		messageOut.setStartTurn(true);
-		computerTurnCommon(sessionId, game, messageOut);
-	}
-	
-	@MessageMapping("/backgammon/continueComputerTurn")
-	public void handleBackgammonContinueComputerSide(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		Game game = backgammonService.getGame(sessionId);
-		ClientServerMessage messageOut = new ClientServerMessage();
-		computerTurnCommon(sessionId, game, messageOut);
-	}	
-	
-	private void playerTurnCommon(String sessionId, Game game, ClientServerMessage messageOut) {
-		messageOut.setSessionId(sessionId);
-		messageOut.setSide(game.getCurrentTurn().getPlayerSide().ordinal());
-		Dice dice = game.getDice();
-		Board board = game.getBoard();
-		messageOut.setDiceRolledEx(dice);
-		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(dice));
-		messageOut.setBar1Count(board.getBar().getPlayer1Count());
-		messageOut.setBar2Count(board.getBar().getPlayer2Count());
-		messageOut.setBarOff(board.isBarOff());
+		ClientServerMessage messageOut = backgammonService.continuePlayerTurn(messageIn);
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
-	}
-	
-	public void computerTurnCommon(String sessionId, Game game, ClientServerMessage messageOut) {
-		messageOut.setSessionId(sessionId);
-		messageOut.setSide(game.getCurrentTurn().getPlayerSide().ordinal());
-		Dice dice = game.getDice();
-		Board board = game.getBoard();
-		messageOut.setDiceRolledEx(dice);
-		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(dice));
-		
-		// temp - random logic
-		List<Move> legalMoves = board.getLegalMoves(dice);
-		Optional<Move> any = legalMoves.stream().findAny();
-		if (any.isPresent()) {
-			any.ifPresent(m -> { 
-				messageOut.setFromPoint(m.getFromPoint());
-				messageOut.setToPoint(m.getToPoint());
-				board.movePip(m.getFromPoint(), m.getToPoint());
-				game.getCurrentTurn().pushMove(new Move(m.getFromPoint(), m.getToPoint()));
-				messageOut.calculateNumbersUsed(dice, board.isBarOff());
-			});
-		} else {
-			messageOut.setNoMove(true);
-		}
-
-		messageOut.setBarHop(board.isBarHop());
-		messageOut.setBar1Count(board.getBar().getPlayer1Count());
-		messageOut.setBar2Count(board.getBar().getPlayer2Count());
-		messageOut.setBarOff(board.isBarOff());
-		
-		simpMessagingTemplate.convertAndSend("/topic/backgammon/doComputerSide", messageOut);
-	}
-
-	///////////////////////////////////////////////////////////////////
-
-	@MessageMapping("/backgammon/pipSelectedToMove")
-	public void handleBackgammonPointClicked(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		Game game = backgammonService.getGame(sessionId);
-		Dice dice = game.getDice();
-		Board board = game.getBoard();
-		ClientServerMessage messageOut = new ClientServerMessage();
-		messageOut.setSessionId(sessionId);
-		messageOut.setSide(game.getCurrentTurn().getPlayerSide().ordinal());
-		messageOut.setDiceRolledEx(dice);
-		messageOut.setSelectedPoint(messageIn.getSelectedPoint());
-		messageOut.setMoveablePointsEx(board.getPossibleMoveIndexes(dice, messageIn.getSelectedPoint()));
-		messageOut.setBar1Count(board.getBar().getPlayer1Count());
-		messageOut.setBar2Count(board.getBar().getPlayer2Count());
-		messageOut.setBarOff(board.isBarOff());
-		simpMessagingTemplate.convertAndSend("/topic/backgammon/selectDestinationPoint", messageOut);
 	}
 	
 	@MessageMapping("/backgammon/pipDeselected")
 	public void handleBackgammonPipDeseleced(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		logger.info("incoming=" + sessionId);
-		Game game = backgammonService.getGame(sessionId);
-		Board board = game.getBoard();
-		Dice dice = game.getDice();
-		ClientServerMessage messageOut = new ClientServerMessage();
-		messageOut.setSessionId(sessionId);
-		messageOut.setSide(game.getCurrentTurn().getPlayerSide().ordinal());
-		messageOut.setDiceRolledEx(dice);
-		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(dice));
-		messageOut.setBar1Count(board.getBar().getPlayer1Count());
-		messageOut.setBar2Count(board.getBar().getPlayer2Count());
+		ClientServerMessage messageOut = backgammonService.pipDeselected(messageIn);
 		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/pipSelectedToMove")
+	public void handleBackgammonPointClicked(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.pipSelectedToMove(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/selectDestinationPoint", messageOut);
 	}
 	
 	@MessageMapping("/backgammon/movePip")
 	public void handleBackgammonMovePip(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		Game game = backgammonService.getGame(sessionId);
-		Board board = game.getBoard();
-		Dice dice = game.getDice();
-		ClientServerMessage messageOut = new ClientServerMessage();
-		messageOut.setSessionId(sessionId);
-		messageOut.setSide(game.getCurrentTurn().getPlayerSide().ordinal());
-		messageOut.setDiceRolledEx(dice);
-		messageOut.setFromPoint(messageIn.getFromPoint());
-		messageOut.setToPoint(messageIn.getToPoint());
-		board.movePip(messageIn.getFromPoint(), messageIn.getToPoint());
-		game.getCurrentTurn().pushMove(new Move(messageIn.getFromPoint(), messageIn.getToPoint()));
-		messageOut.setBarHop(board.isBarHop());
-		messageOut.setBar1Count(board.getBar().getPlayer1Count());
-		messageOut.setBar2Count(board.getBar().getPlayer2Count());
-		messageOut.calculateNumbersUsed(dice, board.isBarOff());
-		messageOut.setBarOff(board.isBarOff());
-		logger.info("num turns = " + game.getNumTurns());
-		if (game.getNumTurns() == 1) {
-			messageOut.setFirstMove(true);
-		}
-		simpMessagingTemplate.convertAndSend("/topic/backgammon/movingPip", messageOut);
-		//simpMessagingTemplate.convertAndSendToUser(user, destination, payload);
+		ClientServerMessage messageOut = backgammonService.movePip(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/movingPip", messageOut);		
 	}
 	
+	@MessageMapping("/backgammon/switchToComputerSide")
+	public void handleBackgammonSwitchSides(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.switchToComputerSide(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/doComputerSide", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/continueComputerTurn")
+	public void handleBackgammonContinueComputerSide(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.continueComputerTurn(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/doComputerSide", messageOut);
+	}	
+
 	@MessageMapping("/backgammon/debugPoints")
 	public void handleBackgammonDebugPoints(ClientServerMessage messageIn) {
-		String sessionId = messageIn.getSessionId();
-		Game game = backgammonService.getGame(sessionId);
-		Board board = game.getBoard();
-		Point[] points = board.getPoints();
-		for (int i=0;i<points.length;i++) {
-			Point point = points[i];
-			logger.info("point[" + i + "] = " + point.toString());
-		}
-		Bar bar = board.getBar();
-		logger.info("bar 1 count = " + bar.getPlayer1Count());
-		logger.info("bar 2 count = " + bar.getPlayer2Count());
-		game.debugMoves();
+		backgammonService.debugPoints(messageIn);
 	}
+	
+	//simpMessagingTemplate.convertAndSendToUser(user, destination, payload);
 }
 
 
