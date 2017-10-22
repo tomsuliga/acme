@@ -50,7 +50,7 @@ function init() {
 	// pip-index: 0-14, point-index: 0-23
 	let pips1 = [ [0,0], [1,0], [2,11], [3,11], [4,11], [5,11], [6,11], [7,16], [8,16], [9,16], [10,18], [11,18], [12,18], [13,18], [14,18] ];
 	let pips2 = [ [0,5], [1,5], [2,5], [3,5], [4,5], [5,7], [6,7], [7,7], [8,12], [9,12], [10,12], [11,12], [12,12], [13,23], [14,23] ];
-	
+
 	for (let i=0;i<15;i++) {
 		createAndMovePip(pips1[i][0], pips1[i][1], 1);
 		createAndMovePip(pips2[i][0], pips2[i][1], 2);
@@ -121,13 +121,20 @@ function movePipToSpot(p1, point, delay) {
 	let startCol = 0;
 	let startRow = 0;
 	let pointCount = 0;
+	let adjustmentNeeded = false;
 	
 	if (point == 88) {
 		startCol = 13 * 56 + 28 - 1;
 		if (currentSide == 1) {
-			startRow = 16 * bear1.length;
+			startRow = 18 * bear1.length;
 		} else if (currentSide == 2) {
-			startRow = (13 * 56) - (bear2.length * 16);
+			startRow = (13 * 56) - 18 - (bear2.length * 18);
+			if ($(p1).hasClass('openPip')) {
+				startRow -= (56-18);
+			} else {
+				startRow -= (56-18);
+				adjustmentNeeded = true;
+			}
 		}
 	} else if (point <= 23) {
 		pointCount = points[point].length;
@@ -191,6 +198,38 @@ function movePipToSpot(p1, point, delay) {
 		}
 		zoffset = 1;
 		break;
+	case 11:
+		if (point <= 11) {
+			startRow = 11 * 56;
+		} else {
+			startRow = 1 * 56;
+		}
+		zoffset = 2;
+		break;
+	case 12:
+		if (point <= 11) {
+			startRow = 10 * 56;
+		} else {
+			startRow = 2 * 56;
+		}
+		zoffset = 2;
+		break;
+	case 13:
+		if (point <= 11) {
+			startRow = 9 * 56;
+		} else {
+			startRow = 3 * 56;
+		}
+		zoffset = 2;
+		break;
+	case 14:
+		if (point <= 11) {
+			startRow = 8 * 56;
+		} else {
+			startRow = 4 * 56;
+		}
+		zoffset = 2;
+		break;
 	}
 	
 	$(p1).attr("data-point", point);
@@ -200,9 +239,23 @@ function movePipToSpot(p1, point, delay) {
 	    'left': marginLeft + startCol}, delay, function() {
 	    	$(p1).css("z-index", 1 + zoffset);
 	    	if (point == 88 && !($(p1).hasClass('openPip'))) {
+	    		//if (currentSide == 2) {
+	    		//	$(p1).animate({
+	    		//		'top': marginTop + startRow + 56,
+	    		//		'left': marginLeft + startCol});
+	    		//}
 	    		$(p1).removeClass('pip');
 	    		$(p1).addClass('pipBear');
-	    	}
+	    		if (adjustmentNeeded) {
+		    		$(p1).animate(
+		    			{
+		    		    'top': marginTop + startRow + (56-18),
+		    		    'left': marginLeft + startCol
+		    		    }, 0, function() {	    		
+		    		    }
+		    		);
+	    		}
+	    	}	    	
 	    }
 	);	
 };
@@ -603,7 +656,7 @@ async function doComputerSide(incoming) {
 			pip = bar2.pop();
 		}
 	} else {
-		pip =     points[ob.fromPoint].pop();
+		pip = points[ob.fromPoint].pop();
 	}
 	
 	$("#" + pip).addClass("pipSelectedToMove"); // yellow
@@ -613,6 +666,9 @@ async function doComputerSide(incoming) {
 	let toPoint = ob.toPoint;
 	console.log("to point=" + toPoint);
 	let openId = '#' + openPips[toPoint];
+	if (toPoint == 88) {
+		openId = '#openPip_89';
+	}
 	movePipToSpot(openId, toPoint, 0);
 	$(openId).show();
 	await sleep(1000);
