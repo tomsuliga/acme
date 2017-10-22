@@ -19,5 +19,20 @@ public class Bear {
 	public void setPlayer2Count(int player2Count) {
 		this.player2Count = player2Count;
 	}
+	
+	public void player1Push() {
+		player1Count++;
+	}
+	public void player2Push() {
+		player2Count++;
+	}
+	
+	public void playerPush(PlayerSide ps) {
+		if (ps == PlayerSide.PLAYER_1) {
+			player1Count++;
+		} else {
+			player2Count++;
+		}
+	}
 }
 

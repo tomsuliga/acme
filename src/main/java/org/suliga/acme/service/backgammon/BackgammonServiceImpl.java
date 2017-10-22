@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,7 @@ public class BackgammonServiceImpl implements BackgammonService {
 		messageOut.setFromPoint(messageIn.getFromPoint());
 		messageOut.setToPoint(messageIn.getToPoint());
 		board.movePip(messageIn.getFromPoint(), messageIn.getToPoint());
-		game.getCurrentTurn().pushMove(new Move(messageIn.getFromPoint(), messageIn.getToPoint()));
+		game.getCurrentTurn().pushMove(new Move(messageIn.getFromPoint(), messageIn.getToPoint(), false));
 		messageOut.setBarHop(board.isBarHop());
 		messageOut.setBar1Count(board.getBar().getPlayer1Count());
 		messageOut.setBar2Count(board.getBar().getPlayer2Count());
@@ -96,6 +97,7 @@ public class BackgammonServiceImpl implements BackgammonService {
 		messageOut.setSide(game.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setSelectedPoint(messageIn.getSelectedPoint());
+		messageOut.setBearOff(board.isBearOffAllowed());
 		messageOut.setMoveablePointsEx(board.getPossibleMoveIndexes(dice, messageIn.getSelectedPoint()));
 		messageOut.setBar1Count(board.getBar().getPlayer1Count());
 		messageOut.setBar2Count(board.getBar().getPlayer2Count());
@@ -116,6 +118,10 @@ public class BackgammonServiceImpl implements BackgammonService {
 		Bar bar = board.getBar();
 		logger.info("bar 1 count = " + bar.getPlayer1Count());
 		logger.info("bar 2 count = " + bar.getPlayer2Count());
+
+		logger.info("bear 1 count = " + board.getBear().getPlayer1Count());
+		logger.info("bear 2 count = " + board.getBear().getPlayer2Count());
+		
 		game.debugMoves();
 	}
 	
@@ -141,15 +147,14 @@ public class BackgammonServiceImpl implements BackgammonService {
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(dice));
 		
-		// temp - random logic
 		List<Move> legalMoves = board.getLegalMoves(dice);
-		Optional<Move> any = legalMoves.stream().findAny();
-		if (any.isPresent()) {
-			any.ifPresent(m -> { 
+		Optional<Move> bestMove = getBestComputerMove(board, legalMoves);
+		if (bestMove.isPresent()) {
+			bestMove.ifPresent(m -> { 
 				messageOut.setFromPoint(m.getFromPoint());
 				messageOut.setToPoint(m.getToPoint());
 				board.movePip(m.getFromPoint(), m.getToPoint());
-				game.getCurrentTurn().pushMove(new Move(m.getFromPoint(), m.getToPoint()));
+				game.getCurrentTurn().pushMove(new Move(m.getFromPoint(), m.getToPoint(), false));
 				messageOut.calculateNumbersUsed(dice, board.isBarOff());
 			});
 		} else {
@@ -162,6 +167,69 @@ public class BackgammonServiceImpl implements BackgammonService {
 		messageOut.setBarOff(board.isBarOff());
 
 		return messageOut;
+	}
+	
+	private Optional<Move> getBestComputerMove(Board board, List<Move> legalMoves) {
+		Move bestMove = null;
+		
+		if (legalMoves.size() == 0) {
+			// do nothing
+		} else if (legalMoves.size() == 1) {
+			bestMove = legalMoves.get(0);
+		} else {
+			Move coverOwnPip = null;
+			Move hitOtherPip = null;
+			Move safePip = null;
+			Move singleToMultiplePip = null;
+			Move bearOffMove = null;
+			Move randomMove = legalMoves.get(ThreadLocalRandom.current().nextInt(legalMoves.size()));
+			for (int i=0;i<legalMoves.size();i++) {
+				Move m = legalMoves.get(i);
+				if (m.isMultiDiceUsed()) {
+					// currently only check best single move
+					continue;
+				}
+				PlayerSide psFrom = board.getPlayerSideFromPoint(m.getFromPoint());
+				PlayerSide psTo = board.getPlayerSideFromPoint(m.getToPoint());
+				if (psFrom != psTo) {
+					if (board.getNumPips(m.getToPoint()) == 1) {
+						hitOtherPip = m;
+					}
+				} 
+				if (psFrom == psTo) {
+					if (board.getNumPips(m.getToPoint()) == 1) {
+						coverOwnPip = m;
+					}
+					if (board.getNumPips(m.getFromPoint()) == 1 && board.getNumPips(m.getToPoint()) > 0) {
+						singleToMultiplePip = m;
+					}
+				}
+				if (board.getNumPips(m.getFromPoint()) > 2) {
+					safePip = m;
+				}
+				if (m.getToPoint() == Move.TO_BEAR) {
+					bearOffMove = m;
+				}
+			}
+			if (coverOwnPip != null) {
+				bestMove = coverOwnPip;
+			} else if (hitOtherPip != null) {
+				bestMove = hitOtherPip;
+			} else if (singleToMultiplePip != null) {
+				bestMove = singleToMultiplePip;
+			} else if (safePip != null) {
+				bestMove = safePip;
+			} else if (bearOffMove != null) {
+				bestMove = bearOffMove;
+			} else {
+				bestMove = randomMove;
+			}
+		}
+		
+		if (bestMove == null) {
+			return Optional.empty();
+		}
+		return Optional.of(bestMove);
 	}
 
 	@Override

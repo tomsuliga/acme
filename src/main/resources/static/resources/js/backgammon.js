@@ -3,6 +3,7 @@ var divBoard;
 var sessionId;
 var points;
 var openPips;
+var openPipsBear;
 var bar1;
 var bar2;
 var bear1;
@@ -12,6 +13,7 @@ var currentState;
 var currentSelectedPoint;
 var startOfGameFirstRoll;
 var turnOver;
+var gameOver;
 
 $(document).ready(function() {
 	init();
@@ -28,6 +30,7 @@ function init() {
 	sessionId = divBoard.attr("data-sessionId"); // from Controller and HTML 
 	points = [];
 	openPips = [];
+	openPipsBear = [];
 	bar1 = [];
 	bar2 = [];
 	bear1 = [];
@@ -37,6 +40,7 @@ function init() {
 	currentSelectedPoint = -1;
 	startOfGameFirstRoll = true;
 	turnOver = false;
+	gameOver = false;
 	
 	for (let i=0;i<24;i++) {
 		points[i] = new Array();
@@ -59,6 +63,14 @@ function init() {
 		divBoard.append(p1);
 		let id = $(p1).attr("id");
 		openPips[i] = id;
+	}
+
+	for (let i=0;i<2;i++) {
+		let p1 = document.createElement("div");
+		$(p1).addClass("openPip"); $(p1).attr("id", "openPip_" + (88+i)); $(p1).attr("data-point", (88+i)); $(p1).attr("hidden", "hidden");
+		divBoard.append(p1);
+		let id = $(p1).attr("id");
+		openPipsBear[i] = id;
 	}
 	
 	// create roll button
@@ -108,19 +120,77 @@ function movePipToSpot(p1, point, delay) {
 	let marginLeft = 122;
 	let startCol = 0;
 	let startRow = 0;
+	let pointCount = 0;
+	
+	if (point == 88) {
+		startCol = 13 * 56 + 28 - 1;
+		if (currentSide == 1) {
+			startRow = 16 * bear1.length;
+		} else if (currentSide == 2) {
+			startRow = (13 * 56) - (bear2.length * 16);
+		}
+	} else if (point <= 23) {
+		pointCount = points[point].length;
+	}
 	
 	if (point >= 0 && point <= 5) {
 		startCol = (12-point) * 56;
-		startRow = 12 * 56 - (points[point].length * 56);
+		startRow = 12 * 56 - (pointCount * 56);
 	} else if (point >= 6 && point <= 11) {
 		startCol = (11-point) * 56;
-		startRow = 12 * 56 - (points[point].length * 56);
+		startRow = 12 * 56 - (pointCount * 56);
 	} else if (point >= 12 && point <= 17) {
 		startCol = (point-12) * 56;
-		startRow = points[point].length * 56;
+		startRow = pointCount * 56;
 	} else if (point >= 18 && point <= 23) {
 		startCol = (point-11) * 56;
-		startRow = points[point].length * 56;
+		startRow = pointCount * 56;
+	}
+	
+	// stack pips
+	let zoffset = 0;
+	switch (pointCount) {
+	default: break;
+	case 6:
+		if (point <= 11) {
+			startRow = 12 * 56 - 28;
+		} else {
+			startRow = 0 * 56 + 28;
+		}
+		zoffset = 1;
+		break;
+	case 7:
+		if (point <= 11) {
+			startRow = 11 * 56 - 28;
+		} else {
+			startRow = 1 * 56 + 28;
+		}
+		zoffset = 1;
+		break;
+	case 8:
+		if (point <= 11) {
+			startRow = 10 * 56 - 28;
+		} else {
+			startRow = 2 * 56 + 28;
+		}
+		zoffset = 1;
+		break;
+	case 9:
+		if (point <= 11) {
+			startRow = 9 * 56 - 28;
+		} else {
+			startRow = 3 * 56 + 28;
+		}
+		zoffset = 1;
+		break;
+	case 10:
+		if (point <= 11) {
+			startRow = 8 * 56 - 28;
+		} else {
+			startRow = 4 * 56 + 28;
+		}
+		zoffset = 1;
+		break;
 	}
 	
 	$(p1).attr("data-point", point);
@@ -128,9 +198,13 @@ function movePipToSpot(p1, point, delay) {
 	$(p1).animate({
 	    'top': marginTop + startRow,
 	    'left': marginLeft + startCol}, delay, function() {
-	    	$(p1).css("z-index", 1);
+	    	$(p1).css("z-index", 1 + zoffset);
+	    	if (point == 88 && !($(p1).hasClass('openPip'))) {
+	    		$(p1).removeClass('pip');
+	    		$(p1).addClass('pipBear');
+	    	}
 	    }
-	);		
+	);	
 };
 
 function movePipToBar(pip, side, delay) {
@@ -185,6 +259,10 @@ stomp.connect({}, function(frame) {
 async function showPipsAllowedToMove(incoming) {
 	console.log('incoming received msg: ' + incoming);
 	let ob = JSON.parse(incoming.body);
+	
+	if (checkWin()) {
+		return;
+	}
 	
 	if (ob.turnOver) {
 		if (ob.startTurn) {
@@ -274,6 +352,10 @@ function highlightLegalPips(ob, add) {
 function hideOpenPips() {
 	for (let i=0;i<24;i++) {
 		let id = '#' + openPips[i];
+		$(id).hide();
+	}
+	for (let i=0;i<2;i++) {
+		let id = '#' + openPipsBear[i];
 		$(id).hide();
 	}
 }
@@ -380,9 +462,15 @@ function selectDestinationPoint(incoming) {
 	for (let i=0;i<ob.moveablePoints.length;i++) {
 		let point = ob.moveablePoints[i];
 		console.log("point=" + point);
-		let openId = '#' + openPips[point];
-		movePipToSpot(openId, point, 0);
-		$(openId).show();
+		if (point == 88 || point == 89) {
+			let bearId = '#' + openPipsBear[point-88];
+			movePipToSpot(bearId, point, 0);
+			$(bearId).show();			
+		} else {
+			let openId = '#' + openPips[point];
+			movePipToSpot(openId, point, 0);
+			$(openId).show();
+		}
 	}
 
 	currentState = "possibleMove";
@@ -422,12 +510,22 @@ async function movingPip(incoming) {
 		await sleep(600);
 	}
 	
-	points[ob.toPoint].push(pip);
+	if (ob.toPoint <= 23) {
+		points[ob.toPoint].push(pip);
+	} else if (currentSide == 1) {
+		bear1.push(pip);
+	} else if (currentSide == 2) {
+		bear2.push(pip);
+	}
 	hideDiceUsed(ob);
 	hideOpenPips();
 	hideAllowedToMovePips();
 	$("#" + pip).removeClass('pipSelectedToMove');
 
+	if (checkWin()) {
+		return;
+	}
+	
 	if (!ob.done) {
 		currentState = "possibleSelect";
 	}
@@ -537,10 +635,21 @@ async function doComputerSide(incoming) {
 		await sleep(600);
 	}
 	
-	points[ob.toPoint].push(pip);
+	if (ob.toPoint <= 23) {
+		points[ob.toPoint].push(pip);
+	} else if (currentSide == 1) {
+		bear1.push(pip);
+	} else if (currentSide == 2) {
+		bear2.push(pip);
+	}
+
 	hideDiceUsed(ob);
 	hideOpenPips();
 	$("#" + pip).removeClass('pipSelectedToMove');
+	
+	if (checkWin()) {
+		return;
+	}
 	
 	// end turn?
 	if (ob.turnOver) {
@@ -553,7 +662,12 @@ async function doComputerSide(incoming) {
 
 //dynamic - works after class being added
 $(document).on('click', "button#btnRoll", function() {
+	if (gameOver) {
+		return;
+	}
+	
 	$('button#btnRoll').hide();
+	$('button#btnRoll').text('Roll Dice');
 	let payload = JSON.stringify({ 'sessionId':sessionId });
 	if (startOfGameFirstRoll) {
 		startOfGameFirstRoll = false;
@@ -609,9 +723,28 @@ $(document).on('click', '#btnDebugPoints', function() {
 	console.log('bar1 ' + bar1.length);
 	console.log('bar2 ' + bar2.length);
 
+	console.log('bear1 ' + bear1.length);
+	console.log('bear2 ' + bear2.length);
+
 	let payload = JSON.stringify({ 'sessionId':sessionId});
 	stomp.send('/stomp/backgammon/debugPoints', {}, payload);
 });
+
+function checkWin() {
+	if (bear1.length == 15) {
+		gameOver = true;
+		$('button#btnRoll').text("You Win!");
+		$('button#btnRoll').show();
+		return true;
+	} else if (bear2.length == 15) {
+		gameOver = true;
+		$('button#btnRoll').text("You Lose!");
+		$('button#btnRoll').show();
+		return true;
+	}
+	return false;
+}
+
 
 
 

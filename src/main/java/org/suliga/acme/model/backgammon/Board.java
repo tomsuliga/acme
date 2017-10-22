@@ -1,5 +1,7 @@
 package org.suliga.acme.model.backgammon;
 
+import static org.mockito.Matchers.booleanThat;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,13 +66,44 @@ public class Board {
 		return bear;
 	}
 	
+	public PlayerSide getPlayerSideFromPoint(int point) {
+		if (point == Move.FROM_BAR) {
+			return currentPlayerSide;
+		}
+
+		if (point == Move.TO_BEAR) {
+			return currentPlayerSide;
+		}
+
+		return points[point].getPlayerSide();
+	}
+	
+	public int getNumPips(int point) {
+		if (point == Move.FROM_BAR) {
+			return 1;
+		}
+		
+		if (point == Move.TO_BEAR) {
+			return 0;
+		}
+		
+		return points[point].getNumPips();
+	}
+	
 	public void movePip(int pipFrom, int pipTo) {
 		if (barOff) {
 			bar.pop(currentPlayerSide);
 		} else {
 			points[pipFrom].pop(); // also clears playerSide if 0
 		}
-		PlayerSide toPs = points[pipTo].getPlayerSide();
+		
+		PlayerSide toPs = getPlayerSideFromPoint(pipTo);
+		
+		if (pipTo == Move.TO_BEAR) {
+			bear.playerPush(toPs);
+			return;
+		}
+		
 		if (currentPlayerSide != toPs && toPs != PlayerSide.NONE_0 && toPs != null) {
 			points[pipTo].pop();
 			if (toPs == PlayerSide.PLAYER_1) {
@@ -141,7 +174,7 @@ public class Board {
 		if (barCount > 0) {
 			// where can pip go?
 			// only the first seq num matters
-			// check all incase first 3 of double are already used
+			// check all in case first 3 of double are already used
 			// die - 1 === pointTo index
 			for (int i=0;i<diceNumsSeq.size();i++) {
 				List<Integer> seq = diceNumsSeq.get(i);
@@ -152,7 +185,7 @@ public class Board {
 					indexTo = 24 - seq.get(0);
 				}
 				if (isLegalPoint(indexTo, currentPlayerSide)) {
-					Move move = new Move(Move.FROM_BAR, indexTo);
+					Move move = new Move(Move.FROM_BAR, indexTo, false);
 					barOff = true;
 					if (isMoveUnique(legalMoves, move)) {
 						legalMoves.add(move);
@@ -162,6 +195,8 @@ public class Board {
 			}
 		} else {
 			barOff = false;
+			boolean bearOffAllowed = isBearOffAllowed();
+			
 			for (int i=0;i<NUM_POINTS;i++) {
 				Point pointFrom = points[i];
 				if (pointFrom.isOwned(currentPlayerSide)) {
@@ -170,21 +205,24 @@ public class Board {
 						int total = 0;
 						boolean allGood = true;
 						List<Integer> seq = diceNumsSeq.get(j);
+						int indexTo = 0;
 						for (int k=0;k<seq.size();k++) {
-							int indexTo = i + ((total + seq.get(k)) * directionSign);
+							indexTo = i + ((total + seq.get(k)) * directionSign);
 							if (!isLegalPoint(indexTo, currentPlayerSide)) {
 								allGood = false;
+								break;
+							} else if (bearOffAllowed) {
+								// only use first move if bear off
 								break;
 							} else {
 								total += seq.get(k);
 							}
 						}
 						if (allGood) {
-							int indexTo = i + (total * directionSign);
-							Move move = new Move(i, indexTo);
+							Move move = new Move(i, indexTo, seq.size() > 1);
 							if (isMoveUnique(legalMoves, move)) {
 								legalMoves.add(move);
-								//logger.info("*** getLegalMoves added: " + move.toString() + ", i=" + i + ", total=" + total);
+								logger.info("*** getLegalMoves added: " + move.toString());
 							}
 						}
 					}
@@ -193,6 +231,24 @@ public class Board {
 		}
 		
 		return legalMoves;
+	}
+	
+	public boolean isBearOffAllowed() {
+		if (currentPlayerSide == PlayerSide.PLAYER_1) {
+			for (int i=0;i<=17;i++) {
+				if (points[i].isOwned(PlayerSide.PLAYER_1)) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			for (int i=23;i>=6;i--) {
+				if (points[i].isOwned(PlayerSide.PLAYER_2)) {
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 	
 	private boolean isMoveUnique(List<Move> moves, Move move) {
@@ -207,7 +263,12 @@ public class Board {
 	}
 	
 	private boolean isLegalPoint(int indexTo, PlayerSide ps) {
-		if (indexTo >= NUM_POINTS 
+		if ((indexTo > 23 && isBearOffAllowed())
+		 || (indexTo < 0 && isBearOffAllowed())) {
+			return true;
+		}
+		
+		if (indexTo >= NUM_POINTS
 		 || indexTo < 0) {
 			return false;
 		}

@@ -20,6 +20,7 @@ public class ClientServerMessage {
 	private boolean barHop;
 	private boolean barOff;
 	private boolean noMove;
+	private boolean bearOff;
 	private boolean startTurn; // to reveal dice
 	private String state; // Roll
 	private boolean firstMove; // only at start of game
@@ -130,30 +131,55 @@ public class ClientServerMessage {
 		
 		int num = Math.abs(fromPoint - toPoint);
 
-		if (barOff) {
+		boolean found = false;
+
+		if (toPoint == Move.TO_BEAR) {
+			int numNeeded = 1;
+			if (fromPoint >= 18) {
+				numNeeded = 24 - fromPoint;
+			} else {
+				numNeeded = fromPoint + 1;
+			}
+			for (int i=numNeeded;i<=6;i++) {
+				for (int j=0;j<4;j++) {
+					if (j >= 2 && diceRolled[0] != diceRolled[1]) {
+						break;
+					}
+					if (diceUsed[j] == false && diceRolled[j] == i) {
+						diceUsed[j] = true;
+						dice.setUsed(j);
+						found = true;
+						break;
+					}
+				}
+				if (found) {
+					break;
+				}
+			}
+		} else if (barOff) {
 			num = toPoint + 1;
 			if (num > 6) {
 				num = 25 - num;
 			}
 		}
-		
-		boolean found = false;
-		
-		// not double
-		if (!diceUsed[0] && num == diceRolled[0]) {
-			diceUsed[0] = true;
-			dice.setUsed(0);
-			found = true;
-		} else if (!diceUsed[1] && num == diceRolled[1]) {
-			diceUsed[1] = true;
-			dice.setUsed(1);
-			found = true;
-		} else if (!diceUsed[0] && !diceUsed[1] && num == (diceRolled[0] + diceRolled[1])) {
-			diceUsed[0] = true;
-			diceUsed[1] = true;
-			dice.setUsed(0);
-			dice.setUsed(1);
-			found = true;
+			
+		if (!found) {
+			// not double
+			if (!diceUsed[0] && num == diceRolled[0]) {
+				diceUsed[0] = true;
+				dice.setUsed(0);
+				found = true;
+			} else if (!diceUsed[1] && num == diceRolled[1]) {
+				diceUsed[1] = true;
+				dice.setUsed(1);
+				found = true;
+			} else if (!diceUsed[0] && !diceUsed[1] && num == (diceRolled[0] + diceRolled[1])) {
+				diceUsed[0] = true;
+				diceUsed[1] = true;
+				dice.setUsed(0);
+				dice.setUsed(1);
+				found = true;
+			}
 		}
 		
 		if (diceUsed[0] && diceUsed[1] && diceRolled[0] != diceRolled[1]) {
@@ -282,7 +308,7 @@ public class ClientServerMessage {
 	public boolean isNoMove() {
 		return noMove;
 	}
-
+	
 	public void setNoMove(boolean noMove) {
 		this.noMove = noMove;
 	}
@@ -302,4 +328,24 @@ public class ClientServerMessage {
 	public void setBarOff(boolean barOff) {
 		this.barOff = barOff;
 	}
+
+	public boolean isBearOff() {
+		return bearOff;
+	}
+
+	public void setBearOff(boolean bearOff) {
+		this.bearOff = bearOff;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

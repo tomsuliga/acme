@@ -57,6 +57,14 @@ div.pip, div.openPip {
 	position: absolute;
 }
 
+div.pipBear {
+	border-radius: 8px;
+	box-sizing: border-box;
+	width: 58px;
+	height: 16px;
+	position: absolute;
+}
+
 div.pip_1 {
 	background-color: #00b;
 	border-top: 3px solid #00f;
