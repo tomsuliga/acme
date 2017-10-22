@@ -200,6 +200,7 @@ public class Board {
 			for (int i=0;i<NUM_POINTS;i++) {
 				Point pointFrom = points[i];
 				if (pointFrom.isOwned(currentPlayerSide)) {
+					int countDiceUsed = 0;
 					for (int j=0;j<diceNumsSeq.size();j++) {
 						// try all combo's from this point
 						int total = 0;
@@ -208,6 +209,7 @@ public class Board {
 						int indexTo = 0;
 						for (int k=0;k<seq.size();k++) {
 							indexTo = i + ((total + seq.get(k)) * directionSign);
+							countDiceUsed++;
 							if (!isLegalPoint(indexTo, currentPlayerSide)) {
 								allGood = false;
 								break;
@@ -219,7 +221,7 @@ public class Board {
 							}
 						}
 						if (allGood) {
-							Move move = new Move(i, indexTo, seq.size() > 1);
+							Move move = new Move(i, indexTo, countDiceUsed > 1);
 							if (isMoveUnique(legalMoves, move)) {
 								legalMoves.add(move);
 								logger.info("*** getLegalMoves added: " + move.toString());

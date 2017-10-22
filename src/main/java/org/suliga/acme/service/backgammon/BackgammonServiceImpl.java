@@ -180,11 +180,10 @@ public class BackgammonServiceImpl implements BackgammonService {
 			Move coverOwnPip = null;
 			Move hitOtherPip = null;
 			Move safePip = null;
+			Move safePipOutside = null;
 			Move singleToMultiplePip = null;
 			Move bearOffMove = null;
-			Move randomMove1 = legalMoves.get(ThreadLocalRandom.current().nextInt(legalMoves.size()));
-			Move randomMove2 = legalMoves.get(ThreadLocalRandom.current().nextInt(legalMoves.size()));
-			Move randomMove3 = legalMoves.get(ThreadLocalRandom.current().nextInt(legalMoves.size()));
+			
 			for (int i=0;i<legalMoves.size();i++) {
 				Move m = legalMoves.get(i);
 				if (m.isMultiDiceUsed()) {
@@ -208,6 +207,9 @@ public class BackgammonServiceImpl implements BackgammonService {
 				}
 				if (board.getNumPips(m.getFromPoint()) > 2) {
 					safePip = m;
+					if (m.getFromPoint() > 5) {
+						safePipOutside = m;
+					}
 				}
 				if (m.getToPoint() == Move.TO_BEAR) {
 					bearOffMove = m;
@@ -219,18 +221,23 @@ public class BackgammonServiceImpl implements BackgammonService {
 				bestMove = hitOtherPip;
 			} else if (singleToMultiplePip != null) {
 				bestMove = singleToMultiplePip;
+			} else if (safePipOutside != null) {
+				bestMove = safePipOutside;
 			} else if (safePip != null) {
 				bestMove = safePip;
 			} else if (bearOffMove != null) {
 				bestMove = bearOffMove;
 			} else {
-				// prefer backboard first
-				if (randomMove1.getFromPoint() > 5) {
-					bestMove = randomMove1;
-				} else if (randomMove2.getFromPoint() > 5) {
-					bestMove = randomMove2;
-				} else {
-					bestMove = randomMove3;
+				// safety valve
+				bestMove = legalMoves.get(ThreadLocalRandom.current().nextInt(legalMoves.size()));
+				// try to get good random move
+				for (int i=0;i<10;i++) {
+					Move m = legalMoves.get(ThreadLocalRandom.current().nextInt(legalMoves.size()));
+					// prefer backboard move over bear quarter move
+					if (m.getFromPoint() > 5 && !m.isMultiDiceUsed()) {
+						bestMove = m;
+						break;
+					}
 				}
 			}
 		}
