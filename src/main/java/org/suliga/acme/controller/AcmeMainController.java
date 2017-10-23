@@ -196,6 +196,7 @@ public class AcmeMainController {
 	@GetMapping("/backgammon")
 	public String getBackgammon(Model model, HttpServletRequest req) {
 		String sessionId = req.getSession().getId();
+		logger.info("<><><> sessionId: " + sessionId);
 		model.addAttribute("sessionId", sessionId);
 		return "backgammon";
 	}
@@ -247,15 +248,17 @@ public class AcmeMainController {
 	}
 	
 	@MessageMapping("/backgammon/switchToComputerSide")
-	public void handleBackgammonSwitchSides(ClientServerMessage messageIn) {
+	@SendTo("/topic/backgammon/doComputerSide")
+	public ClientServerMessage handleBackgammonSwitchSides(ClientServerMessage messageIn) {
 		ClientServerMessage messageOut = backgammonService.switchToComputerSide(messageIn);
-		simpMessagingTemplate.convertAndSend("/topic/backgammon/doComputerSide", messageOut);
+		return messageOut;
 	}
 	
 	@MessageMapping("/backgammon/continueComputerTurn")
-	public void handleBackgammonContinueComputerSide(ClientServerMessage messageIn) {
+	@SendTo("/topic/backgammon/doComputerSide")
+	public ClientServerMessage handleBackgammonContinueComputerSide(ClientServerMessage messageIn) {
 		ClientServerMessage messageOut = backgammonService.continueComputerTurn(messageIn);
-		simpMessagingTemplate.convertAndSend("/topic/backgammon/doComputerSide", messageOut);
+		return messageOut;
 	}	
 
 	@MessageMapping("/backgammon/debugPoints")
