@@ -6,9 +6,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.suliga.acme.dao.backgammon.DiceDao;
+import org.suliga.acme.dao.backgammon.GameDao;
+import org.suliga.acme.dao.backgammon.MoveDao;
+import org.suliga.acme.dao.backgammon.PlayerDao;
+import org.suliga.acme.dao.backgammon.TurnDao;
 import org.suliga.acme.model.backgammon.Bar;
 import org.suliga.acme.model.backgammon.Board;
 import org.suliga.acme.model.backgammon.ClientServerMessage;
@@ -17,11 +25,18 @@ import org.suliga.acme.model.backgammon.Game;
 import org.suliga.acme.model.backgammon.Move;
 import org.suliga.acme.model.backgammon.PlayerSide;
 import org.suliga.acme.model.backgammon.Point;
+import org.suliga.acme.model.backgammon.Turn;
 
 @Service
 public class BackgammonServiceImpl implements BackgammonService {
 	private static final Logger logger = LoggerFactory.getLogger(BackgammonServiceImpl.class);
 
+	@Autowired private GameDao gameDao;
+	@Autowired private PlayerDao playerDao;
+	@Autowired private TurnDao turnDao;
+	@Autowired private DiceDao diceDao;
+	@Autowired private MoveDao moveDao;
+	
 	private Map<String, Game> games;
 	
 	public BackgammonServiceImpl() {
@@ -42,6 +57,18 @@ public class BackgammonServiceImpl implements BackgammonService {
 		}
 		return games.get(sessionId);
 	}
+	
+	@Override
+	public Game newGame(String sessionId) {
+		if (games.containsKey(sessionId)) {
+			synchronized(BackgammonServiceImpl.class) {
+				if (games.containsKey(sessionId)) {
+					games.remove(sessionId);
+				}
+			}
+		}
+		return getGame(sessionId);
+	}
 
 	@Override
 	public ClientServerMessage movePip(ClientServerMessage messageIn) {
@@ -56,7 +83,7 @@ public class BackgammonServiceImpl implements BackgammonService {
 		messageOut.setFromPoint(messageIn.getFromPoint());
 		messageOut.setToPoint(messageIn.getToPoint());
 		board.movePip(messageIn.getFromPoint(), messageIn.getToPoint());
-		game.getCurrentTurn().pushMove(new Move(messageIn.getFromPoint(), messageIn.getToPoint(), false));
+		game.getCurrentTurn().pushMove(new Move(game.getCurrentTurn(), messageIn.getFromPoint(), messageIn.getToPoint(), false));
 		messageOut.setBarHop(board.isBarHop());
 		messageOut.setBar1Count(board.getBar().getPlayer1Count());
 		messageOut.setBar2Count(board.getBar().getPlayer2Count());
@@ -80,7 +107,7 @@ public class BackgammonServiceImpl implements BackgammonService {
 		messageOut.setSessionId(sessionId);
 		messageOut.setSide(game.getCurrentTurn().getPlayerSide().ordinal());
 		messageOut.setDiceRolledEx(dice);
-		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(dice));
+		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(game.getCurrentTurn(), dice));
 		messageOut.setBar1Count(board.getBar().getPlayer1Count());
 		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		return messageOut;
@@ -98,7 +125,7 @@ public class BackgammonServiceImpl implements BackgammonService {
 		messageOut.setDiceRolledEx(dice);
 		messageOut.setSelectedPoint(messageIn.getSelectedPoint());
 		messageOut.setBearOff(board.isBearOffAllowed());
-		messageOut.setMoveablePointsEx(board.getPossibleMoveIndexes(dice, messageIn.getSelectedPoint()));
+		messageOut.setMoveablePointsEx(board.getPossibleMoveIndexes(game.getCurrentTurn(), dice, messageIn.getSelectedPoint()));
 		messageOut.setBar1Count(board.getBar().getPlayer1Count());
 		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		messageOut.setBarOff(board.isBarOff());
@@ -131,7 +158,7 @@ public class BackgammonServiceImpl implements BackgammonService {
 		Dice dice = game.getDice();
 		Board board = game.getBoard();
 		messageOut.setDiceRolledEx(dice);
-		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(dice));
+		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(game.getCurrentTurn(), dice));
 		messageOut.setBar1Count(board.getBar().getPlayer1Count());
 		messageOut.setBar2Count(board.getBar().getPlayer2Count());
 		messageOut.setBarOff(board.isBarOff());
@@ -145,16 +172,16 @@ public class BackgammonServiceImpl implements BackgammonService {
 		Dice dice = game.getDice();
 		Board board = game.getBoard();
 		messageOut.setDiceRolledEx(dice);
-		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(dice));
+		messageOut.setMoveablePointsEx(board.getPossibleSelectIndexes(game.getCurrentTurn(), dice));
 		
-		List<Move> legalMoves = board.getLegalMoves(dice);
+		List<Move> legalMoves = board.getLegalMoves(game.getCurrentTurn(), dice);
 		Optional<Move> bestMove = getBestComputerMove(board, legalMoves);
 		if (bestMove.isPresent()) {
 			bestMove.ifPresent(m -> { 
 				messageOut.setFromPoint(m.getFromPoint());
 				messageOut.setToPoint(m.getToPoint());
 				board.movePip(m.getFromPoint(), m.getToPoint());
-				game.getCurrentTurn().pushMove(new Move(m.getFromPoint(), m.getToPoint(), false));
+				game.getCurrentTurn().pushMove(new Move(game.getCurrentTurn(), m.getFromPoint(), m.getToPoint(), false));
 				messageOut.calculateNumbersUsed(dice, board.isBarOff());
 			});
 		} else {
@@ -298,6 +325,24 @@ public class BackgammonServiceImpl implements BackgammonService {
 		} else {
 			return computerTurnCommon(sessionId, game, messageOut);
 		}
+	}
+
+	@Override
+	@Transactional
+	public void saveGame(String sessionId) {
+		Game game = getGame(sessionId);
+		playerDao.save(game.getPlayer1());
+		playerDao.save(game.getPlayer2());
+		List<Turn> turns = game.getTurns();
+		turns.forEach(t -> {
+			diceDao.save(t.getDice());
+			List<Move> moves = t.getMoves();
+			moves.forEach(m -> {
+				moveDao.save(m);
+			});
+			turnDao.save(t);
+		});
+		gameDao.save(game);
 	}
 }
 

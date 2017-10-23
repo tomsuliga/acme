@@ -5,6 +5,8 @@ import org.suliga.acme.model.backgammon.Game;
 
 public interface BackgammonService {
 	Game getGame(String sessionId);
+	Game newGame(String sessionId);
+	void saveGame(String sessionId);
 	ClientServerMessage movePip(ClientServerMessage messageIn);
 	ClientServerMessage pipDeselected(ClientServerMessage messageIn);
 	ClientServerMessage pipSelectedToMove(ClientServerMessage messageIn);

@@ -204,7 +204,13 @@ public class AcmeMainController {
 	@MessageMapping("/backgammon/newGame")
 	public void handleBackgammonNewGame(ClientServerMessage messageIn) {
 		String sessionId = messageIn.getSessionId();
-		backgammonService.getGame(sessionId).init();
+		backgammonService.newGame(sessionId);
+	}
+	
+	@MessageMapping("/backgammon/saveGame")
+	public void handleBackgammonSaveGame(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		backgammonService.saveGame(sessionId);
 	}
 	
 	@MessageMapping("/backgammon/startOfGameFirstRoll")

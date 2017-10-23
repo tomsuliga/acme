@@ -108,22 +108,22 @@ public class ClientServerMessage {
 	public void setDiceRolledEx(Dice dice) {		
 		if (dice.isDouble()) {
 			diceRolled = new int[4];
-			diceRolled[0] = dice.getDie(0);
-			diceRolled[1] = dice.getDie(1);
-			diceRolled[2] = dice.getDie(0);
-			diceRolled[3] = dice.getDie(1);
+			diceRolled[0] = dice.getDie1();
+			diceRolled[1] = dice.getDie2();
+			diceRolled[2] = dice.getDie1();
+			diceRolled[3] = dice.getDie2();
 			diceUsed = new boolean[4];
-			diceUsed[0] = dice.isUsed(0);
-			diceUsed[1] = dice.isUsed(1);
-			diceUsed[2] = dice.isUsed(2);
-			diceUsed[3] = dice.isUsed(3);
+			diceUsed[0] = dice.isUsed1();
+			diceUsed[1] = dice.isUsed2();
+			diceUsed[2] = dice.isUsed3();
+			diceUsed[3] = dice.isUsed4();
 		} else {
 			diceRolled = new int[2];
-			diceRolled[0] = dice.getDie(0);
-			diceRolled[1] = dice.getDie(1);
+			diceRolled[0] = dice.getDie1();
+			diceRolled[1] = dice.getDie2();
 			diceUsed = new boolean[2];
-			diceUsed[0] = dice.isUsed(0);
-			diceUsed[1] = dice.isUsed(1);
+			diceUsed[0] = dice.isUsed1();
+			diceUsed[1] = dice.isUsed2();
 		}
 	}
 	
@@ -147,7 +147,7 @@ public class ClientServerMessage {
 					}
 					if (diceUsed[j] == false && diceRolled[j] == i) {
 						diceUsed[j] = true;
-						dice.setUsed(j);
+						dice.setUsedUsingIndex(j);
 						found = true;
 						break;
 					}
@@ -167,17 +167,17 @@ public class ClientServerMessage {
 			// not double
 			if (!diceUsed[0] && num == diceRolled[0]) {
 				diceUsed[0] = true;
-				dice.setUsed(0);
+				dice.setUsedUsingIndex(0);
 				found = true;
 			} else if (!diceUsed[1] && num == diceRolled[1]) {
 				diceUsed[1] = true;
-				dice.setUsed(1);
+				dice.setUsedUsingIndex(1);
 				found = true;
 			} else if (!diceUsed[0] && !diceUsed[1] && num == (diceRolled[0] + diceRolled[1])) {
 				diceUsed[0] = true;
 				diceUsed[1] = true;
-				dice.setUsed(0);
-				dice.setUsed(1);
+				dice.setUsedUsingIndex(0);
+				dice.setUsedUsingIndex(1);
 				found = true;
 			}
 		}
@@ -196,43 +196,43 @@ public class ClientServerMessage {
 		// double
 		if (!diceUsed[2] && num == diceRolled[2]) {
 			diceUsed[2] = true;
-			dice.setUsed(2);
+			dice.setUsedUsingIndex(2);
 			found = true;
 		} else if (!diceUsed[3] && num == diceRolled[3]) {
 			diceUsed[3] = true;
-			dice.setUsed(3);
+			dice.setUsedUsingIndex(3);
 			found = true;
 		} else if (!diceUsed[2] && !diceUsed[3] && num == (diceRolled[2] + diceRolled[3])) {
 			diceUsed[2] = true;
 			diceUsed[3] = true;
-			dice.setUsed(2);
-			dice.setUsed(3);
+			dice.setUsedUsingIndex(2);
+			dice.setUsedUsingIndex(3);
 			found = true;
 		} else if (!diceUsed[0] && !diceUsed[1] && !diceUsed[2] && num == (diceRolled[0] + diceRolled[1] + diceRolled[2])) {
 			diceUsed[0] = true;
 			diceUsed[1] = true;
 			diceUsed[2] = true;
-			dice.setUsed(0);
-			dice.setUsed(1);
-			dice.setUsed(2);
+			dice.setUsedUsingIndex(0);
+			dice.setUsedUsingIndex(1);
+			dice.setUsedUsingIndex(2);
 			found = true;
 		} else if (!diceUsed[1] && !diceUsed[2] && !diceUsed[3] && num == (diceRolled[1] + diceRolled[2] + diceRolled[3])) {
 			diceUsed[1] = true;
 			diceUsed[2] = true;
 			diceUsed[3] = true;
-			dice.setUsed(1);
-			dice.setUsed(2);
-			dice.setUsed(3);
+			dice.setUsedUsingIndex(1);
+			dice.setUsedUsingIndex(2);
+			dice.setUsedUsingIndex(3);
 			found = true;
 		} else if (!diceUsed[0] && !diceUsed[1] && !diceUsed[2] && !diceUsed[3] && num == (diceRolled[0] + diceRolled[1] + diceRolled[2] + diceRolled[3])) {
 			diceUsed[0] = true;
 			diceUsed[1] = true;
 			diceUsed[2] = true;
 			diceUsed[3] = true;
-			dice.setUsed(0);
-			dice.setUsed(1);
-			dice.setUsed(2);
-			dice.setUsed(3);
+			dice.setUsedUsingIndex(0);
+			dice.setUsedUsingIndex(1);
+			dice.setUsedUsingIndex(2);
+			dice.setUsedUsingIndex(3);
 			found = true;
 		}
 		

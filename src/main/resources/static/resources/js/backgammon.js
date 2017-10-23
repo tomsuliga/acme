@@ -25,6 +25,12 @@ $(document).on('click', '#btnNewGame', function() {
 	window.location.reload();
 });
 
+$(document).on('click', '#btnSaveGame', function() {
+	console.log("Save Game");
+	let payload = JSON.stringify({ 'sessionId':sessionId});
+	stomp.send('/stomp/backgammon/saveGame', {}, payload);
+});
+
 function init() {
 	divBoard = $("div#board");
 	sessionId = divBoard.attr("data-sessionId"); // from Controller and HTML 

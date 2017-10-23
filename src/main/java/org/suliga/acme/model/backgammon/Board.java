@@ -1,7 +1,5 @@
 package org.suliga.acme.model.backgammon;
 
-import static org.mockito.Matchers.booleanThat;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,6 +13,7 @@ public class Board {
 	private static final Logger logger = LoggerFactory.getLogger(Board.class);
 
 	private static final int NUM_POINTS = 24;
+	
 	private Point[] points;
 	private Bar bar;
 	private Bear bear;
@@ -120,52 +119,52 @@ public class Board {
 		points[pipTo].setPlayerSide(currentPlayerSide);
 	}
 	
-	public Set<Integer> getPossibleSelectIndexes(Dice dice) {
-		List<Move> legalMoves = getLegalMoves(dice);
+	public Set<Integer> getPossibleSelectIndexes(Turn currentTurn, Dice dice) {
+		List<Move> legalMoves = getLegalMoves(currentTurn, dice);
 		Set<Integer> indexes = new HashSet<>();
 		legalMoves.forEach(m -> indexes.add(m.getFromPoint()));
 		indexes.forEach(m -> logger.info("index=" + m));
 		return indexes;
 	}
 	
-	public Set<Integer> getPossibleMoveIndexes(Dice dice, int pointIndexFrom) {
-		List<Move> legalMoves = getLegalMoves(dice);
+	public Set<Integer> getPossibleMoveIndexes(Turn currentTurn, Dice dice, int pointIndexFrom) {
+		List<Move> legalMoves = getLegalMoves(currentTurn, dice);
 		Set<Integer> indexes = new HashSet<>();
 		legalMoves.forEach(m -> { if (m.getFromPoint() == pointIndexFrom) indexes.add(m.getToPoint()); });
 		return indexes;
 	}
 	
-	public List<Move> getLegalMoves(Dice dice) {
+	public List<Move> getLegalMoves(Turn currentTurn, Dice dice) {
 		List<Move> legalMoves = new ArrayList<>();
 		int directionSign = currentPlayerSide == PlayerSide.PLAYER_1 ? 1 : -1;
 		
 		List<List<Integer>> diceNumsSeq = new ArrayList<>();
 		
-		if (!dice.isUsed(0)) {
-			diceNumsSeq.add(Arrays.asList(dice.getDie(0)));
+		if (!dice.isUsed1()) {
+			diceNumsSeq.add(Arrays.asList(dice.getDie1()));
 		}
-		if (!dice.isUsed(1)) {
-			diceNumsSeq.add(Arrays.asList(dice.getDie(1)));
+		if (!dice.isUsed2()) {
+			diceNumsSeq.add(Arrays.asList(dice.getDie2()));
 		}
-		if (!dice.isUsed(0) && !dice.isUsed(1)) {
-			diceNumsSeq.add(Arrays.asList(dice.getDie(0), dice.getDie(1)));
+		if (!dice.isUsed1() && !dice.isUsed2()) {
+			diceNumsSeq.add(Arrays.asList(dice.getDie1(), dice.getDie2())); // order 1,2
 			if (!dice.isDouble()) {
-				diceNumsSeq.add(Arrays.asList(dice.getDie(1), dice.getDie(0)));
+				diceNumsSeq.add(Arrays.asList(dice.getDie2(), dice.getDie1())); // order 2,1
 			}
 		}
 		if (dice.isDouble()) {
 			// all 4 numbers are same
-			if (dice.isUsed(0) && dice.isUsed(1) && (!dice.isUsed(2) || !dice.isUsed(3))) {
-				diceNumsSeq.add(Arrays.asList(dice.getDie(0)));
+			if (dice.isUsed1() && dice.isUsed2() && (!dice.isUsed3() || !dice.isUsed4())) {
+				diceNumsSeq.add(Arrays.asList(dice.getDie1()));
 			}
-			if (!dice.isUsed(2) && !dice.isUsed(3)) {
-				diceNumsSeq.add(Arrays.asList(dice.getDie(0), dice.getDie(0)));
+			if (!dice.isUsed3() && !dice.isUsed4()) {
+				diceNumsSeq.add(Arrays.asList(dice.getDie1(), dice.getDie1()));
 			}
-			if (!dice.isUsed(1) && !dice.isUsed(2) && !dice.isUsed(3)) {
-				diceNumsSeq.add(Arrays.asList(dice.getDie(0), dice.getDie(0), dice.getDie(0)));
+			if (!dice.isUsed2() && !dice.isUsed3() && !dice.isUsed4()) {
+				diceNumsSeq.add(Arrays.asList(dice.getDie1(), dice.getDie1(), dice.getDie1()));
 			}
-			if (!dice.isUsed(0) && !dice.isUsed(1) && !dice.isUsed(2) && !dice.isUsed(3)) {
-				diceNumsSeq.add(Arrays.asList(dice.getDie(0), dice.getDie(0), dice.getDie(0), dice.getDie(0)));
+			if (!dice.isUsed1() && !dice.isUsed2() && !dice.isUsed3() && !dice.isUsed4()) {
+				diceNumsSeq.add(Arrays.asList(dice.getDie1(), dice.getDie1(), dice.getDie1(), dice.getDie1()));
 			}
 		}
 		
@@ -185,7 +184,7 @@ public class Board {
 					indexTo = 24 - seq.get(0);
 				}
 				if (isLegalPoint(indexTo, currentPlayerSide)) {
-					Move move = new Move(Move.FROM_BAR, indexTo, false);
+					Move move = new Move(currentTurn, Move.FROM_BAR, indexTo, false);
 					barOff = true;
 					if (isMoveUnique(legalMoves, move)) {
 						legalMoves.add(move);
@@ -221,7 +220,7 @@ public class Board {
 							}
 						}
 						if (allGood) {
-							Move move = new Move(i, indexTo, countDiceUsed > 1);
+							Move move = new Move(currentTurn, i, indexTo, countDiceUsed > 1);
 							if (isMoveUnique(legalMoves, move)) {
 								legalMoves.add(move);
 								logger.info("*** getLegalMoves added: " + move.toString());
