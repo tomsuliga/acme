@@ -199,6 +199,7 @@ public class AcmeMainController {
 		String sessionId = req.getSession().getId();
 		logger.info("<><><> sessionId: " + sessionId);
 		model.addAttribute("sessionId", sessionId);
+		model.addAttribute("replay", backgammonService.getGame(sessionId).isReplay());
 		model.addAttribute("savedGames", backgammonService.getAllGames());
 		return "backgammon";
 	}
@@ -213,6 +214,19 @@ public class AcmeMainController {
 	public void handleBackgammonSaveGame(ClientServerMessage messageIn) {
 		String sessionId = messageIn.getSessionId();
 		backgammonService.saveGame(sessionId);
+	}
+	
+	@MessageMapping("/backgammon/loadGame")
+	@SendTo("/topic/backgammon/gameLoaded")
+	public ClientServerMessage handleBackgammonLoadGame(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		long gameId = messageIn.getGameId();
+		Game game = backgammonService.loadGame(sessionId, gameId);
+		ClientServerMessage messageOut = new ClientServerMessage();
+		messageOut.setReplay(true);
+		messageOut.setSessionId(sessionId);
+		messageOut.setFirstMove(true);
+		return messageOut;
 	}
 	
 	@MessageMapping("/backgammon/startOfGameFirstRoll")

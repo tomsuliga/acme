@@ -24,6 +24,8 @@ public class ClientServerMessage {
 	private boolean startTurn; // to reveal dice
 	private String state; // Roll
 	private boolean firstMove; // only at start of game
+	private long gameId;
+	private boolean replay;
 	
 	public ClientServerMessage() {}
 
@@ -335,6 +337,22 @@ public class ClientServerMessage {
 
 	public void setBearOff(boolean bearOff) {
 		this.bearOff = bearOff;
+	}
+
+	public long getGameId() {
+		return gameId;
+	}
+
+	public void setGameId(long gameId) {
+		this.gameId = gameId;
+	}
+
+	public boolean isReplay() {
+		return replay;
+	}
+
+	public void setReplay(boolean replay) {
+		this.replay = replay;
 	}
 }
 

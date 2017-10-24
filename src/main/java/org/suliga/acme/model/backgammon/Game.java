@@ -40,6 +40,9 @@ public class Game {
 			
 	@Transient
 	private Turn currentTurn;
+	
+	@Transient
+	private boolean replay;
 		
 	public Game() {
 		board = new Board();
@@ -56,9 +59,10 @@ public class Game {
 		turns = new ArrayList<>();
 		gameOver = false;
 		currentTurn = null;
+		replay = false;
 		
 		player1 = new Player("Tom", TuringType.HUMAN);
-		player2 = new Player("Hal 9000", TuringType.COMPUTER);
+		player2 = new Player("HAL 9000", TuringType.COMPUTER);
 	}
 	
 	public boolean isGameOver() {
@@ -100,6 +104,12 @@ public class Game {
 	
 	// Only done one time per game
 	public Dice startOfGameFirstRoll() {
+		if (replay) {
+			currentTurn = turns.get(0);
+			board.setCurrentPlayerSide(currentTurn.getPlayerSide());
+			return currentTurn.getDice();
+		}
+		
 		Dice dice = new Dice();
 		while (dice.isDouble()) {
 			dice = new Dice();
@@ -148,6 +158,14 @@ public class Game {
 
 	public void setTurns(List<Turn> turns) {
 		this.turns = turns;
+	}
+
+	public boolean isReplay() {
+		return replay;
+	}
+
+	public void setReplay(boolean replay) {
+		this.replay = replay;
 	}
 }
 
