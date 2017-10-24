@@ -31,6 +31,16 @@ $(document).on('click', '#btnSaveGame', function() {
 	stomp.send('/stomp/backgammon/saveGame', {}, payload);
 });
 
+$(document).on('click', '#btnLoadGame', function() {
+	console.log("Load Game");
+	$("#myModal").modal('show');
+});
+
+$(document).on('click', '.loadGameId', function() {
+	let gameId = $(this).attr('data-gameId');
+	console.log('Id = ' + gameId);
+});
+
 function init() {
 	divBoard = $("div#board");
 	sessionId = divBoard.attr("data-sessionId"); // from Controller and HTML 

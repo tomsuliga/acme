@@ -344,6 +344,11 @@ public class BackgammonServiceImpl implements BackgammonService {
 		});
 		gameDao.save(game);
 	}
+
+	@Override
+	public Iterable<Game> getAllGames() {
+		return gameDao.findAll();
+	}
 }
 
 

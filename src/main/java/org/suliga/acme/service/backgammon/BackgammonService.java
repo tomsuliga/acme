@@ -7,6 +7,7 @@ public interface BackgammonService {
 	Game getGame(String sessionId);
 	Game newGame(String sessionId);
 	void saveGame(String sessionId);
+	Iterable<Game> getAllGames();
 	ClientServerMessage movePip(ClientServerMessage messageIn);
 	ClientServerMessage pipDeselected(ClientServerMessage messageIn);
 	ClientServerMessage pipSelectedToMove(ClientServerMessage messageIn);

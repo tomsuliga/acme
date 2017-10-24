@@ -1,5 +1,6 @@
 package org.suliga.acme.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -198,6 +199,7 @@ public class AcmeMainController {
 		String sessionId = req.getSession().getId();
 		logger.info("<><><> sessionId: " + sessionId);
 		model.addAttribute("sessionId", sessionId);
+		model.addAttribute("savedGames", backgammonService.getAllGames());
 		return "backgammon";
 	}
 	

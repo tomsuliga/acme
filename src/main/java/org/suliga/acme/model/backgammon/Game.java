@@ -58,7 +58,7 @@ public class Game {
 		currentTurn = null;
 		
 		player1 = new Player("Tom", TuringType.HUMAN);
-		player2 = new Player("Hal", TuringType.COMPUTER);
+		player2 = new Player("Hal 9000", TuringType.COMPUTER);
 	}
 	
 	public boolean isGameOver() {
