@@ -14,6 +14,7 @@ var currentSelectedPoint;
 var startOfGameFirstRoll;
 var turnOver;
 var gameOver;
+var replay;
 
 $(document).ready(function() {
 	init();
@@ -39,11 +40,19 @@ $(document).on('click', '#btnLoadGame', function() {
 $(document).on('click', '.loadGameId', function() {
 	let gameId = $(this).attr('data-gameId');
 	console.log('Id = ' + gameId);
+	let payload = JSON.stringify({ 'sessionId':sessionId, 'gameId':gameId, 'replay':true });
+	stomp.send('/stomp/backgammon/loadGame', {}, payload);
 });
+
+function gameLoaded(incoming) {
+	let ob = JSON.parse(incoming.body);
+	window.location.reload();
+}
 
 function init() {
 	divBoard = $("div#board");
 	sessionId = divBoard.attr("data-sessionId"); // from Controller and HTML 
+	replay = divBoard.attr("data-replay");
 	points = [];
 	openPips = [];
 	openPipsBear = [];
@@ -93,7 +102,15 @@ function init() {
 	let b1 = document.createElement("button");
 	$(b1).addClass("btnRoll"); 
 	$(b1).attr("id", "btnRoll"); 
-	$(b1).text("Roll Dice");
+		
+	if (replay == "true") {
+		$(b1).text("Replay Game");
+		console.log("<> replay 1 = " + replay);
+	} else {
+		$(b1).text("Roll Dice");
+		console.log("<> replay 2 = " + replay);
+	}
+	
 	divBoard.append(b1);
 	$(b1).animate({
 	    'top': 65 + 12 + 6 * 56,
@@ -287,7 +304,6 @@ function movePipToBar(pip, side, delay) {
 		rowPos -= 56 * (2 + bar2.length) * 1;
 	}
 	
-//	$(pip).attr("data-point", point);
 	$(pip).css("z-index", 11);
 	$(pip).animate({
 	    'top': rowPos,
@@ -302,10 +318,6 @@ var stompSock = new SockJS(stompUrl);
 var stomp = Stomp.over(stompSock);
 
 stomp.connect({}, function(frame) {
-	stomp.subscribe('/topic/backgammon/clickResult', function(incoming) {
-		console.log('incoming received msg: ' + incoming);
-	});
-	
 	stomp.subscribe('/topic/backgammon/showPipsAllowedToMove', function(incoming) {
 		showPipsAllowedToMove(incoming);
 	});
@@ -320,6 +332,10 @@ stomp.connect({}, function(frame) {
 
 	stomp.subscribe('/topic/backgammon/doComputerSide', function(incoming) {
 		doComputerSide(incoming);
+	});
+	
+	stomp.subscribe('/topic/backgammon/gameLoaded', function(incoming) {
+		gameLoaded(incoming);
 	});
 });
 
@@ -345,6 +361,7 @@ async function showPipsAllowedToMove(incoming) {
 	} else {
 		turnOver = false;
 		$('#btnRoll').text("Roll Dice");
+		console.log("<> replay 3 = " + replay);
 	}
 	
 	hideOpenPips();
@@ -601,6 +618,7 @@ async function movingPip(incoming) {
 	
 	if (ob.turnOver) {
 		$('#btnRoll').text("Roll Dice");
+		console.log("<> replay 4 = " + replay);
 		handleTurnOverPlayer();
 	} else {
 		let payload = JSON.stringify({ 'sessionId':sessionId });
@@ -659,6 +677,7 @@ async function doComputerSide(incoming) {
 		await sleep(1000);
 		$('#btnRoll').hide();
 		$('#btnRoll').text("Roll Dice");
+		console.log("<> replay 5 = " + replay);
 		handleTurnOverComputer();
 		return;
 	}
@@ -740,10 +759,12 @@ $(document).on('click', "button#btnRoll", function() {
 	
 	$('button#btnRoll').hide();
 	$('button#btnRoll').text('Roll Dice');
+	console.log("<> replay 7 = " + replay);
 	let payload = JSON.stringify({ 'sessionId':sessionId });
 	if (startOfGameFirstRoll) {
 		startOfGameFirstRoll = false;
 		$('button#btnRoll').text("Roll Dice"); // hidden, for next reveal
+		console.log("<> replay 8 = " + replay);
 		$('button#btnRoll').animate({
 		    'top': 65 + 12 + 6 * 56,
 		    'left': 122 + 10 + 5 * 56}, 0
@@ -797,6 +818,8 @@ $(document).on('click', '#btnDebugPoints', function() {
 
 	console.log('bear1 ' + bear1.length);
 	console.log('bear2 ' + bear2.length);
+	
+	console.log('replay = ' + replay);
 
 	let payload = JSON.stringify({ 'sessionId':sessionId});
 	stomp.send('/stomp/backgammon/debugPoints', {}, payload);

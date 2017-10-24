@@ -10,7 +10,7 @@
 <body>
 <h1 class='shadowfont'>Backgammon</h1>
 
-<div id='board' th:attr="data-sessionId=${sessionId}">
+<div id='board' th:attr="data-sessionId=${sessionId}, data-replay=${replay}">
 		<div th:each="col:${#numbers.sequence(0, 16)}" th:remove="tag"> <!-- Inclusive -->
 			<div th:class='${"col " + ((col <= 1 || col == 8 || col >= 15) ? "bar" : (col%2 == 1 ? "light" : "dark"))}'
 				 th:id='${"col_" + col}' th:text='${""}' 

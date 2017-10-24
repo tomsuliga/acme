@@ -349,6 +349,15 @@ public class BackgammonServiceImpl implements BackgammonService {
 	public Iterable<Game> getAllGames() {
 		return gameDao.findAll();
 	}
+
+	@Override
+	public Game loadGame(String sessionId, long gameId) {
+		Game game = gameDao.findOne(gameId);
+		game.setReplay(true);		
+		synchronized(BackgammonServiceImpl.class) {
+			return games.put(sessionId, game);
+		}
+	}
 }
 
 
