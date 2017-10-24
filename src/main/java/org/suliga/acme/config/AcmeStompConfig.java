@@ -12,10 +12,10 @@ public class AcmeStompConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		registry.enableSimpleBroker("/topic"); // memory broker - forward to subscribed clients
+		registry.enableSimpleBroker("/topic", "/queue"); // memory broker - forward to subscribed clients - send to cient: /topic/backgammon/...
 		// registry.enableStompBrokerRelay("/queue", "/topic"); // real STOMP broker such as RabbitMQ or ActiveMQ
 
-		registry.setApplicationDestinationPrefixes("/stomp"); // application destinations - forward to controller
+		registry.setApplicationDestinationPrefixes("/stomp"); // application destinations - forward to controller - javascript sends: /stomp/backgammon/...
 
 	}
 
@@ -25,6 +25,7 @@ public class AcmeStompConfig extends AbstractWebSocketMessageBrokerConfigurer {
 		registry.addEndpoint("/dailydiet").withSockJS();
 		registry.addEndpoint("/mazegen").withSockJS();
 		registry.addEndpoint("/primegen").withSockJS();
+		registry.addEndpoint("/backgammon").withSockJS();
 	}
 }
 

@@ -12,7 +12,7 @@ body, h1, div#maindiv, header#mainheader {
 nav#rssnav {
 	width: 200px;
 	height: 25px;
-	background-color: #b00;
+	background-color: #f00;
 	float: left;
 }
 
@@ -39,7 +39,7 @@ aside#rssfeeds {
 nav#navsubjects {
 	width: 200px;
 	height: 25px;
-	background-color: #b00;
+	background-color: #f00;
 	float: left;
 }
 

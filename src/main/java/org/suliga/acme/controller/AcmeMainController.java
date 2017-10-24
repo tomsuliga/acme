@@ -1,6 +1,8 @@
 package org.suliga.acme.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,6 +15,14 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.suliga.acme.model.backgammon.Bar;
+import org.suliga.acme.model.backgammon.Board;
+import org.suliga.acme.model.backgammon.Dice;
+import org.suliga.acme.model.backgammon.Game;
+import org.suliga.acme.model.backgammon.Move;
+import org.suliga.acme.model.backgammon.PlayerSide;
+import org.suliga.acme.model.backgammon.Point;
+import org.suliga.acme.model.backgammon.ClientServerMessage;
 import org.suliga.acme.model.crossword.CrosswordGrid;
 import org.suliga.acme.model.dailydiet.FoodItem;
 import org.suliga.acme.model.dailydiet.StompNumServings;
@@ -22,6 +32,7 @@ import org.suliga.acme.model.dailydiet.StompFoodItemId;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
 import org.suliga.acme.model.primegen.PrimegenStart;
+import org.suliga.acme.service.backgammon.BackgammonService;
 import org.suliga.acme.service.crossword.CrosswordPuzzleService;
 import org.suliga.acme.service.dailydiet.DailyDietService;
 import org.suliga.acme.service.earthquakes.EarthquakesService;
@@ -44,6 +55,7 @@ public class AcmeMainController {
 	@Autowired private CrosswordPuzzleService crosswordPuzzleService;
 	@Autowired private RssService rssService;
 	@Autowired private JavaTestService javaTestService;
+	@Autowired private BackgammonService backgammonService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -179,11 +191,93 @@ public class AcmeMainController {
 		return "javatest";
 	}
 	
+	//////////////////////////////////////////////////////////////////
+	////   B A C K G A M M O N  //////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
 	@GetMapping("/backgammon")
-	public String getBackgammon(Model model) {
+	public String getBackgammon(Model model, HttpServletRequest req) {
+		String sessionId = req.getSession().getId();
+		logger.info("<><><> sessionId: " + sessionId);
+		model.addAttribute("sessionId", sessionId);
+		model.addAttribute("savedGames", backgammonService.getAllGames());
 		return "backgammon";
 	}
+	
+	@MessageMapping("/backgammon/newGame")
+	public void handleBackgammonNewGame(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		backgammonService.newGame(sessionId);
+	}
+	
+	@MessageMapping("/backgammon/saveGame")
+	public void handleBackgammonSaveGame(ClientServerMessage messageIn) {
+		String sessionId = messageIn.getSessionId();
+		backgammonService.saveGame(sessionId);
+	}
+	
+	@MessageMapping("/backgammon/startOfGameFirstRoll")
+	public void handleBackgammonFirstMove(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.startOfGameFirstRoll(messageIn);
+		if (messageOut.getSide() == 1) {
+			simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
+		} else {
+			simpMessagingTemplate.convertAndSend("/topic/backgammon/doComputerSide", messageOut);
+		}
+	}
+	
+	@MessageMapping("/backgammon/startPlayerTurn") // new player turn of many
+	public void handleBackgammonStartPlayerTurn(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.startPlayerTurn(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/continuePlayerTurn")
+	public void handleBackgammonContinueTurn(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.continuePlayerTurn(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/pipDeselected")
+	public void handleBackgammonPipDeseleced(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.pipDeselected(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/showPipsAllowedToMove", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/pipSelectedToMove")
+	public void handleBackgammonPointClicked(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.pipSelectedToMove(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/selectDestinationPoint", messageOut);
+	}
+	
+	@MessageMapping("/backgammon/movePip")
+	public void handleBackgammonMovePip(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.movePip(messageIn);
+		simpMessagingTemplate.convertAndSend("/topic/backgammon/movingPip", messageOut);		
+	}
+	
+	@MessageMapping("/backgammon/switchToComputerSide")
+	@SendTo("/topic/backgammon/doComputerSide")
+	public ClientServerMessage handleBackgammonSwitchSides(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.switchToComputerSide(messageIn);
+		return messageOut;
+	}
+	
+	@MessageMapping("/backgammon/continueComputerTurn")
+	@SendTo("/topic/backgammon/doComputerSide")
+	public ClientServerMessage handleBackgammonContinueComputerSide(ClientServerMessage messageIn) {
+		ClientServerMessage messageOut = backgammonService.continueComputerTurn(messageIn);
+		return messageOut;
+	}	
+
+	@MessageMapping("/backgammon/debugPoints")
+	public void handleBackgammonDebugPoints(ClientServerMessage messageIn) {
+		backgammonService.debugPoints(messageIn);
+	}
+	
+	//simpMessagingTemplate.convertAndSendToUser(user, destination, payload);
 }
+
+
 
 
 

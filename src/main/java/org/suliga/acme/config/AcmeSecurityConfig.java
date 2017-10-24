@@ -19,5 +19,4 @@ public class AcmeSecurityConfig extends WebSecurityConfigurerAdapter {
 	    hs.headers().frameOptions().disable();
 	   	hs.csrf().ignoringAntMatchers("/h2-console/**", "/console/**");
 	}
-
 }
