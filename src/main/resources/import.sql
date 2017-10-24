@@ -1,3 +1,4 @@
+
 SET FOREIGN_KEY_CHECKS=0;
 BEGIN WORK;
 insert into BG_PLAYER (id, name, turing_type) values (1, 'Tom', 'HUMAN');
@@ -44,3 +45,4 @@ insert into BG_MOVE (id, from_point, to_point, turn_id) values (17,2,8,11);
 insert into BG_GAME (id, game_over, player1_id, player2_id) values (1, false, 1, 2);
 COMMIT;
 SET FOREIGN_KEY_CHECKS=1;
+
