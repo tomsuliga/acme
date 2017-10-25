@@ -1,8 +1,6 @@
 package org.suliga.acme.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,23 +13,20 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.suliga.acme.model.backgammon.Bar;
-import org.suliga.acme.model.backgammon.Board;
-import org.suliga.acme.model.backgammon.Dice;
-import org.suliga.acme.model.backgammon.Game;
-import org.suliga.acme.model.backgammon.Move;
-import org.suliga.acme.model.backgammon.PlayerSide;
-import org.suliga.acme.model.backgammon.Point;
 import org.suliga.acme.model.backgammon.ClientServerMessage;
+import org.suliga.acme.model.backgammon.Game;
 import org.suliga.acme.model.crossword.CrosswordGrid;
 import org.suliga.acme.model.dailydiet.FoodItem;
-import org.suliga.acme.model.dailydiet.StompNumServings;
 import org.suliga.acme.model.dailydiet.NutrientAggregate;
 import org.suliga.acme.model.dailydiet.NutrientDisplaySummary;
 import org.suliga.acme.model.dailydiet.StompFoodItemId;
+import org.suliga.acme.model.dailydiet.StompNumServings;
 import org.suliga.acme.model.minesweeper.GameColRow;
 import org.suliga.acme.model.minesweeper.GameGrid;
 import org.suliga.acme.model.primegen.PrimegenStart;
+import org.suliga.acme.model.test.ZGame;
+import org.suliga.acme.model.test.ZGameDao;
+import org.suliga.acme.model.test.ZGameService;
 import org.suliga.acme.service.backgammon.BackgammonService;
 import org.suliga.acme.service.crossword.CrosswordPuzzleService;
 import org.suliga.acme.service.dailydiet.DailyDietService;
@@ -56,6 +51,7 @@ public class AcmeMainController {
 	@Autowired private RssService rssService;
 	@Autowired private JavaTestService javaTestService;
 	@Autowired private BackgammonService backgammonService;
+	@Autowired private ZGameService zgameService;
 
 	@GetMapping({"/", "/index", "/home"})
 	public String getIndex(Model model) {
@@ -283,9 +279,15 @@ public class AcmeMainController {
 		return messageOut;
 	}	
 
+	@Autowired 
+	private ZGameDao gameDao;
+
 	@MessageMapping("/backgammon/debugPoints")
 	public void handleBackgammonDebugPoints(ClientServerMessage messageIn) {
 		backgammonService.debugPoints(messageIn);
+		zgameService.testSaveAndLoad1();
+		zgameService.testSaveAndLoad2();
+		//ZGame.testSaveAndLoad2(gameDao);
 	}
 	
 	//simpMessagingTemplate.convertAndSendToUser(user, destination, payload);

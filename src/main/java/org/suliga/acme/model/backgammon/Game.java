@@ -79,7 +79,9 @@ public class Game {
 	}
 	
 	public void debugMoves() {
-		turns.forEach(t -> logger.info(t.toString()));
+		for (int i=0;i<turns.size();i++) {
+			logger.info(turns.get(i).toString());
+		}
 	}
 	
 	public Turn getCurrentTurn() {

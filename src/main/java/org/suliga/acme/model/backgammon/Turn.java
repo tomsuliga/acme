@@ -61,7 +61,7 @@ public class Turn {
 	
 	@Override
 	public String toString() {
-		return "Turn for " + playerSide + " " + dice.toString() + " " + moves;
+		return "[" + id + "] Turn for " + playerSide + " " + dice.toString() + " " + moves;
 	}
 
 	public long getId() {
