@@ -1,7 +1,12 @@
 package org.suliga.acme.model.test;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -11,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -25,18 +31,19 @@ public class ZGame {
 	@GeneratedValue
 	private long id;
 	
-	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.PERSIST)
+	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private ZPlayer player1;
 	
-	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.PERSIST)
+	@ManyToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private ZPlayer player2;
 	
 	@JoinColumn(name="FK_ZGAME") // col is in ZTurn table
-	@OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.PERSIST, orphanRemoval = true)
-	private List<ZTurn> zturns;
+	@OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval = true)
+	@OrderBy("id")
+	private Set<ZTurn> zturns;
 	
 	public ZGame() {
-		zturns = new ArrayList<>();
+		zturns = new LinkedHashSet<>(64);
 	}
 	
 	public ZGame(ZPlayer player1, ZPlayer player2) {
@@ -51,14 +58,13 @@ public class ZGame {
 	
 	@Override
 	public String toString() {
-		return "ZGame " + player1 + ", " + player2 + ", num turns = " + zturns.size();
+		StringBuilder sb = new StringBuilder();
+		sb.append("ZGame " + player1 + ", " + player2 + ", num turns = " + zturns.size() + "\n");
+		zturns.forEach(t -> sb.append(t.toString() + "\n"));
+		return sb.toString();
 	}
 	
-	@Transactional
-	public static void testSaveAndLoad2(ZGameDao gameDao) {
-		ZGame loadedGame = gameDao.findOne(1L);
-	
-		logger.info("Loaded Game:");
-		logger.info(loadedGame.toString());
+	public LinkedHashSet<ZTurn> getTurns() {
+		return (LinkedHashSet<ZTurn>) zturns;
 	}
 }

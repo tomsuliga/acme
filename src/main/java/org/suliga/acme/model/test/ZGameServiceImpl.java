@@ -27,21 +27,20 @@ public class ZGameServiceImpl implements ZGameService {
 			ZTurn turn = new ZTurn();
 			game.addTurn(turn);
 			for (int j=0;j<2;j++) {
-				ZMove move = new ZMove(i,j);
+				ZMove move = new ZMove(i, j);
 				turn.addMove(move);
 			}
 		}
 		
 		gameDao.save(game);
+		logger.info("Found ZGame A: " + game.toString());
 	}
 	
 	@Override
 	@Transactional
-	public void testSaveAndLoad2() {
-		ZGame loadedGame = gameDao.findOne(1L);
-	
-		logger.info("Loaded Game:");
-		logger.info(loadedGame.toString());
+	public void testSaveAndLoad2(long index) {
+		ZGame zgame = gameDao.findOne(index);
+		logger.info("Found ZGame B: " + zgame.toString());
 	}
 }
 

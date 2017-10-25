@@ -19,11 +19,11 @@ public class ZTurn {
 	@GeneratedValue
 	private long id;
 
-	@OneToOne(fetch=FetchType.EAGER, cascade=CascadeType.PERSIST)
+	@OneToOne(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private ZDice dice;
 	
 	@JoinColumn(name="FK_ZTURN") // col is in ZMove table
-	@OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.PERSIST)
+	@OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
 	private List<ZMove> zmoves;
 	
 	public ZTurn() {
@@ -38,4 +38,15 @@ public class ZTurn {
 		}
 		zmoves.add(move);
 	}
+	
+	@Override
+	public String toString() {
+		return "Turn:" + id + " " + zmoves;
+	}
 }
+
+
+
+
+
+

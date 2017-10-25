@@ -286,8 +286,7 @@ public class AcmeMainController {
 	public void handleBackgammonDebugPoints(ClientServerMessage messageIn) {
 		backgammonService.debugPoints(messageIn);
 		zgameService.testSaveAndLoad1();
-		zgameService.testSaveAndLoad2();
-		//ZGame.testSaveAndLoad2(gameDao);
+		zgameService.testSaveAndLoad2(1L);
 	}
 	
 	//simpMessagingTemplate.convertAndSendToUser(user, destination, payload);

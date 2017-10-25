@@ -12,14 +12,19 @@ public class ZMove {
 	@GeneratedValue
 	private long id;
 	
-	private int from_point;
+	private int fromPoint;
 	
-	private int to_point;
+	private int toPoint;
 
 	public ZMove() {}
 	
-	public ZMove(int from_point, int to_point) {
-		this.from_point = from_point;
-		this.to_point = to_point;
+	public ZMove(int fromPoint, int toPoint) {
+		this.fromPoint = fromPoint;
+		this.toPoint = toPoint;
+	}
+	
+	@Override
+	public String toString() {
+		return "Move[" + fromPoint + ":" + toPoint + "]";
 	}
 }
