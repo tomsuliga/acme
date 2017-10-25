@@ -26,8 +26,8 @@ public class ZGameServiceImpl implements ZGameService {
 		for (int i=0;i<7;i++) {
 			ZTurn turn = new ZTurn();
 			game.addTurn(turn);
-			for (int j=0;j<2;j++) {
-				ZMove move = new ZMove(i, j);
+			for (int j=0;j<4;j++) {
+				ZMove move = new ZMove(j, i);
 				turn.addMove(move);
 			}
 		}

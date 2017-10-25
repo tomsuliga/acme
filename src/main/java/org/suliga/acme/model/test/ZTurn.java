@@ -1,7 +1,9 @@
 package org.suliga.acme.model.test;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.persistence.CascadeType;
@@ -12,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 
 @Entity
 public class ZTurn {
@@ -23,11 +26,12 @@ public class ZTurn {
 	private ZDice dice;
 	
 	@JoinColumn(name="FK_ZTURN") // col is in ZMove table
-	@OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
-	private List<ZMove> zmoves;
+	@OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval = true)
+	@OrderBy("id")	
+	private Set<ZMove> zmoves;
 	
 	public ZTurn() {
-		zmoves = new ArrayList<>();
+		zmoves = new LinkedHashSet<>();
 	}
 	
 	public void addMove(ZMove move) {
