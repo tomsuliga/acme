@@ -1,5 +1,6 @@
 package org.suliga.acme.model.test;
 
+import java.sql.Timestamp;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedHashSet;
@@ -18,6 +19,7 @@ import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,9 @@ public class ZGame {
 	@OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("id")
 	private Set<ZTurn> zturns;
+	
+	@CreationTimestamp
+	private Timestamp createdOn;  // Set automatically by Hibernate
 	
 	@Transient
 	private ArrayDeque<ZTurn> turns = new ArrayDeque<>();
@@ -69,7 +74,7 @@ public class ZGame {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("ZGame " + player1 + ", " + player2 + ", num turns = " + zturns.size() + "\n");
+		sb.append("ZGame " + player1 + " vs " + player2 + ", " + createdOn + ", num turns = " + zturns.size() + "\n");
 		turns.forEach(t -> sb.append(t.toString() + "\n"));
 		return sb.toString();
 	}
